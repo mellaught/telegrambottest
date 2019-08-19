@@ -11,9 +11,9 @@ create table if not exists users (
 var CREATE_SALES_IF_NOT_EXISTS = `
 create table if not exists sales (
 	id BIGINT NOT NULL,
-	user_id BIGINT NOT NULL,
-	inf VARCHAR(255),
+	user_id INT NOT NULL,
+	info VARCHAR(255),
 	sell_at timestamp,
 	PRIMARY KEY (id),
-	FOREIGN KEY (user_id) REFERENCES usets (id)
+	FOREIGN KEY (user_id) REFERENCES users (id)
 );`

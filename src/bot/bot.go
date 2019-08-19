@@ -7,6 +7,7 @@ import (
 	"strings"
 	api "telegrambottest/src/bipdev"
 	stct "telegrambottest/src/bipdev/structs"
+	vocab "telegrambottest/src/bot/vocabulary"
 	"telegrambottest/src/db"
 
 	//strt "bipbot/src/bipdev/structs"
@@ -15,14 +16,14 @@ import (
 )
 
 const (
-	startCommand   = "start"
-	priceCommand   = "price"
-	buyCommand     = "buy"
-	sellCommand    = "sell"
-	salesCommand   = "lookat"
-	getMainMenu    = "getmainmenu"
-	engLangCommand = "englanguage"
-	rusLangCommand = "ruslanguage"
+	startCommand    = "start"
+	priceCommand    = "price"
+	buyCommand      = "buy"
+	sellCommand     = "sell"
+	salesCommand    = "lookat"
+	getMainMenu     = "getmainmenu"
+	engvocabCommand = "engvocabuage"
+	rusvocabCommand = "rusvocabuage"
 )
 
 var (
@@ -31,18 +32,11 @@ var (
 )
 
 type Dialog struct {
-	ChatId   int64
-	UserId   int
-	Text     string
-	Language string
-	Command  string
-}
-
-type BuySell struct {
-	Address string
-	Email   string
-	Price   float32
-	Coin    string
+	ChatId    int64
+	UserId    int
+	Text      string
+	language string
+	Command   string
 }
 
 type Bot struct {
@@ -89,7 +83,7 @@ func (b *Bot) Run() {
 			continue
 		}
 
-		dialog, exist := assembleUpdate(update)
+		dialog, exist := b.assembleUpdate(update)
 		if !exist {
 			continue
 		}
@@ -98,32 +92,38 @@ func (b *Bot) Run() {
 			if dialog.Command == "buy" {
 				b.Buy(dialog)
 				continue
+			} else if dialog.Command == "sell" {
+				b.Sell(dialog)
+				continue
 			}
 		}
 		if botCommand := b.getCommand(update); botCommand != "" {
 			b.RunCommand(botCommand, dialog)
 			continue
 		}
-		msg := tgbotapi.NewMessage(dialog.ChatId, "Select, please, what you want:)")
-		msg.ReplyMarkup = newMainMenuKeyboard()
+		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Select", dialog.language))
+		msg.ReplyMarkup = newMainMenuKeyboard(dialog)
 		b.Bot.Send(msg)
 
 	}
 }
 
 // assembleUpdate
-func assembleUpdate(update tgbotapi.Update) (Dialog, bool) {
+func (b *Bot) assembleUpdate(update tgbotapi.Update) (Dialog, bool) {
 	dialog := Dialog{}
-
+	_ = b.DB.GetLanguage(int(update.Message.Chat.ID))
 	if update.Message != nil {
+		dialog.language = b.DB.GetLanguage(int(update.Message.Chat.ID))
 		dialog.ChatId = update.Message.Chat.ID
 		dialog.UserId = int(update.Message.Chat.ID)
 		dialog.Text = update.Message.Text
 	} else if update.CallbackQuery != nil {
+		dialog.language = b.DB.GetLanguage(int(update.Message.Chat.ID))
 		dialog.ChatId = update.CallbackQuery.Message.Chat.ID
 		dialog.UserId = int(update.CallbackQuery.Message.Chat.ID)
 		dialog.Text = ""
 	} else {
+		dialog.language = "en"
 		return dialog, false
 	}
 
@@ -155,26 +155,31 @@ func (b *Bot) RunCommand(command string, dialog Dialog) {
 	commands[dialog.UserId] = command
 	switch command {
 	case startCommand:
-		msg := tgbotapi.NewMessage(dialog.ChatId, "Privet, i'm a exchange BIP/BTC or BTC/BIP bot")
-		msg.ReplyMarkup = newLanguageKeybord()
+		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Hello", dialog.language))
+		msg.ReplyMarkup = newvocabuageKeybord()
 		b.Bot.Send(msg)
-	case getMainMenu:
-		msg := tgbotapi.NewMessage(dialog.ChatId, "You can get current price BIP/USD\n"+
-			"Also buy or sell your coins for BTC\n"+
-			"My service give your chance to see your sales")
-		msg.ReplyMarkup = newMainMenuKeyboard()
-		b.Bot.Send(msg)
+	case engvocabCommand:
+
+		//b.Bot()
+	case rusvocabCommand:
+
+	// case getMainMenu:
+	// 	msg := tgbotapi.NewMessage(dialog.ChatId, "You can get current price BIP/USD\n"+
+	// 		"Also buy or sell your coins for BTC\n"+
+	// 		"My service give your chance to see your sales")
+	// 	msg.ReplyMarkup = newMainMenuKeyboard()
+	// 	b.Bot.Send(msg)
 	case priceCommand:
 		price, err := b.Api.GetPrice()
 		if err != nil {
 			msg := tgbotapi.NewMessage(dialog.ChatId, err.Error())
 			b.Bot.Send(msg)
 		}
-		ans := fmt.Sprintf("📈 Now BIP/USD %f $", price)
+		ans := fmt.Sprintf(vocab.GetTranslate("Now", dialog.language), price)
 		msg := tgbotapi.NewMessage(dialog.ChatId, ans)
 		b.Bot.Send(msg)
 	case buyCommand:
-		msg := tgbotapi.NewMessage(dialog.ChatId, "Send me your Minter Address:)")
+		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Send", dialog.language))
 		msg.ReplyMarkup = tgbotapi.ForceReply{
 			ForceReply: true,
 			Selective:  true,
@@ -189,8 +194,37 @@ func (b *Bot) RunCommand(command string, dialog Dialog) {
 	}
 }
 
-// Buy is function if method Buy.
+// Buy is function if method Buy
 func (b *Bot) Buy(dialog Dialog) {
+	if strings.Contains(dialog.Text, "@") {
+		addr, err := b.Api.GetBTCDeposAddress(CommandInfo[dialog.UserId], "BIP",
+			dialog.Text)
+		if err != nil {
+			msg := tgbotapi.NewMessage(dialog.ChatId, err.Error())
+			b.Bot.Send(msg)
+			return
+		}
+		ans := fmt.Sprintf("Your BTC deposit address %s", addr)
+		msg := tgbotapi.NewMessage(dialog.ChatId, ans)
+		dialog.Command = ""
+		b.Bot.Send(msg)
+		return
+		// Проверка статуса пошла
+		//go b.CheckStatus(dialog, addr)
+	} else {
+		CommandInfo[dialog.UserId] = dialog.Text
+		msg := tgbotapi.NewMessage(dialog.ChatId, "Send me your email!\n Example: myfriend@bipbest.com")
+		msg.ReplyMarkup = tgbotapi.ForceReply{
+			ForceReply: true,
+			Selective:  true,
+		}
+		b.Bot.Send(msg)
+		return
+	}
+}
+
+// Buy is function if method Sell
+func (b *Bot) Sell(dialog Dialog) {
 	if strings.Contains(dialog.Text, "@") {
 		addr, err := b.Api.GetBTCDeposAddress(CommandInfo[dialog.UserId], "BIP",
 			dialog.Text)
@@ -231,23 +265,23 @@ func (b *Bot) Buy(dialog Dialog) {
 // }
 
 // newMainMenuKeyboard is main menu keyboar : price, buy, sell, sales
-func newMainMenuKeyboard() tgbotapi.InlineKeyboardMarkup {
+func newMainMenuKeyboard(dialog Dialog) tgbotapi.InlineKeyboardMarkup {
 	return tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("💹Price", priceCommand),
-			tgbotapi.NewInlineKeyboardButtonData("💰Buy", buyCommand),
-			tgbotapi.NewInlineKeyboardButtonData("💰Sell", sellCommand),
-			tgbotapi.NewInlineKeyboardButtonData("📃My sales", salesCommand),
+			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Price", dialog.language), priceCommand),
+			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Buy", dialog.language), buyCommand),
+			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Sell", dialog.language), sellCommand),
+			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Sales", dialog.language), salesCommand),
 		),
 	)
 }
 
-// LanguageKeybord is keybouad for select language
-func newLanguageKeybord() tgbotapi.InlineKeyboardMarkup {
+// vocabuageKeybord is keybouad for select vocabuage
+func newvocabuageKeybord() tgbotapi.InlineKeyboardMarkup {
 	return tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🇷🇺 Русский", rusLangCommand),
-			tgbotapi.NewInlineKeyboardButtonData("🇬🇧 English", engLangCommand),
+			tgbotapi.NewInlineKeyboardButtonData("🇷🇺 Русский", rusvocabCommand),
+			tgbotapi.NewInlineKeyboardButtonData("🇬🇧 English", engvocabCommand),
 		),
 	)
 }

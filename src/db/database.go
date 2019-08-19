@@ -1,15 +1,11 @@
 package db
 
 import (
-	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
-
-var ctx context.Context
 
 type DataBase struct {
 	DB *sql.DB
@@ -31,25 +27,54 @@ func InitDB(db *sql.DB) error {
 	return nil
 }
 
-// GetLanguage return language of user
-func (d *DataBase) GetLanguage(Userid int) (string, error) {
+// PutUser adds user in database
+func (d *DataBase) PutUser(ChatId int64) error {
 
-	rows, err := d.DB.Query("Select lang from users where user_id = $1 limit 1", Userid)
-
+	_, err := d.DB.Exec("INSERT INTO USERS(id, chat_id, lang)"+
+		"VALUES ($1,$2,$3)", int(ChatId), ChatId, "en")
 	if err != nil {
-		fmt.Println(err)
-		return "", errors.New("Something going wrong with database, sorry:(")
+		return err
 	}
+
+	return nil
+}
+
+// GetLanguage returns language for user by UserId
+func (d *DataBase) GetLanguage(Userid int) string {
+
+	rows := d.DB.QueryRow("SELECT lang FROM USERS WHERE id = $1 limit 1", Userid)
 
 	var lang string
-
-	defer rows.Close()
-
-	err = rows.Scan(&lang)
-	if err != nil {
-		fmt.Println(err)
-		return "", errors.New("Something going wrong with database, sorry:(")
+	if rows == nil {
+		fmt.Println("Empty!")
 	}
 
-	return lang, nil
+	err := rows.Scan(&lang)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+
+	return lang
+}
+
+// SetLanguage is setting language for user by UserId
+func (d *DataBase) SetLanguage(UserId int, lang string) error {
+
+	_, err := d.DB.Exec("UPDATE USERS SET lang = $1 where id = $2", lang, UserId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GetSales returns all sales for user by UserId
+func (d *DataBase) GetSales() {
+
+}
+
+// UpdateSales updates (insert new) sales for user by UserId
+func (d *DataBase) UpdateSales() {
+
 }
