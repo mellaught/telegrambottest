@@ -5,13 +5,17 @@ var Translates = map[string]map[string]string{
 		"en": "Language",
 		"ru": "Язык",
 	},
-	"English": {
-		"en": "English",
-		"ru": "Английский",
+	"english": {
+		"en": "english",
+		"ru": "английский",
 	},
-	"Russian": {
-		"en": "Russian",
-		"ru": "Русский",
+	"russian": {
+		"en": "russian",
+		"ru": "русский",
+	},
+	"Installed": {
+		"en": "Installed",
+		"ru": "Установлен",
 	},
 	"Select": {
 		"en": "Select, please, what you want:)",

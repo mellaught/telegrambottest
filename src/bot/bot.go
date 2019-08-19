@@ -159,9 +159,17 @@ func (b *Bot) RunCommand(command string, dialog Dialog) {
 		msg.ReplyMarkup = newvocabuageKeybord()
 		b.Bot.Send(msg)
 	case engvocabCommand:
-
-		//b.Bot()
+		b.DB.SetLanguage(dialog.UserId, "en") 
+		dialog.language = "en"
+		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Installed", dialog.language) + 
+		vocab.GetTranslate("english", dialog.language))
+		b.Bot.Send(msg)
 	case rusvocabCommand:
+		b.DB.SetLanguage(dialog.UserId, "ru") 
+		dialog.language = "ru"
+		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Installed", dialog.language) + 
+		vocab.GetTranslate("russian", dialog.language))
+		b.Bot.Send(msg)
 
 	// case getMainMenu:
 	// 	msg := tgbotapi.NewMessage(dialog.ChatId, "You can get current price BIP/USD\n"+
@@ -285,35 +293,3 @@ func newvocabuageKeybord() tgbotapi.InlineKeyboardMarkup {
 		),
 	)
 }
-
-// if update.Message.IsCommand() {
-
-// 	switch update.Message.Command() {
-// 	case "start":
-// 		msg.Text = "Privet, i'm a exchange BIP/BTC bot or BTC/BIP."
-// 		bot.Send(msg)
-
-//
-
-// 	case "sell":
-// 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Delepment")
-// 		bot.Send(msg)
-
-// 	case "buy":
-// 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Delepment")
-// 		bot.Send(msg)
-
-// 	case "lookAt":
-// 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Delepment")
-// 		bot.Send(msg)
-// 	}
-
-// } else {
-// 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Please, send command!:)")
-// 	bot.Send(msg)
-// }
-
-// msg.ReplyMarkup = newMainMenuKeyboard()
-// bot.Send(msg)
-
-// }
