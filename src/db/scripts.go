@@ -3,11 +3,10 @@ package db
 var CREATE_USERS_IF_NOT_EXISTS = `
 create table if not exists users (
 	id INT NOT NULL,
-   chat_id BIGINT NOT NULL,
-   lang VARCHAR(8),
-   PRIMARY KEY (id)
+   	chat_id BIGINT NOT NULL,
+   	lang VARCHAR(8),
+   	PRIMARY KEY (id)
 );`
-
 
 var CREATE_SALES_IF_NOT_EXISTS = `
 create table if not exists sales (

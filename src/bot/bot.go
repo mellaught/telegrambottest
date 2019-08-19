@@ -96,32 +96,8 @@ func (b *Bot) Run() {
 
 		if update.Message != nil && update.Message.ReplyToMessage != nil {
 			if dialog.Command == "buy" {
-				if strings.Contains(dialog.Text, "@") {
-					addr, err := b.Api.GetBTCDeposAddress(CommandInfo[dialog.UserId], "BIP",
-						dialog.Text)
-					if err != nil {
-						msg := tgbotapi.NewMessage(dialog.ChatId, err.Error())
-						b.Bot.Send(msg)
-						continue
-					}
-					ans := fmt.Sprintf("Your BTC deposit address %s", addr)
-					msg := tgbotapi.NewMessage(dialog.ChatId, ans)
-					dialog.Command = ""
-					b.Bot.Send(msg)
-					continue
-					// Проверка статуса пошла
-					//go b.CheckStatus(dialog, addr)
-				} else {
-					CommandInfo[dialog.UserId] = dialog.Text
-					msg := tgbotapi.NewMessage(dialog.ChatId, "Send me your email!\n Example: myfriend@bipbest.com")
-					msg.ReplyMarkup = tgbotapi.ForceReply{
-						ForceReply: true,
-						Selective:  true,
-					}
-					b.Bot.Send(msg)
-					continue
-				}
-
+				b.Buy(dialog)
+				continue
 			}
 		}
 		if botCommand := b.getCommand(update); botCommand != "" {
@@ -210,6 +186,35 @@ func (b *Bot) RunCommand(command string, dialog Dialog) {
 	case salesCommand:
 		msg := tgbotapi.NewMessage(dialog.ChatId, "Delepment")
 		b.Bot.Send(msg)
+	}
+}
+
+// Buy is function if method Buy.
+func (b *Bot) Buy(dialog Dialog) {
+	if strings.Contains(dialog.Text, "@") {
+		addr, err := b.Api.GetBTCDeposAddress(CommandInfo[dialog.UserId], "BIP",
+			dialog.Text)
+		if err != nil {
+			msg := tgbotapi.NewMessage(dialog.ChatId, err.Error())
+			b.Bot.Send(msg)
+			return
+		}
+		ans := fmt.Sprintf("Your BTC deposit address %s", addr)
+		msg := tgbotapi.NewMessage(dialog.ChatId, ans)
+		dialog.Command = ""
+		b.Bot.Send(msg)
+		return
+		// Проверка статуса пошла
+		//go b.CheckStatus(dialog, addr)
+	} else {
+		CommandInfo[dialog.UserId] = dialog.Text
+		msg := tgbotapi.NewMessage(dialog.ChatId, "Send me your email!\n Example: myfriend@bipbest.com")
+		msg.ReplyMarkup = tgbotapi.ForceReply{
+			ForceReply: true,
+			Selective:  true,
+		}
+		b.Bot.Send(msg)
+		return
 	}
 }
 
