@@ -4,6 +4,14 @@ import (
 	"math/big"
 )
 
+//Config ..
+type Config struct {
+	Token      string
+	URL        string
+	Driver     string
+	DataSource string
+}
+
 // Price is a structure of resp method GetPrice()
 type Price struct {
 	Data struct {
@@ -58,10 +66,4 @@ type AddrHistory struct {
 	Data struct {
 		Amount int64 `json:"amount"`
 	} `json:"data"`
-}
-
-//Config ..
-type Config struct {
-	Token string
-	URL   string
 }

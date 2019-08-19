@@ -1,12 +1,13 @@
 package bot
 
 import (
-	api "bipBot/src/bipdev"
-	stct "bipBot/src/bipdev/structs"
 	"database/sql"
 	"fmt"
 	"log"
 	"strings"
+	api "telegrambottest/src/bipdev"
+	stct "telegrambottest/src/bipdev/structs"
+	"telegrambottest/src/db"
 
 	//strt "bipbot/src/bipdev/structs"
 
@@ -47,7 +48,7 @@ type BuySell struct {
 type Bot struct {
 	Token string
 	Api   *api.App
-	dbsql *sql.DB
+	DB    db.DataBase
 	Bot   *tgbotapi.BotAPI
 }
 
@@ -55,10 +56,13 @@ func InitBot(config stct.Config, dbsql *sql.DB) *Bot {
 
 	b := Bot{
 		Token: config.Token,
-		dbsql: dbsql,
+		DB: db.DataBase{
+			DB: dbsql,
+		},
 	}
 
 	b.Api = api.InitApp(config.URL)
+	//db.InitDB(dbsql)
 	bot, err := tgbotapi.NewBotAPI(b.Token)
 	if err != nil {
 		log.Fatal(err)
@@ -92,28 +96,30 @@ func (b *Bot) Run() {
 
 		if update.Message != nil && update.Message.ReplyToMessage != nil {
 			if dialog.Command == "buy" {
-				fmt.Println("IN BUY!")
 				if strings.Contains(dialog.Text, "@") {
 					addr, err := b.Api.GetBTCDeposAddress(CommandInfo[dialog.UserId], "BIP",
 						dialog.Text)
 					if err != nil {
 						msg := tgbotapi.NewMessage(dialog.ChatId, err.Error())
 						b.Bot.Send(msg)
+						continue
 					}
 					ans := fmt.Sprintf("Your BTC deposit address %s", addr)
 					msg := tgbotapi.NewMessage(dialog.ChatId, ans)
 					dialog.Command = ""
 					b.Bot.Send(msg)
+					continue
 					// Проверка статуса пошла
 					//go b.CheckStatus(dialog, addr)
 				} else {
 					CommandInfo[dialog.UserId] = dialog.Text
-					msg := tgbotapi.NewMessage(dialog.ChatId, "Send me your email!")
+					msg := tgbotapi.NewMessage(dialog.ChatId, "Send me your email!\n Example: myfriend@bipbest.com")
 					msg.ReplyMarkup = tgbotapi.ForceReply{
 						ForceReply: true,
 						Selective:  true,
 					}
 					b.Bot.Send(msg)
+					continue
 				}
 
 			}
