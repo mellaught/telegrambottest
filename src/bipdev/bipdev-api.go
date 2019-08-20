@@ -1,12 +1,12 @@
 package api
 
 import (
-	stct "bipBot/src/bipdev/structs"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	stct "telegrambottest/src/bipdev/structs"
 )
 
 // App is main app for API Methods
@@ -125,6 +125,7 @@ func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error
 		fmt.Println(err)
 		return nil, errors.New("Something going wrong, sorry:(")
 	}
+	fmt.Println(data.Data)
 	return data, nil
 }
 
@@ -204,43 +205,23 @@ func (a *App) GetTagInfo(tag string) (*stct.TagInfo, error) {
 
 // Wait while someone will buy your coins (or provide received tag so someone can by your coins directly)
 
+// BTCAddressHistory returns BTCAddress history  
 func (a *App) BTCAddressHistory(address string) (*stct.AddrHistory, error) {
+
 	req := a.URL + "bitcoinAddressHistory?address=" + address
-	response, err := http.Get(req)
-	if err != nil {
-		return nil, errors.New("http://bip.dev is not respond")
-	}
-
-	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println(err)
-		return nil, errors.New("Something going wrong, sorry:(")
-	}
-	if response.StatusCode == 400 {
-		data := &stct.Err{}
-		err := json.Unmarshal([]byte(contents), data)
-		if err != nil {
-			fmt.Println(err)
-			return nil, errors.New("Something going wrong, sorry:(")
-		}
-		return nil, errors.New(data.Error.Message)
-	}
-
-	fmt.Println(response.StatusCode)
-
-	data := &stct.AddrHistory{}
-	err = json.Unmarshal([]byte(contents), data)
-	if err != nil {
-		fmt.Println(err)
-		return nil, errors.New("Something going wrong, sorry:(")
-	}
-
-	return data, nil
+	return AddressHistory(req)
 }
 
+// MinterAddressHistory returns MinterAddress history  
 func (a *App) MinterAddressHistory(address string) (*stct.AddrHistory, error) {
 	req := a.URL + "minterAddressHistory?address=" + address
+
+	return AddressHistory(req)
+}
+
+// AddressHistory returns address history 
+func AddressHistory(req string) (*stct.AddrHistory, error) {
+
 	response, err := http.Get(req)
 	if err != nil {
 		return nil, errors.New("http://bip.dev is not respond")

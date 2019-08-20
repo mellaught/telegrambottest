@@ -46,7 +46,7 @@ type DeposMNT struct {
 type BTCStatus struct {
 	Data struct {
 		Coin        string `json:"coin"`
-		WillReceive string `json:"will_receive"`
+		WillReceive float64 `json:"will_receive"`
 	} `json:"data"`
 }
 
