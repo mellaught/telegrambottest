@@ -12,19 +12,22 @@ type DataBase struct {
 }
 
 // InitDB creates tables USERs or SALEs if tables not exists
-func InitDB(db *sql.DB) error {
+func InitDB(db *sql.DB) (*DataBase, error) {
 
+	d := DataBase{
+		DB: db,
+	}
 	_, err := db.Exec(CREATE_USERS_IF_NOT_EXISTS)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	_, err = db.Exec(CREATE_SALES_IF_NOT_EXISTS)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &d, nil
 }
 
 // PutUser adds user in database
