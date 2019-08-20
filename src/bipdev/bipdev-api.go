@@ -5,8 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"sync"
 	stct "telegrambottest/src/bipdev/structs"
+	"time"
 )
 
 // App is main app for API Methods
@@ -117,7 +120,14 @@ func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error
 		return nil, errors.New("Something going wrong, sorry:(")
 	}
 
-	fmt.Println(response.StatusCode)
+	if response.StatusCode == 404 {
+		data := &stct.Err{}
+		err := json.Unmarshal([]byte(contents), data)
+		if err != nil {
+			return nil, err
+		}
+		return nil, errors.New(data.Error.Message)
+	}
 
 	data := &stct.BTCStatus{}
 	err = json.Unmarshal([]byte(contents), data)
@@ -125,7 +135,7 @@ func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error
 		fmt.Println(err)
 		return nil, errors.New("Something going wrong, sorry:(")
 	}
-	fmt.Println(data.Data)
+
 	return data, nil
 }
 
@@ -205,21 +215,21 @@ func (a *App) GetTagInfo(tag string) (*stct.TagInfo, error) {
 
 // Wait while someone will buy your coins (or provide received tag so someone can by your coins directly)
 
-// BTCAddressHistory returns BTCAddress history  
+// BTCAddressHistory returns BTCAddress history
 func (a *App) BTCAddressHistory(address string) (*stct.AddrHistory, error) {
 
 	req := a.URL + "bitcoinAddressHistory?address=" + address
 	return AddressHistory(req)
 }
 
-// MinterAddressHistory returns MinterAddress history  
+// MinterAddressHistory returns MinterAddress history
 func (a *App) MinterAddressHistory(address string) (*stct.AddrHistory, error) {
 	req := a.URL + "minterAddressHistory?address=" + address
 
 	return AddressHistory(req)
 }
 
-// AddressHistory returns address history 
+// AddressHistory returns address history
 func AddressHistory(req string) (*stct.AddrHistory, error) {
 
 	response, err := http.Get(req)
@@ -233,7 +243,8 @@ func AddressHistory(req string) (*stct.AddrHistory, error) {
 		fmt.Println(err)
 		return nil, errors.New("Something going wrong, sorry:(")
 	}
-	if response.StatusCode == 400 {
+
+	if response.StatusCode == 404 {
 		data := &stct.Err{}
 		err := json.Unmarshal([]byte(contents), data)
 		if err != nil {
@@ -254,3 +265,43 @@ func AddressHistory(req string) (*stct.AddrHistory, error) {
 
 	return data, nil
 }
+
+func (a *App) CheckStatus(address string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	willcoin := 0.
+	for {
+		stat, err := a.GetBTCDepositStatus(address)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		if stat.Data.WillReceive != willcoin {
+			// Сообщить что придет столько то и
+			// b.Bot.Send(msg)
+			fmt.Println(stat.Data.WillReceive)
+			willcoin = stat.Data.WillReceive
+			time.Sleep(60 * time.Second)
+		}
+
+		fmt.Println(stat.Data.WillReceive)
+		time.Sleep(3 * time.Second)
+	}
+}
+
+// func (a *App) CheckStatus(address string) {
+
+// 	for {
+// 		stat, err := a.GetBTCDepositStatus(address)
+// 		if err != nil {
+// 			log.Fatal(err)
+// 			return
+// 		}
+// 		if stat.Data.WillReceive != 0 {
+// 			// Сообщить что придет столько то и
+// 			fmt.Println(stat.Data.WillReceive)
+// 			return
+// 		}
+// 		fmt.Println(stat.Data.WillReceive)
+// 		time.Sleep(2 * time.Second)
+// 	}
+// }

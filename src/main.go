@@ -1,43 +1,43 @@
 package main
 
-import (
-	"database/sql"
-	"fmt"
-	"os"
-	stct "telegrambottest/src/bipdev/structs"
-	"telegrambottest/src/bot"
+// import (
+// 	"database/sql"
+// 	"fmt"
+// 	"os"
+// 	stct "telegrambottest/src/bipdev/structs"
+// 	"telegrambottest/src/bot"
 
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/joho/godotenv"
+// 	_ "github.com/jinzhu/gorm/dialects/postgres"
+// 	"github.com/joho/godotenv"
 
-	"log"
-)
+// 	"log"
+// )
 
-func main() {
+// func main() {
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+// 	err := godotenv.Load()
+// 	if err != nil {
+// 		log.Fatal("Error loading .env file")
+// 	}
 
-	conf := stct.Config{
-		URL:        os.Getenv("URL"),
-		Token:      os.Getenv("TOKEN"),
-		Driver:     os.Getenv("DRIVER"),
-		DataSource: os.Getenv("DATASOURCE"),
-	}
+// 	conf := stct.Config{
+// 		URL:        os.Getenv("URL"),
+// 		Token:      os.Getenv("TOKEN"),
+// 		Driver:     os.Getenv("DRIVER"),
+// 		DataSource: os.Getenv("DATASOURCE"),
+// 	}
 
-	dbsql, err := sql.Open(conf.Driver, conf.DataSource)
-	if err != nil {
-		log.Fatal(err)
-	}
+// 	dbsql, err := sql.Open(conf.Driver, conf.DataSource)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	defer dbsql.Close()
+// 	defer dbsql.Close()
 
-	// Inizializaton users from DB, token for bot.
-	bot := bot.InitBot(conf, dbsql)
-	// Run bot
-	fmt.Println("Bot started!")
-	bot.Run()
+// 	// Inizializaton users from DB, token for bot.
+// 	bot := bot.InitBot(conf, dbsql)
+// 	// Run bot
+// 	fmt.Println("Bot started!")
+// 	bot.Run()
 
-}
+// }

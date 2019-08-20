@@ -28,7 +28,7 @@ func TestGetPrice(t *testing.T) {
 
 // Test for GetBTCDeposAddress
 // Result: Success: Tests passed.
-func TestGetGetBTCDeposAddress(t *testing.T) {
+func TestGetBTCDeposAddress(t *testing.T) {
 
 	a := InitApp("https://mbank.dl-dev.ru/api/")
 
@@ -44,7 +44,7 @@ func TestGetGetBTCDeposAddress(t *testing.T) {
 }
 
 // Test for GetBTCDepositStatus
-// Result: 
+// Result: Success: Tests passed.
 func TestGetBTCDepositStatus(t *testing.T) {
 
 	a := InitApp("https://mbank.dl-dev.ru/api/")
@@ -58,15 +58,10 @@ func TestGetBTCDepositStatus(t *testing.T) {
 		t.Errorf("Empty stat")
 	}
 
-	// stat, err = a.GetBTCDepositStatus("sadw")
-	// if err == nil {
-	// 	t.Fatal(err)
-	// }
-
-	// t.Log(err)
-}
-
-func TestBuy(t *testing.T) {
+	stat, err = a.GetBTCDepositStatus("saawdadadw")
+	if err.Error() != "Address not found" {
+		t.Errorf("Cannot found err")
+	}
 
 }
 
