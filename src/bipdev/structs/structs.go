@@ -2,6 +2,7 @@ package stct
 
 import (
 	"math/big"
+	"time"
 )
 
 //Config ..
@@ -45,7 +46,7 @@ type DeposMNT struct {
 // BTCStatus is a responce func GetBTCDepositStatus.
 type BTCStatus struct {
 	Data struct {
-		Coin        string `json:"coin"`
+		Coin        string  `json:"coin"`
 		WillReceive float64 `json:"will_receive"`
 	} `json:"data"`
 }
@@ -68,4 +69,16 @@ type AddrHistory struct {
 
 type Data struct {
 	Amount string `json:"amount"`
+}
+
+// Loot is a responce GetLoots
+type Loot struct {
+	ID            int
+	Tag           string
+	Coin          string
+	Price         int
+	Amout         string
+	MinterAddress string
+	CreatedAt     time.Time
+	LastSell      time.Time
 }

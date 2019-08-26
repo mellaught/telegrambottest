@@ -8,8 +8,8 @@ create table if not exists users (
    	PRIMARY KEY (id)
 );`
 
-var CREATE_SALES_IF_NOT_EXISTS = `
-create table if not exists sales (
+var CREATE_LOOTS_IF_NOT_EXISTS = `
+create table if not exists loots (
 	id SERIAL,
 	user_id INT NOT NULL,
 	tag VARCHAR(255),

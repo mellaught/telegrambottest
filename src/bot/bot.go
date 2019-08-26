@@ -45,7 +45,7 @@ type Dialog struct {
 type Bot struct {
 	Token string
 	Api   *api.App
-	DB    db.DataBase
+	DB    *db.DataBase
 	Bot   *tgbotapi.BotAPI
 }
 
@@ -53,17 +53,16 @@ func InitBot(config stct.Config, dbsql *sql.DB) *Bot {
 
 	b := Bot{
 		Token: config.Token,
-		DB: db.DataBase{
-			DB: dbsql,
-		},
+		DB:    &db.DataBase{},
 	}
 
 	// Create table if not exists
-	err := db.InitDB(dbsql)
+	db, err := db.InitDB(dbsql)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	b.DB = db
 	// Define URL
 	b.Api = api.InitApp(config.URL)
 
@@ -209,16 +208,16 @@ func (b *Bot) RunCommand(command string, dialog Dialog) {
 	case salesCommand:
 		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Development", dialog.language))
 		b.Bot.Send(msg)
-	// case getMainMenu:
-	// 	msg := tgbotapi.NewMessage(dialog.ChatId, "You can get current price BIP/USD\n"+
-	// 		"Also buy or sell your coins for BTC\n"+
-	// 		"My service give your chance to see your sales")
-	// 	msg.ReplyMarkup = newMainMenuKeyboard()
-	// 	b.Bot.Send(msg)
+		// case getMainMenu:
+		// 	msg := tgbotapi.NewMessage(dialog.ChatId, "You can get current price BIP/USD\n"+
+		// 		"Also buy or sell your coins for BTC\n"+
+		// 		"My service give your chance to see your sales")
+		// 	msg.ReplyMarkup = newMainMenuKeyboard()
+		// 	b.Bot.Send(msg)
 	}
 }
 
-// Buy() is function if method Buy
+// Buy is function for method Buy
 func (b *Bot) Buy(dialog *Dialog) {
 	if strings.Contains(dialog.Text, "@") {
 		addr, err := b.Api.GetBTCDeposAddress(CommandInfo[dialog.UserId], "BIP",
@@ -230,12 +229,14 @@ func (b *Bot) Buy(dialog *Dialog) {
 		}
 		ans := fmt.Sprintf(vocab.GetTranslate("BTC deposit", dialog.language), addr)
 		msg := tgbotapi.NewMessage(dialog.ChatId, ans)
+		msg.ReplyMarkup = tgbotapi.ForceReply{
+			ForceReply: false,
+			Selective:  false,
+		}
 		dialog.Command = ""
 		b.Bot.Send(msg)
 		go b.CheckStatusBuy(dialog, addr)
 		return
-		// Проверка статуса пошла
-		//go b.CheckStatus(dialog, addr)
 	} else {
 		CommandInfo[dialog.UserId] = dialog.Text
 		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Email", dialog.language))
@@ -291,7 +292,7 @@ func (b *Bot) CheckStatusBuy(dialog *Dialog, address string) {
 	}
 }
 
-// Sell() is function if method Sell
+// Sell is function for method Sell
 func (b *Bot) Sell(dialog Dialog) {
 	if len(dialog.Text) > 24 {
 		// checkvalidbitcoin
@@ -308,7 +309,7 @@ func (b *Bot) Sell(dialog Dialog) {
 		b.Bot.Send(msg)
 		return
 		// Проверка статуса пошла
-		//go b.CheckStatus(dialog, addr)
+		//go b.CheckStatusSell(dialog, addr)
 	} else {
 		CoinToSell[dialog.UserId] = dialog.Text
 		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Send BTC", dialog.language))
@@ -320,6 +321,62 @@ func (b *Bot) Sell(dialog Dialog) {
 		return
 	}
 }
+
+// CheckStatusSell checks status of deposit for method Sell
+func (b *Bot) CheckStatusSell(tag string, dialog *Dialog) {
+	timeout := time.After(2 * time.Minute)
+	tick := time.Tick(3 * time.Second)
+	amount := "0"
+	for {
+		select {
+		case <-timeout:
+			if amount == "0" {
+				msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("timeout", dialog.language))
+				msg.ReplyMarkup = newMainMenuKeyboard(dialog)
+				b.Bot.Send(msg)
+				return
+			} else {
+				continue
+			}
+		case <-tick:
+			taginfo, err := b.Api.GetTagInfo(tag)
+			if err != nil {
+				fmt.Println(err)
+				msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Error", dialog.language))
+				b.Bot.Send(msg)
+				return
+			}
+			if taginfo.Data.Amount != amount {
+				amount = taginfo.Data.Amount
+				fmt.Printf("Новый депозит на продажу %s %s по %d $\n", taginfo.Data.Amount, taginfo.Data.Coin, taginfo.Data.Price)
+				// Добавить в БД
+				b.DB.PutLoot(dialog.UserId,tag,taginfo)
+				//go a.CheckLootforSell(taginfo.Data.MinterAddress)
+				return
+			}
+
+		}
+	}
+}
+
+// func (a *App) CheckLootforSell(addr string) {
+// 	tick := time.Tick(1 * time.Hour)
+// 	lenght := 0
+// 	for {
+// 		select {
+// 		case <-tick:
+// 			history, err := a.MinterAddressHistory(addr)
+// 			if err != nil {
+// 				log.Fatal(err)
+// 				return
+// 			}
+// 			if len(history.Data) > lenght {
+
+// 			}
+
+// 		}
+// 	}
+// }
 
 // newMainMenuKeyboard is main menu keyboar : price, buy, sell, sales
 func newMainMenuKeyboard(dialog *Dialog) tgbotapi.InlineKeyboardMarkup {

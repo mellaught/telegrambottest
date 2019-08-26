@@ -120,10 +120,3 @@ func TestAddressHistory(t *testing.T) {
 		t.Errorf("Wrong amout of Data[1] %s, want: %s", h.Data[1].Amount, "200000000000000000000")
 	}
 }
-
-//Creating Table
-// if os.Getenv("CREATE_TABLE") == "yes" {
-// 	if err := createTable(); err != nil {
-// 		panic(err)
-// 	}
-// }

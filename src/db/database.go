@@ -2,6 +2,8 @@ package db
 
 import (
 	"database/sql"
+	stct "telegrambottest/src/bipdev/structs"
+	"time"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -21,7 +23,7 @@ func InitDB(db *sql.DB) (*DataBase, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec(CREATE_SALES_IF_NOT_EXISTS)
+	_, err = db.Exec(CREATE_LOOTS_IF_NOT_EXISTS)
 	if err != nil {
 		return nil, err
 	}
@@ -66,12 +68,45 @@ func (d *DataBase) SetLanguage(UserId int, lang string) error {
 	return nil
 }
 
-// GetSales returns all sales for user by UserId
-func (d *DataBase) GetSales() {
+// PutLoot puts new loot for sale
+func (d *DataBase) PutLoot(UserId int, tag string, taginfo *stct.TagInfo) error {
+	_, err := d.DB.Exec("INSERT INTO USERS(user_id, tag, coin, price, amount, minter_address, created_at)"+
+		"VALUES ($1,$2,$3,$4,$5,$6,$7)", UserId, tag, taginfo.Data.Coin, taginfo.Data.Price, taginfo.Data.Amount, taginfo.Data.MinterAddress, time.Now().UTC())
+	if err != nil {
+		return err
+	}
 
+	return nil
+}
+
+// GetSales returns all sales for user by UserId
+func (d *DataBase) GetLoots(UserId int) error {
+	rows, err := d.DB.Query("SELECT * FROM LOOTS WHERE user_id = $1 ", UserId)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	loots := []*stct.Loot{}
+	for rows.Next() {
+		loot := new(stct.Loot)
+		err := rows.Scan(&loot.ID, &loot.Tag, &loot.Coin, &loot.Price, &loot.Amout, &loot.MinterAddress, &loot.CreatedAt, &loot.LastSell)
+		if err != nil {
+			return err
+		}
+
+		loots = append(loots, loot)
+	}
+
+	if err = rows.Err(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // UpdateSales updates (insert new) sales for user by UserId
-func (d *DataBase) UpdateSales() {
-
+func (d *DataBase) UpdateLoots(UserId int) {
+	
 }

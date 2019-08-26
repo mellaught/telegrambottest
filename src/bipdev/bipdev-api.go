@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"sync"
 	stct "telegrambottest/src/bipdev/structs"
-	"time"
 )
 
 // App is main app for API Methods
@@ -263,54 +261,3 @@ func AddressHistory(req string) (*stct.AddrHistory, error) {
 	return data, nil
 }
 
-// CheckStatusSell ..
-func (a *App) CheckStatusSell(tag string, wg *sync.WaitGroup) {
-	defer wg.Done()
-	timeout := time.After(2 * time.Minute)
-	tick := time.Tick(3 * time.Second)
-	amount := "0"
-	for {
-		select {
-		case <-timeout:
-			if amount == "0" {
-				fmt.Println("timeout")
-				return
-			} else {
-				continue
-			}
-		case <-tick:
-			taginfo, err := a.GetTagInfo(tag)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			if taginfo.Data.Amount != amount {
-				amount = taginfo.Data.Amount
-				fmt.Printf("Новый депозит на продажу %s %s по %d $", taginfo.Data.Amount, taginfo.Data.Coin, taginfo.Data.Price)
-				// Добавить в БД
-				//go a.CheckLootforSell(taginfo.Data.MinterAddress)
-				return
-			}
-
-		}
-	}
-}
-
-// func (a *App) CheckLootforSell(addr string) {
-// 	tick := time.Tick(1 * time.Hour)
-// 	lenght := 0
-// 	for {
-// 		select {
-// 		case <-tick:
-// 			history, err := a.MinterAddressHistory(addr)
-// 			if err != nil {
-// 				log.Fatal(err)
-// 				return
-// 			}
-// 			if len(history.Data) > lenght {
-
-// 			}
-
-// 		}
-// 	}
-// }
