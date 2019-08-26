@@ -8,7 +8,7 @@ import (
 var MinterAddress = "Mxc19bf5558d8b374ad02557fd87d57ade178fc14a"
 
 // BitcoinAddress is my bitcoin testnet address
-var BitcoinAddress = ""
+var BitcoinAddress = "mkWZZPqd1FebZM1MNFfZBQoYFqA4EpE8vD"
 
 // Test for GetPrice
 // Result: Success: Tests passed
@@ -80,27 +80,45 @@ func TestTagInfo(t *testing.T) {
 	t.Log(tag.Data)
 }
 
+// Test for GetBTCDepositStatus
+// Result: Success: Tests passed.
 func TestGetMinterDeposAddress(t *testing.T) {
 
 	a := InitApp("https://mbank.dl-dev.ru/api/")
 
-	addr, err := a.GetMinterDeposAddress(BitcoinAddress, "BIP", "0.1")
+	addr, err := a.GetMinterDeposAddress(BitcoinAddress, "BIP", 0.1)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if addr == nil {
 		t.Errorf("Empty responce")
 	}
-	t.Log(addr.Data)
+
+	if addr.Data.Tag == "" || addr.Data.Address == ""{
+		t.Errorf("Empty tag or address: %s and %s ", addr.Data.Tag, addr.Data.Address)
+	}
 
 }
 
+// Test for MinterAddressHistory and also BTCAddressHistory  
+// Result: Success: Tests passed.
 func TestAddressHistory(t *testing.T) {
 
 	a := InitApp("https://mbank.dl-dev.ru/api/")
+	h, err := a.MinterAddressHistory("Mx6a55fa3a81fc55124b46a3c36101d11a39c27bbe")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if h == nil{
+		t.Errorf("Empty responce")
+	}
+	if len(h.Data) != 2 {
+		t.Errorf("Wrong len of Data %d, want : %d", len(h.Data), 2)
+	}
 
-	a.BTCAddressHistory("")
-	a.MinterAddressHistory("")
+	if h.Data[1].Amount != "200000000000000000000" {
+		t.Errorf("Wrong amout of Data[1] %s, want: %s", h.Data[1].Amount, "200000000000000000000")
+	}
 }
 
 //Creating Table

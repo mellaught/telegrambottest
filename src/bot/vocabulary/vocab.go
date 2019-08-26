@@ -21,25 +21,41 @@ var Translates = map[string]map[string]string{
 		"en": "Select, please, what you want:)",
 		"ru": "Выберете, пожалуйста, что вы хотите:)",
 	},
-	"Hello!": {
-		"en": "Hello, i'm an exchange bot: BIP/BTC or BTC/BIP",
-		"ru": "Выберете, пожалуйста, что вы хотите:)",
+	"Hello": {
+		"en": "Hello, i'm an exchange bot BIP/BTC or BTC/BIP",
+		"ru": "Привет, я бот для обмена BIP/BTC или BTC/BIP",
 	},
 	"Now": {
 		"en": "📈 Now currency BIP/USD %f $",
 		"ru": "📈 Сейчас курс BIP/USD %f $",
 	},
-	"Send": {
-		"en": "Send me your Minter Address:)",
-		"ru": "Отправь мне свой адрес в Minter:)",
+	"Send minter": {
+		"en": "Send me your Minter address.",
+		"ru": "Отправь мне свой minter адрес.",
+	},
+	"Send BTC": {
+		"en": "Send me your Bitcoin address.",
+		"ru": "Отправь мне свой биткоин адрес.",
+	},
+	"Minter deposit and tag": {
+		"en": "Your minter deposit address: %s\nTag: %s",
+		"ru": "Твой minter адрес для депозита: %s\nTag: %s",
+	},
+	"BTC deposit": {
+		"en": "Your bitcoin deposit address %s",
+		"ru": "Твой bitcoin адрес для депозита: %s",
+	},
+	"Email": {
+		"en": "Send me your email!\nExample: bip@thebest.com",
+		"ru": "Отправь мне свой email!\nПример: bip@thebest.com",
 	},
 	"New deposit": {
-		"en": "New deposit!\n You will receive at least  %f BIP.",
-		"ru": "Новый депозит!\n Вы получите минимум  %f BIP.",
+		"en": "New deposit!\nYou will receive at least  %f BIP.",
+		"ru": "Новый депозит!\nВы получите минимум  %f BIP.",
 	},
 	"Exchange is successful": {
 		"en": "Exchange is successful, you received  %f BIP.",
-		"ru": "Обмен успешен!\n Вы получили  %f BIP.",
+		"ru": "Обмен успешен!\nВы получили  %f BIP.",
 	},
 	"New deposit for sale": {
 		"en": "New deposit for sale: %f BIP at %f $",
@@ -48,6 +64,10 @@ var Translates = map[string]map[string]string{
 	"BIP exchanged": {
 		"en": "%f BIP exchanged for %f BTC",
 		"ru": "%f BIP обменяны на %f BTC",
+	},
+	"Development": {
+		"en": "In development stage",
+		"ru": "В стадии разработки",
 	},
 	"Price": {
 		"en": "💹Currency",
@@ -64,6 +84,14 @@ var Translates = map[string]map[string]string{
 	"Sales": {
 		"en": "📃My sales",
 		"ru": "📃Мои продажи",
+	},
+	"Error": {
+		"en": "Something going wrong:(",
+		"ru": "Что-то пошло не так:(",
+	},
+	"timeout": {
+		"en": "Deposit timed out.",
+		"ru": "Время ожидания депозита истекло.",
 	},
 }
 

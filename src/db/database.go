@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -40,19 +39,14 @@ func (d *DataBase) PutUser(ChatId int64) error {
 }
 
 // GetLanguage returns language for user by UserId
-func (d *DataBase) GetLanguage(Userid int) string {
+func (d *DataBase) GetLanguage(ChatId int64) string {
 
-	rows := d.DB.QueryRow("SELECT lang FROM USERS WHERE id = $1 limit 1", Userid)
-
+	rows := d.DB.QueryRow("SELECT lang FROM USERS WHERE id = $1 limit 1", int(ChatId))
 	var lang string
-	if rows == nil {
-		fmt.Println("Empty!")
-	}
-
 	err := rows.Scan(&lang)
-	if err != nil {
-		fmt.Println(err)
-		return ""
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		d.PutUser(ChatId)
+		return "en"
 	}
 
 	return lang

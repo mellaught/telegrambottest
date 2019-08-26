@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"sync"
 	stct "telegrambottest/src/bipdev/structs"
@@ -68,7 +67,6 @@ func (a *App) GetPrice() (float64, error) {
 }
 
 // --------------------------- Buy ----------------------------------
-
 // -------------------------------- 1 --------------------------------
 
 // GetBTCDeposAddress returns bitcoin address to deposit. (BUY coins)
@@ -139,15 +137,13 @@ func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error
 	return data, nil
 }
 
-// 3. Wait for 2 confirmations and receive coins. Price for the order will be fixed once BTC tx is available in mempool ???
-
 // -------------------------------- Sell ----------------------------------
-
 // -------------------------------- 1 --------------------------------
 
 // GetMinterDeposAddress return deposit struct.
-func (a *App) GetMinterDeposAddress(bitcoinAddress, coin, price string) (*stct.DeposMNT, error) {
-	req := a.URL + "minterDepositAddress?bitcoinAddress=" + bitcoinAddress + "&price=" + price + "&coin=" + coin
+func (a *App) GetMinterDeposAddress(bitcoinAddress, coin string, price float64) (*stct.DeposMNT, error) {
+	pricestr := fmt.Sprintf("%d", int(price*10000.))
+	req := a.URL + "minterDepositAddress?bitcoinAddress=" + bitcoinAddress + "&price=" + pricestr + "&coin=" + coin
 	response, err := http.Get(req)
 	if err != nil {
 		return nil, errors.New("http://bip.dev is not respond")
@@ -160,7 +156,14 @@ func (a *App) GetMinterDeposAddress(bitcoinAddress, coin, price string) (*stct.D
 		return nil, errors.New("Something going wrong, sorry:(")
 	}
 
-	fmt.Println(response.StatusCode)
+	if response.StatusCode == 400 {
+		data := &stct.Err{}
+		err := json.Unmarshal([]byte(contents), data)
+		if err != nil {
+			return nil, err
+		}
+		return nil, errors.New(data.Error.Message)
+	}
 
 	data := &stct.DeposMNT{}
 	err = json.Unmarshal([]byte(contents), data)
@@ -199,8 +202,6 @@ func (a *App) GetTagInfo(tag string) (*stct.TagInfo, error) {
 		return nil, errors.New(data.Error.Message)
 	}
 
-	fmt.Println(response.StatusCode)
-
 	data := &stct.TagInfo{}
 	err = json.Unmarshal([]byte(contents), data)
 	if err != nil {
@@ -210,10 +211,6 @@ func (a *App) GetTagInfo(tag string) (*stct.TagInfo, error) {
 
 	return data, nil
 }
-
-// -------------------------------- 3 --------------------------------
-
-// Wait while someone will buy your coins (or provide received tag so someone can by your coins directly)
 
 // BTCAddressHistory returns BTCAddress history
 func (a *App) BTCAddressHistory(address string) (*stct.AddrHistory, error) {
@@ -266,42 +263,54 @@ func AddressHistory(req string) (*stct.AddrHistory, error) {
 	return data, nil
 }
 
-func (a *App) CheckStatus(address string, wg *sync.WaitGroup) {
+// CheckStatusSell ..
+func (a *App) CheckStatusSell(tag string, wg *sync.WaitGroup) {
 	defer wg.Done()
-	willcoin := 0.
+	timeout := time.After(2 * time.Minute)
+	tick := time.Tick(3 * time.Second)
+	amount := "0"
 	for {
-		stat, err := a.GetBTCDepositStatus(address)
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		if stat.Data.WillReceive != willcoin {
-			// Сообщить что придет столько то и
-			// b.Bot.Send(msg)
-			fmt.Println(stat.Data.WillReceive)
-			willcoin = stat.Data.WillReceive
-			time.Sleep(60 * time.Second)
-		}
+		select {
+		case <-timeout:
+			if amount == "0" {
+				fmt.Println("timeout")
+				return
+			} else {
+				continue
+			}
+		case <-tick:
+			taginfo, err := a.GetTagInfo(tag)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			if taginfo.Data.Amount != amount {
+				amount = taginfo.Data.Amount
+				fmt.Printf("Новый депозит на продажу %s %s по %d $", taginfo.Data.Amount, taginfo.Data.Coin, taginfo.Data.Price)
+				// Добавить в БД
+				//go a.CheckLootforSell(taginfo.Data.MinterAddress)
+				return
+			}
 
-		fmt.Println(stat.Data.WillReceive)
-		time.Sleep(3 * time.Second)
+		}
 	}
 }
 
-// func (a *App) CheckStatus(address string) {
-
+// func (a *App) CheckLootforSell(addr string) {
+// 	tick := time.Tick(1 * time.Hour)
+// 	lenght := 0
 // 	for {
-// 		stat, err := a.GetBTCDepositStatus(address)
-// 		if err != nil {
-// 			log.Fatal(err)
-// 			return
+// 		select {
+// 		case <-tick:
+// 			history, err := a.MinterAddressHistory(addr)
+// 			if err != nil {
+// 				log.Fatal(err)
+// 				return
+// 			}
+// 			if len(history.Data) > lenght {
+
+// 			}
+
 // 		}
-// 		if stat.Data.WillReceive != 0 {
-// 			// Сообщить что придет столько то и
-// 			fmt.Println(stat.Data.WillReceive)
-// 			return
-// 		}
-// 		fmt.Println(stat.Data.WillReceive)
-// 		time.Sleep(2 * time.Second)
 // 	}
 // }

@@ -1,35 +1,39 @@
 package main
 
-import (
-	"fmt"
-	"log"
-	"sync"
-	api "telegrambottest/src/bipdev"
+// import (
+// 	"fmt"
+// 	"log"
+// 	"sync"
+// 	api "telegrambottest/src/bipdev"
+// 	"time"
 
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-)
+// 	_ "github.com/jinzhu/gorm/dialects/postgres"
+// )
 
-var MinterAddress = "Mxc19bf5558d8b374ad02557fd87d57ade178fc14a"
+// var (
+// 	MinterAddress = "Mxc19bf5558d8b374ad02557fd87d57ade178fc14a"
+// 	BitcoinAddress = "n2x6Fu7ACk5BMUJiS75cLLAC3uFz6PgXyf"
+// 	wg sync.WaitGroup
+// )
 
-var wg sync.WaitGroup
+// func main() {
+// 	app := api.InitApp("https://mbank.dl-dev.ru/api/")
 
-func main() {
-	app := api.InitApp("https://mbank.dl-dev.ru/api/")
+// 	addr, err := app.GetMinterDeposAddress(BitcoinAddress, "BIP", 0.1)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	addr, err := app.GetBTCDeposAddress(MinterAddress, "BIP", "xxx@yyy.ru")
-	if err != nil {
-		log.Fatal(err)
-	}
+// 	if addr == nil {
+// 		log.Fatalf("Empty addr")
+// 	}
 
-	if addr == "" {
-		log.Fatalf("Empty addr")
-	}
-	fmt.Println(addr)
-	//time.Sleep(1 * time.Minute)
-	wg.Add(1)
+// 	fmt.Println(addr.Data.Address, addr.Data.Tag)
+// 	time.Sleep(120 * time.Second)
+// 	wg.Add(1)
 
-	go app.CheckStatus(addr, &wg)
-	//time.Sleep(10 * time.Second)
-	wg.Wait()
-	fmt.Println("+ Test over")
-}
+// 	go app.CheckStatusSell(addr.Data.Tag, &wg)
+
+// 	wg.Wait()
+// 	fmt.Println("Test finish")
+// }
