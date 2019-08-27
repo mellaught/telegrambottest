@@ -400,20 +400,20 @@ func (b *Bot) CheckStatusSell(tag string) {
 func (b *Bot) ComposeResp(loots []*stct.Loot) {
 	for _, loot := range loots {
 		text := fmt.Sprintf(
-			"*Tag* _%s_\n"+
-				"*Coin* _%s_ "+
-				" *Price* _%v_\n"+
-				"*Amount* _%s_\n"+
-				"*Minted address* _%s_\n"+
-				"*Created at* _%s_\n"+
-				"*Last sell at* _%s_",
+			"*Tag:*  %s\n"+
+				"*Coin:*  %s  "+
+				"   *Price:*  %v\n"+
+				"*Amount:*  %s\n"+
+				"*Minted address:*  %s\n"+
+				"*Created at:*  %s\n"+
+				"*Last sell at:*  %s",
 			loot.Tag,
 			loot.Coin,
 			loot.Price,
 			loot.Amout,
 			loot.MinterAddress,
-			loot.CreatedAt.String(),
-			loot.LastSell.String())
+			loot.CreatedAt.Format("2006-01-02 15:04:05"),
+			loot.LastSell.Format("2006-01-02 15:04:05"))
 
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, text)
 		msg.ParseMode = "markdown"
