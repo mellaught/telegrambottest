@@ -70,8 +70,8 @@ func (d *DataBase) SetLanguage(UserId int, lang string) error {
 
 // PutLoot puts new loot for sale
 func (d *DataBase) PutLoot(UserId int, tag string, taginfo *stct.TagInfo) error {
-	_, err := d.DB.Exec("INSERT INTO USERS(user_id, tag, coin, price, amount, minter_address, created_at)"+
-		"VALUES ($1,$2,$3,$4,$5,$6,$7)", UserId, tag, taginfo.Data.Coin, taginfo.Data.Price, taginfo.Data.Amount, taginfo.Data.MinterAddress, time.Now().UTC())
+	_, err := d.DB.Exec("INSERT INTO LOOTS(user_id, tag, coin, price, amount, minter_address, created_at)"+
+		"VALUES ($1,$2,$3,$4,$5,$6,$7)", UserId, tag, taginfo.Data.Coin, taginfo.Data.Price, taginfo.Data.Amount, taginfo.Data.MinterAddress, time.Now())
 	if err != nil {
 		return err
 	}
@@ -80,10 +80,10 @@ func (d *DataBase) PutLoot(UserId int, tag string, taginfo *stct.TagInfo) error 
 }
 
 // GetSales returns all sales for user by UserId
-func (d *DataBase) GetLoots(UserId int) error {
+func (d *DataBase) GetLoots(UserId int) ([]*stct.Loot, error) {
 	rows, err := d.DB.Query("SELECT * FROM LOOTS WHERE user_id = $1 ", UserId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -93,20 +93,25 @@ func (d *DataBase) GetLoots(UserId int) error {
 		loot := new(stct.Loot)
 		err := rows.Scan(&loot.ID, &loot.Tag, &loot.Coin, &loot.Price, &loot.Amout, &loot.MinterAddress, &loot.CreatedAt, &loot.LastSell)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		loots = append(loots, loot)
 	}
 
 	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return loots, nil
+}
+
+// UpdateSales updates (insert new) sales for user by UserId
+func (d *DataBase) UpdateLoots(amount, tag string) error {
+	_, err := d.DB.Exec("UPDATE LOOTS SET last_sell_at = $1, amount = $2 where tag = $3", time.Now(), amount, tag)
+	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-// UpdateSales updates (insert new) sales for user by UserId
-func (d *DataBase) UpdateLoots(UserId int) {
-	
 }

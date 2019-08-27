@@ -12,7 +12,7 @@ var CREATE_LOOTS_IF_NOT_EXISTS = `
 create table if not exists loots (
 	id SERIAL,
 	user_id INT NOT NULL,
-	tag VARCHAR(255),
+	tag VARCHAR(255) UNIQUE,
 	coin VARCHAR(255),
 	price INT,
 	amount VARCHAR(255),

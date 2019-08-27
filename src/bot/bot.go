@@ -291,7 +291,7 @@ func (b *Bot) CheckStatusBuy(dialog *Dialog, address string) {
 		}
 	}
 }
-
+// 
 // Sell is function for method Sell
 func (b *Bot) Sell(dialog Dialog) {
 	if len(dialog.Text) > 24 {
@@ -321,6 +321,7 @@ func (b *Bot) Sell(dialog Dialog) {
 		return
 	}
 }
+//curl --data '{"method":"eth_getTransactionByHash","params":["0xa52d68b9dbe210bbc648ad21fcb925e2df56aaf69e9655af5927cb32f3746c8b"],"id":1,"jsonrpc":"2.0"}' -H "Content-Type: application/json" -X POST localhost:8545
 
 // CheckStatusSell checks status of deposit for method Sell
 func (b *Bot) CheckStatusSell(tag string, dialog *Dialog) {
