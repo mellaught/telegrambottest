@@ -49,6 +49,10 @@ var Translates = map[string]map[string]string{
 		"en": "Send me your email!\nExample: bip@thebest.com",
 		"ru": "Отправь мне свой email!\nПример: bip@thebest.com",
 	},
+	"Coin price": {
+		"en": "Send me a price for coins",
+		"ru": "Пришли мне цену за твои монеты",
+	},
 	"New deposit": {
 		"en": "New deposit!\nYou will receive at least  %f BIP.",
 		"ru": "Новый депозит!\nВы получите минимум  %f BIP.",

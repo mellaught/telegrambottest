@@ -102,7 +102,13 @@ func TestGetLoots(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	db.GetLoots(344178872)
+	loots, err := db.GetLoots(344178872)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if loots[0].Price != 1000 || loots[0].Amout != "1000" || loots[0].Coin != "MNT" {
+		t.Errorf("I wanna see price = 1000, but %d, amount = 1000, but %s, coin = MNT, but %s", loots[0].Price, loots[0].Amout, loots[0].Coin)
+	}
 }
 
 // Test for update user's loot: last_sell_at, amount
@@ -118,7 +124,7 @@ func TestUpdateLoots(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = db.UpdateLoots("1000","FFY37X9kRfvfGeDT8hZv")
+	err = db.UpdateLoots("1000", "FFY37X9kRfvfGeDT8hZv")
 	if err != nil {
 		t.Fatal(err)
 	}

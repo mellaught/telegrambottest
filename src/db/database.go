@@ -90,8 +90,9 @@ func (d *DataBase) GetLoots(UserId int) ([]*stct.Loot, error) {
 
 	loots := []*stct.Loot{}
 	for rows.Next() {
+		var u int
 		loot := new(stct.Loot)
-		err := rows.Scan(&loot.ID, &loot.Tag, &loot.Coin, &loot.Price, &loot.Amout, &loot.MinterAddress, &loot.CreatedAt, &loot.LastSell)
+		err := rows.Scan(&loot.ID, &u, &loot.Tag, &loot.Coin, &loot.Price, &loot.Amout, &loot.MinterAddress, &loot.CreatedAt, &loot.LastSell)
 		if err != nil {
 			return nil, err
 		}
