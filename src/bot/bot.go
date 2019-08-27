@@ -254,11 +254,10 @@ func (b *Bot) Buy() {
 	} else {
 		CommandInfo[b.Dlg.UserId] = b.Dlg.Text
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Email", b.Dlg.language))
-		msg.ReplyToMessageID = b.Dlg.MessageId
-		// msg.ReplyMarkup = tgbotapi.ForceReply{
-		// 	ForceReply: true,
-		// 	Selective:  true,
-		// }
+		msg.ReplyMarkup = tgbotapi.ForceReply{
+			ForceReply: true,
+			Selective:  true,
+		}
 		b.Bot.Send(msg)
 		return
 	}
@@ -322,6 +321,10 @@ func (b *Bot) Sell() {
 
 		ans := fmt.Sprintf(vocab.GetTranslate("Minter deposit and tag", b.Dlg.language), depos.Data.Address, depos.Data.Tag)
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
+		msg.ReplyMarkup = tgbotapi.ForceReply{
+			ForceReply: false,
+			Selective:  false,
+		}
 		b.Dlg.Command = ""
 		b.Bot.Send(msg)
 		go b.CheckStatusSell(depos.Data.Tag)
