@@ -207,6 +207,12 @@ func (b *Bot) RunCommand(command string, dialog Dialog) {
 		b.Bot.Send(msg)
 	case salesCommand:
 		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Development", dialog.language))
+		// loots, err := b.DB.GetLoots(dialog.UserId)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Error", dialog.language))
+		// 	b.Bot.Send(msg)
+		// }
 		b.Bot.Send(msg)
 		// case getMainMenu:
 		// 	msg := tgbotapi.NewMessage(dialog.ChatId, "You can get current price BIP/USD\n"+
@@ -291,7 +297,8 @@ func (b *Bot) CheckStatusBuy(dialog *Dialog, address string) {
 		}
 	}
 }
-// 
+
+//
 // Sell is function for method Sell
 func (b *Bot) Sell(dialog Dialog) {
 	if len(dialog.Text) > 24 {
@@ -321,7 +328,6 @@ func (b *Bot) Sell(dialog Dialog) {
 		return
 	}
 }
-//curl --data '{"method":"eth_getTransactionByHash","params":["0xa52d68b9dbe210bbc648ad21fcb925e2df56aaf69e9655af5927cb32f3746c8b"],"id":1,"jsonrpc":"2.0"}' -H "Content-Type: application/json" -X POST localhost:8545
 
 // CheckStatusSell checks status of deposit for method Sell
 func (b *Bot) CheckStatusSell(tag string, dialog *Dialog) {
@@ -351,7 +357,7 @@ func (b *Bot) CheckStatusSell(tag string, dialog *Dialog) {
 				amount = taginfo.Data.Amount
 				fmt.Printf("Новый депозит на продажу %s %s по %d $\n", taginfo.Data.Amount, taginfo.Data.Coin, taginfo.Data.Price)
 				// Добавить в БД
-				b.DB.PutLoot(dialog.UserId,tag,taginfo)
+				b.DB.PutLoot(dialog.UserId, tag, taginfo)
 				//go a.CheckLootforSell(taginfo.Data.MinterAddress)
 				return
 			}
