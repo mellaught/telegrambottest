@@ -67,9 +67,9 @@ create table if not exists users (
    	PRIMARY KEY (id)
 );
 ```
-- Sales. Хранит информации о размещении лота пользователем и истории продажи этих монет.
+- Loots. Хранит информации о размещении лота пользователем и истории продажи этих монет.
 ```
-create table if not exists sales (
+create table if not exists loots (
 	id SERIAL,
 	user_id INT NOT NULL,
 	tag VARCHAR(255),
