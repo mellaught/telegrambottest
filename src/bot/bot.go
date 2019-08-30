@@ -99,7 +99,9 @@ func (b *Bot) Run() {
 		if !exist {
 			continue
 		}
+
 		b.Dlg = dialog
+
 		if update.Message != nil && update.Message.ReplyToMessage != nil {
 			if dialog.Command == "buy" {
 				b.Buy()
@@ -169,14 +171,18 @@ func (b *Bot) getCommand(update tgbotapi.Update) string {
 	return ""
 }
 
-// RunCommand executes the input command
+// RunCommand executes the input command.
 func (b *Bot) RunCommand(command string) {
 	commands[b.Dlg.UserId] = command
 	switch command {
+
+	// "/Start" interacting with the bot, bot description and available commands.
 	case startCommand:
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Hello", b.Dlg.language))
 		msg.ReplyMarkup = b.newVocabuageKeybord()
 		b.Bot.Send(msg)
+
+	// engvocabCommand sets english lang for user.
 	case engvocabCommand:
 		b.DB.SetLanguage(b.Dlg.UserId, "en")
 		b.Dlg.language = "en"
@@ -184,6 +190,8 @@ func (b *Bot) RunCommand(command string) {
 			vocab.GetTranslate("english", b.Dlg.language))
 		msg.ReplyMarkup = b.newMainMenuKeyboard()
 		b.Bot.Send(msg)
+
+	// rusvocabCommand sets russian lang for user.
 	case rusvocabCommand:
 		b.DB.SetLanguage(b.Dlg.UserId, "ru")
 		b.Dlg.language = "ru"
@@ -191,6 +199,8 @@ func (b *Bot) RunCommand(command string) {
 			vocab.GetTranslate("russian", b.Dlg.language))
 		msg.ReplyMarkup = b.newMainMenuKeyboard()
 		b.Bot.Send(msg)
+
+	// priceCommand requests the server for the current BIP / USD rate and sends a message to user with the server responce.
 	case priceCommand:
 		price, err := b.Api.GetPrice()
 		if err != nil {
@@ -200,13 +210,21 @@ func (b *Bot) RunCommand(command string) {
 		ans := fmt.Sprintf(vocab.GetTranslate("Now", b.Dlg.language), price)
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
 		b.Bot.Send(msg)
+
+	// buyCommand collects data from the user to transmit their request.
+	// The user will receive the address for the deposit.
+	// After he sends the money he will receive a notification from bot.
+	// After the money is confirmed, he will receive another notification from bot.
 	case buyCommand:
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Send minter", b.Dlg.language))
+		// requests a forced response from the user to collect data to send a request to the server
 		msg.ReplyMarkup = tgbotapi.ForceReply{
 			ForceReply: true,
 			Selective:  true,
 		}
 		b.Bot.Send(msg)
+
+	//
 	case sellCommand:
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Coin price", b.Dlg.language))
 		msg.ReplyMarkup = tgbotapi.ForceReply{
@@ -214,6 +232,8 @@ func (b *Bot) RunCommand(command string) {
 			Selective:  true,
 		}
 		b.Bot.Send(msg)
+
+	//
 	case salesCommand:
 		loots, err := b.DB.GetLoots(b.Dlg.UserId)
 		if err != nil {
