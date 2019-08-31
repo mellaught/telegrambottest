@@ -31,19 +31,40 @@ var Translates = map[string]map[string]string{
 	},
 	"Send minter": {
 		"en": "Send me your Minter address.",
+<<<<<<< HEAD
 		"ru": "Отправь мне свой Minter адрес.",
+=======
+		"ru": "Отправь мне свой minter адрес.",
+>>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 	},
 	"Send BTC": {
 		"en": "Send me your Bitcoin address.",
 		"ru": "Отправь мне свой биткоин адрес.",
 	},
+<<<<<<< HEAD
 	"Minter deposit": {
 		"en": "Your Minter deposit address %s",
 		"ru": "Твой адрес для депозита в Минтер: %s",
+=======
+	"Minter deposit and tag": {
+		"en": "Your minter deposit address: %s\nTag: %s",
+		"ru": "Твой minter адрес для депозита: %s\nTag: %s",
+	},
+	"BTC deposit": {
+		"en": "Your bitcoin deposit address %s",
+		"ru": "Твой bitcoin адрес для депозита: %s",
+>>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 	},
 	"Email": {
 		"en": "Send me your email!\nExample: bip@thebest.com",
 		"ru": "Отправь мне свой email!\nПример: bip@thebest.com",
+<<<<<<< HEAD
+=======
+	},
+	"Coin price": {
+		"en": "Send me a price for coins",
+		"ru": "Пришли мне цену за твои монеты",
+>>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 	},
 	"New deposit": {
 		"en": "New deposit!\nYou will receive at least  %f BIP.",
@@ -80,6 +101,14 @@ var Translates = map[string]map[string]string{
 	"Sales": {
 		"en": "📃My sales",
 		"ru": "📃Мои продажи",
+	},
+	"Error": {
+		"en": "Something going wrong:(",
+		"ru": "Что-то пошло не так:(",
+	},
+	"timeout": {
+		"en": "Deposit timed out.",
+		"ru": "Время ожидания депозита истекло.",
 	},
 }
 

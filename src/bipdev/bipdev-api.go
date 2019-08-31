@@ -5,11 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"sync"
 	stct "telegrambottest/src/bipdev/structs"
-	"time"
 )
 
 // App is main app for API Methods
@@ -68,7 +65,6 @@ func (a *App) GetPrice() (float64, error) {
 }
 
 // --------------------------- Buy ----------------------------------
-
 // -------------------------------- 1 --------------------------------
 
 // GetBTCDeposAddress returns bitcoin address to deposit. (BUY coins)
@@ -139,10 +135,7 @@ func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error
 	return data, nil
 }
 
-// 3. Wait for 2 confirmations and receive coins. Price for the order will be fixed once BTC tx is available in mempool ???
-
 // -------------------------------- Sell ----------------------------------
-
 // -------------------------------- 1 --------------------------------
 
 // GetMinterDeposAddress return deposit struct.
@@ -217,10 +210,6 @@ func (a *App) GetTagInfo(tag string) (*stct.TagInfo, error) {
 	return data, nil
 }
 
-// -------------------------------- 3 --------------------------------
-
-// Wait while someone will buy your coins (or provide received tag so someone can by your coins directly)
-
 // BTCAddressHistory returns BTCAddress history
 func (a *App) BTCAddressHistory(address string) (*stct.AddrHistory, error) {
 
@@ -270,6 +259,7 @@ func AddressHistory(req string) (*stct.AddrHistory, error) {
 	return data, nil
 }
 
+<<<<<<< HEAD
 func (a *App) CheckStatus(address string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	willcoin := 0.
@@ -314,3 +304,5 @@ func (a *App) CheckStatus(address string, wg *sync.WaitGroup) {
 // 		time.Sleep(2 * time.Second)
 // 	}
 // }
+=======
+>>>>>>> 97af52583c4354e0e85352890f1f573f1701a764

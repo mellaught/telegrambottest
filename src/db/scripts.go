@@ -8,12 +8,17 @@ create table if not exists users (
    	PRIMARY KEY (id)
 );`
 
-var CREATE_SALES_IF_NOT_EXISTS = `
-create table if not exists sales (
-	id BIGINT NOT NULL,
+var CREATE_LOOTS_IF_NOT_EXISTS = `
+create table if not exists loots (
+	id SERIAL,
 	user_id INT NOT NULL,
-	info VARCHAR(255),
-	sell_at timestamp,
+	tag VARCHAR(255) UNIQUE,
+	coin VARCHAR(255),
+	price INT,
+	amount VARCHAR(255),
+	minter_address VARCHAR(255),
+	created_at timestamp,
+	last_sell_at timestamp,
 	PRIMARY KEY (id),
 	FOREIGN KEY (user_id) REFERENCES users (id)
 );`
