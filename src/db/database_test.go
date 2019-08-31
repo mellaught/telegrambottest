@@ -36,9 +36,9 @@ func TestGetLanguage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	lang := db.GetLanguage(12312)
-	if lang != "en" {
-		t.Fatalf("I want see en, but see %s", lang)
+	lang := db.GetLanguage(11)
+	if lang != "ru" {
+		t.Fatalf("I want see ru, but see %s", lang)
 	}
 }
 
@@ -63,3 +63,4 @@ func TestSetLanguage(t *testing.T) {
 		t.Fatalf("I want see en, but see %s", lang)
 	}
 }
+

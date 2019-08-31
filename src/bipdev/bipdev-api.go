@@ -146,8 +146,9 @@ func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error
 // -------------------------------- 1 --------------------------------
 
 // GetMinterDeposAddress return deposit struct.
-func (a *App) GetMinterDeposAddress(bitcoinAddress, coin, price string) (*stct.DeposMNT, error) {
-	req := a.URL + "minterDepositAddress?bitcoinAddress=" + bitcoinAddress + "&price=" + price + "&coin=" + coin
+func (a *App) GetMinterDeposAddress(bitcoinAddress, coin string, price float64) (*stct.DeposMNT, error) {
+	pricestr := fmt.Sprintf("%d", int(price*10000.))
+	req := a.URL + "minterDepositAddress?bitcoinAddress=" + bitcoinAddress + "&price=" + pricestr + "&coin=" + coin
 	response, err := http.Get(req)
 	if err != nil {
 		return nil, errors.New("http://bip.dev is not respond")
@@ -160,7 +161,14 @@ func (a *App) GetMinterDeposAddress(bitcoinAddress, coin, price string) (*stct.D
 		return nil, errors.New("Something going wrong, sorry:(")
 	}
 
-	fmt.Println(response.StatusCode)
+	if response.StatusCode == 400 {
+		data := &stct.Err{}
+		err := json.Unmarshal([]byte(contents), data)
+		if err != nil {
+			return nil, err
+		}
+		return nil, errors.New(data.Error.Message)
+	}
 
 	data := &stct.DeposMNT{}
 	err = json.Unmarshal([]byte(contents), data)
@@ -189,7 +197,7 @@ func (a *App) GetTagInfo(tag string) (*stct.TagInfo, error) {
 		fmt.Println(err)
 		return nil, errors.New("Something going wrong, sorry:(")
 	}
-	if response.StatusCode == 400 {
+	if response.StatusCode == 404 {
 		data := &stct.Err{}
 		err := json.Unmarshal([]byte(contents), data)
 		if err != nil {
@@ -198,8 +206,6 @@ func (a *App) GetTagInfo(tag string) (*stct.TagInfo, error) {
 		}
 		return nil, errors.New(data.Error.Message)
 	}
-
-	fmt.Println(response.StatusCode)
 
 	data := &stct.TagInfo{}
 	err = json.Unmarshal([]byte(contents), data)
@@ -254,8 +260,6 @@ func AddressHistory(req string) (*stct.AddrHistory, error) {
 		return nil, errors.New(data.Error.Message)
 	}
 
-	fmt.Println(response.StatusCode)
-
 	data := &stct.AddrHistory{}
 	err = json.Unmarshal([]byte(contents), data)
 	if err != nil {
@@ -277,10 +281,15 @@ func (a *App) CheckStatus(address string, wg *sync.WaitGroup) {
 		}
 		if stat.Data.WillReceive != willcoin {
 			// Сообщить что придет столько то и
-			// b.Bot.Send(msg)
-			fmt.Println(stat.Data.WillReceive)
-			willcoin = stat.Data.WillReceive
-			time.Sleep(60 * time.Second)
+			if willcoin == 0. {
+				// b.Bot.Send(msg)
+				fmt.Println(stat.Data.WillReceive)
+				willcoin = stat.Data.WillReceive
+				time.Sleep(60 * time.Second)
+			} else {
+				// b.Bot.Send(msg)
+				return
+			}
 		}
 
 		fmt.Println(stat.Data.WillReceive)
