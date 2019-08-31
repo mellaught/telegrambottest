@@ -43,6 +43,13 @@ type Dialog struct {
 	Command   string
 }
 
+// Bot is struct for Bot:   - Token: secret token from .env
+//							- Api:   Struct App for Rest Api methods
+//							- DB:
+//							- Bot
+//							- Dlg
+//							-
+//
 type Bot struct {
 	Token string
 	Api   *api.App
@@ -51,6 +58,7 @@ type Bot struct {
 	Dlg   *Dialog
 }
 
+//
 func InitBot(config stct.Config, dbsql *sql.DB) *Bot {
 
 	b := Bot{
@@ -251,7 +259,9 @@ func (b *Bot) RunCommand(command string) {
 	}
 }
 
-// Buy is function for method Buy
+// Buy is function for command "/buy".
+// Requests an email from the user and Minter deposit address.
+// Requests the "bitcoinDepositAddress" method with the received data.
 func (b *Bot) Buy() {
 	if strings.Contains(b.Dlg.Text, "@") {
 		addr, err := b.Api.GetBTCDeposAddress(CommandInfo[b.Dlg.UserId], "BIP",
