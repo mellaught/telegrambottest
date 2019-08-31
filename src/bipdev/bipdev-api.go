@@ -5,8 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"sync"
 	stct "telegrambottest/src/bipdev/structs"
+	"time"
 )
 
 // App is main app for API Methods
@@ -259,7 +262,6 @@ func AddressHistory(req string) (*stct.AddrHistory, error) {
 	return data, nil
 }
 
-<<<<<<< HEAD
 func (a *App) CheckStatus(address string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	willcoin := 0.
@@ -304,5 +306,3 @@ func (a *App) CheckStatus(address string, wg *sync.WaitGroup) {
 // 		time.Sleep(2 * time.Second)
 // 	}
 // }
-=======
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764

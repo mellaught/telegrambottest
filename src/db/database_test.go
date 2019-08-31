@@ -65,8 +65,6 @@ func TestSetLanguage(t *testing.T) {
 	}
 }
 
-<<<<<<< HEAD
-=======
 // Test for put user's loot to sell
 // Result: Success: Tests passed.
 func TestPutLoot(t *testing.T) {
@@ -131,4 +129,3 @@ func TestUpdateLoots(t *testing.T) {
 		t.Fatal(err)
 	}
 }
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764

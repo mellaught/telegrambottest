@@ -31,16 +31,6 @@ var (
 	commands    = make(map[int]string)
 	CommandInfo = make(map[int]string)
 	CoinToSell  = make(map[int]string)
-<<<<<<< HEAD
-)
-
-type Dialog struct {
-	ChatId   int64
-	UserId   int
-	Text     string
-	language string
-	Command  string
-=======
 	PriceToSell = make(map[int]float64)
 )
 
@@ -51,7 +41,6 @@ type Dialog struct {
 	Text      string
 	language  string
 	Command   string
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 }
 
 // Bot is struct for Bot:   - Token: secret token from .env
@@ -144,15 +133,8 @@ func (b *Bot) Run() {
 }
 
 // assembleUpdate
-<<<<<<< HEAD
-func (b *Bot) assembleUpdate(update tgbotapi.Update) (Dialog, bool) {
-
-	dialog := Dialog{}
-
-=======
 func (b *Bot) assembleUpdate(update tgbotapi.Update) (*Dialog, bool) {
 	dialog := &Dialog{}
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 	if update.Message != nil {
 		fmt.Println("111")
 		dialog.language = b.DB.GetLanguage(update.Message.Chat.ID)
@@ -210,37 +192,15 @@ func (b *Bot) RunCommand(command string) {
 
 	// engvocabCommand sets english lang for user.
 	case engvocabCommand:
-<<<<<<< HEAD
-		b.DB.SetLanguage(dialog.UserId, "en")
-		dialog.language = "en"
-		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Installed", dialog.language) + " " +
-			vocab.GetTranslate("english", dialog.language))
-		msg.ReplyMarkup = newMainMenuKeyboard(dialog)
-=======
 		b.DB.SetLanguage(b.Dlg.UserId, "en")
 		b.Dlg.language = "en"
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Installed", b.Dlg.language)+" "+
 			vocab.GetTranslate("english", b.Dlg.language))
 		msg.ReplyMarkup = b.newMainMenuKeyboard()
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 		b.Bot.Send(msg)
 
 	// rusvocabCommand sets russian lang for user.
 	case rusvocabCommand:
-<<<<<<< HEAD
-		b.DB.SetLanguage(dialog.UserId, "ru")
-		dialog.language = "ru"
-		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Installed", dialog.language) + " " +
-			vocab.GetTranslate("russian", dialog.language))
-		msg.ReplyMarkup = newMainMenuKeyboard(dialog)
-		b.Bot.Send(msg)
-	// case getMainMenu:
-	// 	msg := tgbotapi.NewMessage(dialog.ChatId, "You can get current price BIP/USD\n"+
-	// 		"Also buy or sell your coins for BTC\n"+
-	// 		"My service give your chance to see your sales")
-	// 	msg.ReplyMarkup = newMainMenuKeyboard()
-	// 	b.Bot.Send(msg)
-=======
 		b.DB.SetLanguage(b.Dlg.UserId, "ru")
 		b.Dlg.language = "ru"
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Installed", b.Dlg.language)+" "+
@@ -249,7 +209,6 @@ func (b *Bot) RunCommand(command string) {
 		b.Bot.Send(msg)
 
 	// priceCommand requests the server for the current BIP / USD rate and sends a message to user with the server responce.
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 	case priceCommand:
 		price, err := b.Api.GetPrice()
 		if err != nil {
@@ -275,23 +234,15 @@ func (b *Bot) RunCommand(command string) {
 
 	//
 	case sellCommand:
-<<<<<<< HEAD
-		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Development", dialog.language))
-=======
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Coin price", b.Dlg.language))
 		msg.ReplyMarkup = tgbotapi.ForceReply{
 			ForceReply: true,
 			Selective:  true,
 		}
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 		b.Bot.Send(msg)
 
 	//
 	case salesCommand:
-<<<<<<< HEAD
-		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Development", dialog.language))
-		b.Bot.Send(msg)
-=======
 		loots, err := b.DB.GetLoots(b.Dlg.UserId)
 		if err != nil {
 			fmt.Println(err)
@@ -305,7 +256,6 @@ func (b *Bot) RunCommand(command string) {
 		// 		"My service give your chance to see your sales")
 		// 	msg.ReplyMarkup = newMainMenuKeyboard()
 		// 	b.Bot.Send(msg)
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 	}
 }
 
@@ -332,13 +282,8 @@ func (b *Bot) Buy() {
 		go b.CheckStatusBuy(addr)
 		return
 	} else {
-<<<<<<< HEAD
-		CommandInfo[dialog.UserId] = dialog.Text
-		msg := tgbotapi.NewMessage(dialog.ChatId, "Send me your email!\nExample: myfriend@bipbest.com")
-=======
 		CommandInfo[b.Dlg.UserId] = b.Dlg.Text
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Email", b.Dlg.language))
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 		msg.ReplyMarkup = tgbotapi.ForceReply{
 			ForceReply: true,
 			Selective:  true,
@@ -348,12 +293,6 @@ func (b *Bot) Buy() {
 	}
 }
 
-<<<<<<< HEAD
-// Buy is function if method Sell
-func (b *Bot) Sell(dialog Dialog) {
-	if len(dialog.Text) > 24 {
-		depos, err := b.Api.GetMinterDeposAddress(dialog.Text, CoinToSell[dialog.UserId], 0.1)
-=======
 // CheckStatusBuy checks depos BTC and 2 confirme
 func (b *Bot) CheckStatusBuy(address string) {
 	timeout := time.After(2 * time.Minute)
@@ -404,18 +343,11 @@ func (b *Bot) Sell() {
 		// checkvalidbitcoin
 		CoinToSell[b.Dlg.UserId] = "MNT"
 		depos, err := b.Api.GetMinterDeposAddress(b.Dlg.Text, CoinToSell[b.Dlg.UserId], PriceToSell[b.Dlg.UserId])
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 		if err != nil {
 			msg := tgbotapi.NewMessage(b.Dlg.ChatId, err.Error())
 			b.Bot.Send(msg)
 			return
 		}
-<<<<<<< HEAD
-		
-		ans := fmt.Sprintf(vocab.GetTranslate("Minter deposit", dialog.language), depos.Data.Address)
-		msg := tgbotapi.NewMessage(dialog.ChatId, ans)
-		dialog.Command = ""
-=======
 
 		ans := fmt.Sprintf(vocab.GetTranslate("Minter deposit and tag", b.Dlg.language), depos.Data.Address, depos.Data.Tag)
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
@@ -424,20 +356,14 @@ func (b *Bot) Sell() {
 			Selective:  false,
 		}
 		b.Dlg.Command = ""
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 		b.Bot.Send(msg)
 		go b.CheckStatusSell(depos.Data.Tag)
 		return
 		// Проверка статуса пошла
 
 	} else {
-<<<<<<< HEAD
-		CoinToSell[dialog.UserId] = dialog.Text
-		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Send BTC", dialog.language))
-=======
 		CoinToSell[b.Dlg.UserId] = b.Dlg.Text
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Send BTC", b.Dlg.language))
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 		msg.ReplyMarkup = tgbotapi.ForceReply{
 			ForceReply: true,
 			Selective:  true,

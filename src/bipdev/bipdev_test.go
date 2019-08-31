@@ -8,11 +8,7 @@ import (
 var MinterAddress = "Mxc19bf5558d8b374ad02557fd87d57ade178fc14a"
 
 // BitcoinAddress is my bitcoin testnet address
-<<<<<<< HEAD
-var BitcoinAddress = "mrByFzaeHgwnayPznApmNiLJdcGbvehJqw"
-=======
 var BitcoinAddress = "mkWZZPqd1FebZM1MNFfZBQoYFqA4EpE8vD"
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 
 // Test for GetPrice
 // Result: Success: Tests passed
@@ -91,34 +87,23 @@ func TestTagInfo(t *testing.T) {
 
 }
 
-<<<<<<< HEAD
-// Test for GetMinterDeposAddress
-=======
 // Test for GetBTCDepositStatus
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 // Result: Success: Tests passed.
 func TestGetMinterDeposAddress(t *testing.T) {
 
 	a := InitApp("https://mbank.dl-dev.ru/api/")
 
-<<<<<<< HEAD
-	addr, err := a.GetMinterDeposAddress(BitcoinAddress, "BI", 0.2)
-=======
 	addr, err := a.GetMinterDeposAddress(BitcoinAddress, "BIP", 0.1)
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 	if err != nil {
 		t.Fatal(err)
 	}
 	if addr == nil {
 		t.Errorf("Empty responce")
 	}
-<<<<<<< HEAD
-=======
 
 	if addr.Data.Tag == "" || addr.Data.Address == ""{
 		t.Errorf("Empty tag or address: %s and %s ", addr.Data.Tag, addr.Data.Address)
 	}
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 
 }
 

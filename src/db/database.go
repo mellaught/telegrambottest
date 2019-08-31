@@ -2,13 +2,8 @@ package db
 
 import (
 	"database/sql"
-<<<<<<< HEAD
-
-	//"log"
-=======
 	stct "telegrambottest/src/bipdev/structs"
 	"time"
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -85,42 +80,6 @@ func (d *DataBase) PutLoot(UserId int, tag string, taginfo *stct.TagInfo) error 
 }
 
 // GetSales returns all sales for user by UserId
-<<<<<<< HEAD
-// func (d *DataBase) GetSales(UserId int) []string {
-
-// 	rows, err := d.DB.Query("SELECT * FROM SALES WHERE user_id = $1", UserId)
-
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	defer rows.Close()
-// 	var lang string
-// 	for rows.Next() {
-// 		err := rows.Scan(&lang)
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
-// 	}
-
-// 	if err = rows.Err(); err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	return lang
-// }
-
-// UpdateSales updates (insert new) sales for user by UserId
-// func (d *DataBase) UpdateSales() error {
-// 	_, err := d.DB.Exec("INSERT INTO SALES(chat_id, lang)"+
-// 		"VALUES ($1,$2,$3)", int(ChatId), "en")
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-=======
 func (d *DataBase) GetLoots(UserId int) ([]*stct.Loot, error) {
 	rows, err := d.DB.Query("SELECT * FROM LOOTS WHERE user_id = $1 ", UserId)
 	if err != nil {
@@ -157,4 +116,3 @@ func (d *DataBase) UpdateLoots(amount, tag string) error {
 
 	return nil
 }
->>>>>>> 97af52583c4354e0e85352890f1f573f1701a764
