@@ -62,8 +62,8 @@ var Translates = map[string]map[string]string{
 		"ru": "Обмен успешен!\nВы получили  %f BIP.",
 	},
 	"New deposit for sale": {
-		"en": "New deposit for sale: %f BIP at %f $",
-		"ru": "Новый депозит на продажу: %f BIP по %f",
+		"en": "New deposit for sale: %f %f at %f $",
+		"ru": "Новый депозит на продажу: %f %f по %f $",
 	},
 	"BIP exchanged": {
 		"en": "%f BIP exchanged for %f BTC",

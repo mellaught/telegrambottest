@@ -45,11 +45,10 @@ type Dialog struct {
 
 // Bot is struct for Bot:   - Token: secret token from .env
 //							- Api:   Struct App for Rest Api methods
-//							- DB:
-//							- Bot
-//							- Dlg
-//							-
-//
+//							- DB:    Postgres DB fro users and user's loots.
+//							- Bot:	 Bot
+//							- Dlg:   For dialog struct
+
 type Bot struct {
 	Token string
 	Api   *api.App
@@ -232,6 +231,7 @@ func (b *Bot) RunCommand(command string) {
 		}
 		b.Bot.Send(msg)
 
+	// sellCommand collects data from the user to transmit their request.
 	//
 	case sellCommand:
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Coin price", b.Dlg.language))
@@ -241,7 +241,7 @@ func (b *Bot) RunCommand(command string) {
 		}
 		b.Bot.Send(msg)
 
-	//
+	// salesCommand sends a request to the database to get user's loots.
 	case salesCommand:
 		loots, err := b.DB.GetLoots(b.Dlg.UserId)
 		if err != nil {
@@ -293,7 +293,7 @@ func (b *Bot) Buy() {
 	}
 }
 
-// CheckStatusBuy checks depos BTC and 2 confirme
+// CheckStatusBuy checks depos BTC and wait 2 confirmations
 func (b *Bot) CheckStatusBuy(address string) {
 	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(3 * time.Second)
@@ -336,8 +336,7 @@ func (b *Bot) CheckStatusBuy(address string) {
 	}
 }
 
-//
-// Sell is function for method Sell
+// Sell is function for command /sell.
 func (b *Bot) Sell() {
 	if len(b.Dlg.Text) > 24 {
 		// checkvalidbitcoin
@@ -359,7 +358,6 @@ func (b *Bot) Sell() {
 		b.Bot.Send(msg)
 		go b.CheckStatusSell(depos.Data.Tag)
 		return
-		// Проверка статуса пошла
 
 	} else {
 		CoinToSell[b.Dlg.UserId] = b.Dlg.Text
@@ -373,7 +371,7 @@ func (b *Bot) Sell() {
 	}
 }
 
-// CheckStatusSell checks status of deposit for method Sell
+// CheckStatusSell checks status of deposit for method Sell().
 func (b *Bot) CheckStatusSell(tag string) {
 	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(3 * time.Second)
@@ -399,9 +397,11 @@ func (b *Bot) CheckStatusSell(tag string) {
 			}
 			if taginfo.Data.Amount != amount {
 				amount = taginfo.Data.Amount
-				fmt.Printf("Новый депозит на продажу %s %s по %d $\n", taginfo.Data.Amount, taginfo.Data.Coin, taginfo.Data.Price)
-				// Добавить в БД
+				// Put in DB.
 				b.DB.PutLoot(b.Dlg.UserId, tag, taginfo)
+				ans := fmt.Sprintf(vocab.GetTranslate("New deposit for sale", b.Dlg.language), taginfo.Data.Amount, taginfo.Data.Coin, taginfo.Data.Price)
+				msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
+				b.Bot.Send(msg)
 				//go a.CheckLootforSell(taginfo.Data.MinterAddress)
 				return
 			}
@@ -429,7 +429,7 @@ func (b *Bot) CheckStatusSell(tag string) {
 // 	}
 // }
 
-//
+// Method for sending loots in markdown style to user.
 func (b *Bot) ComposeResp(loots []*stct.Loot) {
 	for _, loot := range loots {
 		text := fmt.Sprintf(
@@ -454,7 +454,7 @@ func (b *Bot) ComposeResp(loots []*stct.Loot) {
 	}
 }
 
-// newMainMenuKeyboard is main menu keyboar : price, buy, sell, sales
+// newMainMenuKeyboard is main menu keyboar: price, buy, sell, sales.
 func (b *Bot) newMainMenuKeyboard() tgbotapi.InlineKeyboardMarkup {
 	return tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -466,7 +466,7 @@ func (b *Bot) newMainMenuKeyboard() tgbotapi.InlineKeyboardMarkup {
 	)
 }
 
-// vocabuageKeybord is keybouad for select vocabuage
+// vocabuageKeybord is keybouad for select vocabuage.
 func (b *Bot) newVocabuageKeybord() tgbotapi.InlineKeyboardMarkup {
 	return tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -476,7 +476,7 @@ func (b *Bot) newVocabuageKeybord() tgbotapi.InlineKeyboardMarkup {
 	)
 }
 
-//
+// newMainKeyboard is keyboard for main menu.
 func (b *Bot) newMainKeyboard() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
