@@ -103,7 +103,7 @@ func (d *DataBase) GetLoots(UserId int) ([]*stct.Loot, error) {
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-
+	
 	return loots, nil
 }
 

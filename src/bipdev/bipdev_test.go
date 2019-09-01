@@ -81,7 +81,7 @@ func TestTagInfo(t *testing.T) {
 	}
 
 	tag, err = a.GetTagInfo("")
-	if err.Error() != "Tag not found"{
+	if err.Error() != "Tag not found" {
 		t.Errorf("Dont found err, want %s", err.Error())
 	}
 
@@ -101,13 +101,13 @@ func TestGetMinterDeposAddress(t *testing.T) {
 		t.Errorf("Empty responce")
 	}
 
-	if addr.Data.Tag == "" || addr.Data.Address == ""{
+	if addr.Data.Tag == "" || addr.Data.Address == "" {
 		t.Errorf("Empty tag or address: %s and %s ", addr.Data.Tag, addr.Data.Address)
 	}
 
 }
 
-// Test for MinterAddressHistory and also BTCAddressHistory  
+// Test for MinterAddressHistory and also BTCAddressHistory
 // Result: Success: Tests passed.
 func TestAddressHistory(t *testing.T) {
 
@@ -116,7 +116,7 @@ func TestAddressHistory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if h == nil{
+	if h == nil {
 		t.Errorf("Empty responce")
 	}
 	if len(h.Data) != 2 {

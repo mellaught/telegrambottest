@@ -17,6 +17,10 @@ var Translates = map[string]map[string]string{
 		"en": "Installed",
 		"ru": "Установлен",
 	},
+	"Settings": {
+		"en": "🔧 Settings",
+		"ru": "🔧 Настройки",
+	},
 	"Select": {
 		"en": "Select, please, what you want:)",
 		"ru": "Выберете, пожалуйста, что вы хотите:)",
@@ -74,20 +78,20 @@ var Translates = map[string]map[string]string{
 		"ru": "В стадии разработки",
 	},
 	"Price": {
-		"en": "💹Currency",
-		"ru": "💹Текущий курс",
+		"en": "💹 Currency",
+		"ru": "💹 Текущий курс",
 	},
 	"Sell": {
-		"en": "💰Sell",
-		"ru": "💰Продать",
+		"en": "💰 Sell",
+		"ru": "💰 Продать",
 	},
 	"Buy": {
-		"en": "💰Buy",
-		"ru": "💰Купить",
+		"en": "💰 Buy",
+		"ru": "💰 Купить",
 	},
-	"Sales": {
-		"en": "📃My sales",
-		"ru": "📃Мои продажи",
+	"Loots": {
+		"en": "📃 My loots",
+		"ru": "📃 Мои продажи",
 	},
 	"Error": {
 		"en": "Something going wrong:(",

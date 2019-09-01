@@ -23,6 +23,8 @@ const (
 	sellCommand     = "sell"
 	salesCommand    = "lookat"
 	getMainMenu     = "getmainmenu"
+	settingsMenu    = "settings"
+	language        = "language"
 	engvocabCommand = "englanguage"
 	rusvocabCommand = "ruslanguage"
 )
@@ -38,6 +40,7 @@ type Dialog struct {
 	ChatId    int64
 	UserId    int
 	MessageId int
+	Callback  string
 	Text      string
 	language  string
 	Command   string
@@ -46,7 +49,7 @@ type Dialog struct {
 // Bot is struct for Bot:   - Token: secret token from .env
 //							- Api:   Struct App for Rest Api methods
 //							- DB:    Postgres DB fro users and user's loots.
-//							- Bot:	 Bot
+//							- Bot:	 tgbotapi Bot(token)
 //							- Dlg:   For dialog struct
 
 type Bot struct {
@@ -124,10 +127,6 @@ func (b *Bot) Run() {
 			continue
 		}
 
-		msg := tgbotapi.NewMessage(dialog.ChatId, vocab.GetTranslate("Select", dialog.language))
-		msg.ReplyMarkup = b.newMainMenuKeyboard()
-		b.Bot.Send(msg)
-
 	}
 }
 
@@ -135,21 +134,19 @@ func (b *Bot) Run() {
 func (b *Bot) assembleUpdate(update tgbotapi.Update) (*Dialog, bool) {
 	dialog := &Dialog{}
 	if update.Message != nil {
-		fmt.Println("111")
 		dialog.language = b.DB.GetLanguage(update.Message.Chat.ID)
 		dialog.ChatId = update.Message.Chat.ID
 		dialog.MessageId = update.Message.MessageID
 		dialog.UserId = int(update.Message.Chat.ID)
 		dialog.Text = update.Message.Text
 	} else if update.CallbackQuery != nil {
-		fmt.Println("222")
 		dialog.language = b.DB.GetLanguage(update.CallbackQuery.Message.Chat.ID)
 		dialog.ChatId = update.CallbackQuery.Message.Chat.ID
 		dialog.MessageId = update.CallbackQuery.Message.MessageID
+		dialog.Callback = update.CallbackQuery.ID
 		dialog.UserId = int(update.CallbackQuery.Message.Chat.ID)
 		dialog.Text = ""
 	} else {
-		fmt.Println("333")
 		dialog.language = "en"
 		return dialog, false
 	}
@@ -189,23 +186,30 @@ func (b *Bot) RunCommand(command string) {
 		msg.ReplyMarkup = b.newVocabuageKeybord()
 		b.Bot.Send(msg)
 
+	case settingsMenu:
+		kb := b.newVocabuageKeybord()
+		msg := tgbotapi.EditMessageTextConfig{
+			BaseEdit: tgbotapi.BaseEdit{
+				ChatID:      b.Dlg.ChatId,
+				MessageID:   b.Dlg.MessageId,
+				ReplyMarkup: &kb,
+			},
+			Text: vocab.GetTranslate("Settings", b.Dlg.language),
+		}
+
+		b.Bot.Send(msg)
+
 	// engvocabCommand sets english lang for user.
 	case engvocabCommand:
 		b.DB.SetLanguage(b.Dlg.UserId, "en")
 		b.Dlg.language = "en"
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Installed", b.Dlg.language)+" "+
-			vocab.GetTranslate("english", b.Dlg.language))
-		msg.ReplyMarkup = b.newMainMenuKeyboard()
-		b.Bot.Send(msg)
+		b.SendMenu()
 
 	// rusvocabCommand sets russian lang for user.
 	case rusvocabCommand:
 		b.DB.SetLanguage(b.Dlg.UserId, "ru")
 		b.Dlg.language = "ru"
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Installed", b.Dlg.language)+" "+
-			vocab.GetTranslate("russian", b.Dlg.language))
-		msg.ReplyMarkup = b.newMainMenuKeyboard()
-		b.Bot.Send(msg)
+		b.SendMenu()
 
 	// priceCommand requests the server for the current BIP / USD rate and sends a message to user with the server responce.
 	case priceCommand:
@@ -217,6 +221,7 @@ func (b *Bot) RunCommand(command string) {
 		ans := fmt.Sprintf(vocab.GetTranslate("Now", b.Dlg.language), price)
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
 		b.Bot.Send(msg)
+		b.SendMenu()
 
 	// buyCommand collects data from the user to transmit their request.
 	// The user will receive the address for the deposit.
@@ -248,15 +253,31 @@ func (b *Bot) RunCommand(command string) {
 			fmt.Println(err)
 			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Error", b.Dlg.language))
 			b.Bot.Send(msg)
+		} else if len(loots) == 0 {
+			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Empty loots", b.Dlg.language))
+			b.Bot.Send(msg)
 		}
 		b.ComposeResp(loots)
-		// case getMainMenu:
-		// 	msg := tgbotapi.NewMessage(dialog.ChatId, "You can get current price BIP/USD\n"+
-		// 		"Also buy or sell your coins for BTC\n"+
-		// 		"My service give your chance to see your sales")
-		// 	msg.ReplyMarkup = newMainMenuKeyboard()
-		// 	b.Bot.Send(msg)
+		b.SendMenu()
+
+	case getMainMenu:
+		b.SendMenu()
 	}
+}
+
+func (b *Bot) SendMenu() {
+
+	kb := b.newMainMenuKeyboard()
+	newmsg := tgbotapi.EditMessageTextConfig{
+		BaseEdit: tgbotapi.BaseEdit{
+			ChatID:      b.Dlg.ChatId,
+			MessageID:   b.Dlg.MessageId,
+			ReplyMarkup: &kb,
+		},
+		Text: vocab.GetTranslate("Select", b.Dlg.language),
+	}
+
+	b.Bot.Send(newmsg)
 }
 
 // Buy is function for command "/buy".
@@ -267,15 +288,20 @@ func (b *Bot) Buy() {
 		addr, err := b.Api.GetBTCDeposAddress(CommandInfo[b.Dlg.UserId], "BIP",
 			b.Dlg.Text)
 		if err != nil {
+			b.Dlg.Command = ""
 			msg := tgbotapi.NewMessage(b.Dlg.ChatId, err.Error())
+			msg.ReplyMarkup = tgbotapi.ReplyKeyboardRemove{
+				RemoveKeyboard: true,
+				Selective:      true,
+			}
 			b.Bot.Send(msg)
 			return
 		}
 		ans := fmt.Sprintf(vocab.GetTranslate("BTC deposit", b.Dlg.language), addr)
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
-		msg.ReplyMarkup = tgbotapi.ForceReply{
-			ForceReply: false,
-			Selective:  false,
+		msg.ReplyMarkup = tgbotapi.ReplyKeyboardRemove{
+			RemoveKeyboard: true,
+			Selective:      true,
 		}
 		b.Dlg.Command = ""
 		b.Bot.Send(msg)
@@ -410,25 +436,6 @@ func (b *Bot) CheckStatusSell(tag string) {
 	}
 }
 
-// func (a *App) CheckLootforSell(addr string) {
-// 	tick := time.Tick(1 * time.Hour)
-// 	lenght := 0
-// 	for {
-// 		select {
-// 		case <-tick:
-// 			history, err := a.MinterAddressHistory(addr)
-// 			if err != nil {
-// 				log.Fatal(err)
-// 				return
-// 			}
-// 			if len(history.Data) > lenght {
-
-// 			}
-
-// 		}
-// 	}
-// }
-
 // Method for sending loots in markdown style to user.
 func (b *Bot) ComposeResp(loots []*stct.Loot) {
 	for _, loot := range loots {
@@ -459,9 +466,16 @@ func (b *Bot) newMainMenuKeyboard() tgbotapi.InlineKeyboardMarkup {
 	return tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Price", b.Dlg.language), priceCommand),
+		),
+		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Buy", b.Dlg.language), buyCommand),
 			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Sell", b.Dlg.language), sellCommand),
-			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Sales", b.Dlg.language), salesCommand),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Loots", b.Dlg.language), salesCommand),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Settings", b.Dlg.language), settingsMenu),
 		),
 	)
 }
@@ -476,23 +490,23 @@ func (b *Bot) newVocabuageKeybord() tgbotapi.InlineKeyboardMarkup {
 	)
 }
 
-// newMainKeyboard is keyboard for main menu.
-func (b *Bot) newMainKeyboard() tgbotapi.ReplyKeyboardMarkup {
-	return tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
-		),
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
-		),
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
-		),
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
-		),
-	)
-}
+// // newMainKeyboard is keyboard for main menu.
+// func (b *Bot) newMainKeyboard() tgbotapi.ReplyKeyboardMarkup {
+// 	return tgbotapi.NewReplyKeyboard(
+// 		tgbotapi.NewKeyboardButtonRow(
+// 			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
+// 		),
+// 		tgbotapi.NewKeyboardButtonRow(
+// 			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
+// 		),
+// 		tgbotapi.NewKeyboardButtonRow(
+// 			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
+// 		),
+// 		tgbotapi.NewKeyboardButtonRow(
+// 			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
+// 		),
+// 	)
+// }
 
 //
 // func (b *Bot) AddressKeyboardHelp() tgbotapi.ReplyKeyboardMarkup {
@@ -505,4 +519,23 @@ func (b *Bot) newMainKeyboard() tgbotapi.ReplyKeyboardMarkup {
 // 		keyboard.Keyboard = append(keyboard.Keyboard, row)
 // 	}
 // 	return keyboard
+// }
+
+// func (a *App) CheckLootforSell(addr string) {
+// 	tick := time.Tick(1 * time.Hour)
+// 	lenght := 0
+// 	for {
+// 		select {
+// 		case <-tick:
+// 			history, err := a.MinterAddressHistory(addr)
+// 			if err != nil {
+// 				log.Fatal(err)
+// 				return
+// 			}
+// 			if len(history.Data) > lenght {
+
+// 			}
+
+// 		}
+// 	}
 // }
