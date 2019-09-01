@@ -93,6 +93,10 @@ var Translates = map[string]map[string]string{
 		"en": "📃 My loots",
 		"ru": "📃 Мои продажи",
 	},
+	"Empty loots": {
+		"en": "You haven't got loots for sale",
+		"ru": "У вас нет лотов на продажу",
+	},
 	"Error": {
 		"en": "Something going wrong:(",
 		"ru": "Что-то пошло не так:(",
