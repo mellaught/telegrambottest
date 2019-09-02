@@ -50,7 +50,7 @@ func (a *App) GetPrice() (float64, error) {
 	contents, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		fmt.Println(err)
-		return -1., errors.New("Something going wrong, sorry:(")
+		return -1., err
 	}
 
 	data := &stct.Price{}
@@ -58,7 +58,7 @@ func (a *App) GetPrice() (float64, error) {
 	err = json.Unmarshal([]byte(contents), data)
 	if err != nil {
 		fmt.Println(err)
-		return -1., errors.New("Something going wrong, sorry:(")
+		return -1., err
 	}
 
 	currentPrice := float64(data.Data.Price / 1000)

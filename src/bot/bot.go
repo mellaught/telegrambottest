@@ -215,8 +215,10 @@ func (b *Bot) RunCommand(command string) {
 	case priceCommand:
 		price, err := b.Api.GetPrice()
 		if err != nil {
-			msg := tgbotapi.NewMessage(b.Dlg.ChatId, err.Error())
+			fmt.Println(err)
+			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Error", b.Dlg.language))
 			b.Bot.Send(msg)
+			return
 		}
 		ans := fmt.Sprintf(vocab.GetTranslate("Now", b.Dlg.language), price)
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
@@ -253,13 +255,16 @@ func (b *Bot) RunCommand(command string) {
 			fmt.Println(err)
 			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Error", b.Dlg.language))
 			b.Bot.Send(msg)
+			return
 		} else if len(loots) == 0 {
 			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Empty loots", b.Dlg.language))
 			msg.ReplyMarkup = b.newMainKeyboard()
 			b.Bot.Send(msg)
+			return
 		}
 		b.ComposeResp(loots)
 
+	// getMainMenu return Inline Keyboard newMainMenuKeyboard()
 	case getMainMenu:
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Select", b.Dlg.language))
 		msg.ReplyMarkup = b.newMainMenuKeyboard()
