@@ -272,6 +272,7 @@ func (b *Bot) RunCommand(command string) {
 	}
 }
 
+// SendMenu edit message and send Inline Keyboard newMainMenuKeyboard()
 func (b *Bot) SendMenu() {
 
 	kb := b.newMainMenuKeyboard()
