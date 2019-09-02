@@ -22,7 +22,7 @@ const (
 	buyCommand      = "buy"
 	sellCommand     = "sell"
 	salesCommand    = "lookat"
-	getMainMenu     = "getmainmenu"
+	getMainMenu     = "getmenu"
 	settingsMenu    = "settings"
 	language        = "language"
 	engvocabCommand = "englanguage"
@@ -165,7 +165,6 @@ func (b *Bot) assembleUpdate(update tgbotapi.Update) (*Dialog, bool) {
 func (b *Bot) getCommand(update tgbotapi.Update) string {
 	if update.Message != nil {
 		if update.Message.IsCommand() {
-			fmt.Println("command: ", update.Message.Command())
 			return update.Message.Command()
 		}
 	} else if update.CallbackQuery != nil {
@@ -220,8 +219,8 @@ func (b *Bot) RunCommand(command string) {
 		}
 		ans := fmt.Sprintf(vocab.GetTranslate("Now", b.Dlg.language), price)
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
+		msg.ReplyMarkup = b.newMainKeyboard()
 		b.Bot.Send(msg)
-		b.SendMenu()
 
 	// buyCommand collects data from the user to transmit their request.
 	// The user will receive the address for the deposit.
@@ -255,13 +254,15 @@ func (b *Bot) RunCommand(command string) {
 			b.Bot.Send(msg)
 		} else if len(loots) == 0 {
 			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Empty loots", b.Dlg.language))
+			msg.ReplyMarkup = b.newMainKeyboard()
 			b.Bot.Send(msg)
 		}
 		b.ComposeResp(loots)
-		b.SendMenu()
 
 	case getMainMenu:
-		b.SendMenu()
+		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Select", b.Dlg.language))
+		msg.ReplyMarkup = b.newMainMenuKeyboard()
+		b.Bot.Send(msg)
 	}
 }
 
@@ -290,19 +291,13 @@ func (b *Bot) Buy() {
 		if err != nil {
 			b.Dlg.Command = ""
 			msg := tgbotapi.NewMessage(b.Dlg.ChatId, err.Error())
-			msg.ReplyMarkup = tgbotapi.ReplyKeyboardRemove{
-				RemoveKeyboard: true,
-				Selective:      true,
-			}
+			msg.ReplyMarkup = b.newMainKeyboard()
 			b.Bot.Send(msg)
 			return
 		}
 		ans := fmt.Sprintf(vocab.GetTranslate("BTC deposit", b.Dlg.language), addr)
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
-		msg.ReplyMarkup = tgbotapi.ReplyKeyboardRemove{
-			RemoveKeyboard: true,
-			Selective:      true,
-		}
+		msg.ReplyMarkup = b.newMainKeyboard()
 		b.Dlg.Command = ""
 		b.Bot.Send(msg)
 		go b.CheckStatusBuy(addr)
@@ -370,21 +365,17 @@ func (b *Bot) Sell() {
 		depos, err := b.Api.GetMinterDeposAddress(b.Dlg.Text, CoinToSell[b.Dlg.UserId], PriceToSell[b.Dlg.UserId])
 		if err != nil {
 			msg := tgbotapi.NewMessage(b.Dlg.ChatId, err.Error())
+			msg.ReplyMarkup = b.newMainKeyboard()
 			b.Bot.Send(msg)
 			return
 		}
-
 		ans := fmt.Sprintf(vocab.GetTranslate("Minter deposit and tag", b.Dlg.language), depos.Data.Address, depos.Data.Tag)
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
-		msg.ReplyMarkup = tgbotapi.ForceReply{
-			ForceReply: false,
-			Selective:  false,
-		}
 		b.Dlg.Command = ""
+		msg.ReplyMarkup = b.newMainKeyboard()
 		b.Bot.Send(msg)
 		go b.CheckStatusSell(depos.Data.Tag)
 		return
-
 	} else {
 		CoinToSell[b.Dlg.UserId] = b.Dlg.Text
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Send BTC", b.Dlg.language))
@@ -457,6 +448,7 @@ func (b *Bot) ComposeResp(loots []*stct.Loot) {
 
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, text)
 		msg.ParseMode = "markdown"
+		msg.ReplyMarkup = b.newMainKeyboard()
 		b.Bot.Send(msg)
 	}
 }
@@ -490,23 +482,17 @@ func (b *Bot) newVocabuageKeybord() tgbotapi.InlineKeyboardMarkup {
 	)
 }
 
-// // newMainKeyboard is keyboard for main menu.
-// func (b *Bot) newMainKeyboard() tgbotapi.ReplyKeyboardMarkup {
-// 	return tgbotapi.NewReplyKeyboard(
-// 		tgbotapi.NewKeyboardButtonRow(
-// 			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
-// 		),
-// 		tgbotapi.NewKeyboardButtonRow(
-// 			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
-// 		),
-// 		tgbotapi.NewKeyboardButtonRow(
-// 			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
-// 		),
-// 		tgbotapi.NewKeyboardButtonRow(
-// 			tgbotapi.NewKeyboardButton(vocab.GetTranslate("Price", b.Dlg.language)),
-// 		),
-// 	)
-// }
+// newMainKeyboard is keyboard for main menu.
+func (b *Bot) newMainKeyboard() tgbotapi.ReplyKeyboardMarkup {
+	keyboard := tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("/getmenu"),
+		),
+	)
+
+	keyboard.OneTimeKeyboard = true
+	return keyboard
+}
 
 //
 // func (b *Bot) AddressKeyboardHelp() tgbotapi.ReplyKeyboardMarkup {

@@ -54,8 +54,8 @@ var Translates = map[string]map[string]string{
 		"ru": "Отправь мне свой email!\nПример: bip@thebest.com",
 	},
 	"Coin price": {
-		"en": "Send me a price for coins",
-		"ru": "Пришли мне цену за твои монеты",
+		"en": "Send me a price for coins.",
+		"ru": "Пришли мне цену за твои монеты.",
 	},
 	"New deposit": {
 		"en": "New deposit!\nYou will receive at least  %f BIP.",
@@ -66,12 +66,12 @@ var Translates = map[string]map[string]string{
 		"ru": "Обмен успешен!\nВы получили  %f BIP.",
 	},
 	"New deposit for sale": {
-		"en": "New deposit for sale: %f %f at %f $",
-		"ru": "Новый депозит на продажу: %f %f по %f $",
+		"en": "New deposit for sale: %f %f at %f $.",
+		"ru": "Новый депозит на продажу: %f %f по %f $.",
 	},
 	"BIP exchanged": {
-		"en": "%f BIP exchanged for %f BTC",
-		"ru": "%f BIP обменяны на %f BTC",
+		"en": "%f BIP exchanged for %f BTC.",
+		"ru": "%f BIP обменяны на %f BTC.",
 	},
 	"Development": {
 		"en": "In development stage",
@@ -94,8 +94,8 @@ var Translates = map[string]map[string]string{
 		"ru": "📃 Мои продажи",
 	},
 	"Empty loots": {
-		"en": "You haven't got loots for sale",
-		"ru": "У вас нет лотов на продажу",
+		"en": "You haven't got loots for sale.",
+		"ru": "У вас нет лотов на продажу.",
 	},
 	"Error": {
 		"en": "Something going wrong:(",
