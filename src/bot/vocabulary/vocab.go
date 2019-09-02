@@ -54,8 +54,8 @@ var Translates = map[string]map[string]string{
 		"ru": "Отправь мне свой email!\nПример: bip@thebest.com",
 	},
 	"Coin price": {
-		"en": "Send me a price for coins.",
-		"ru": "Пришли мне цену за твои монеты.",
+		"en": "Send me a price for coins, format: 0.xxx.\nAllowable range: 0.1 - 0.32 $.",
+		"ru": "Пришли мне цену за свои монеты, формат: 0.xxx.\nДопустимый диапазон: 0.1 - 0.32 $.",
 	},
 	"New deposit": {
 		"en": "New deposit!\nYou will receive at least  %f BIP.",
@@ -100,6 +100,10 @@ var Translates = map[string]map[string]string{
 	"Error": {
 		"en": "Something going wrong:(",
 		"ru": "Что-то пошло не так:(",
+	},
+	"Wrong price": {
+		"en": "Wrong price format!",
+		"ru": "Нерпавильный формат цены!",
 	},
 	"timeout": {
 		"en": "Deposit timed out.",

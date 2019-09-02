@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	api "telegrambottest/src/bipdev"
 	stct "telegrambottest/src/bipdev/structs"
@@ -359,7 +360,7 @@ func (b *Bot) CheckStatusBuy(address string) {
 
 // Sell is function for command /sell.
 func (b *Bot) Sell() {
-	if len(b.Dlg.Text) > 24 {
+	if len(b.Dlg.Text) > 3 {
 		// checkvalidbitcoin
 		CoinToSell[b.Dlg.UserId] = "MNT"
 		depos, err := b.Api.GetMinterDeposAddress(b.Dlg.Text, CoinToSell[b.Dlg.UserId], PriceToSell[b.Dlg.UserId])
@@ -377,7 +378,15 @@ func (b *Bot) Sell() {
 		go b.CheckStatusSell(depos.Data.Tag)
 		return
 	} else {
-		CoinToSell[b.Dlg.UserId] = b.Dlg.Text
+		price, err := strconv.ParseFloat(b.Dlg.Text, 64)
+		if err != nil {
+			fmt.Println(err)
+			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Wrong price", b.Dlg.language))
+			b.Bot.Send(msg)
+			return
+		}
+
+		PriceToSell[b.Dlg.UserId] = price
 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Send BTC", b.Dlg.language))
 		msg.ReplyMarkup = tgbotapi.ForceReply{
 			ForceReply: true,
