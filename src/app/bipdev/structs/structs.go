@@ -71,6 +71,10 @@ type Data struct {
 	Amount string `json:"amount"`
 }
 
+type Available struct {
+	Data []int `json:"data"`
+}
+
 // Loot is a responce GetLoots
 type Loot struct {
 	ID            int
@@ -81,4 +85,10 @@ type Loot struct {
 	MinterAddress string
 	CreatedAt     time.Time
 	LastSell      time.Time
+}
+
+// REST API request for update loot with current tag
+type UPDLoot struct {
+	Tag    string `json:"tag"`
+	Amount string `json:"amount"`
 }

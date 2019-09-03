@@ -22,3 +22,13 @@ create table if not exists loots (
 	PRIMARY KEY (id),
 	FOREIGN KEY (user_id) REFERENCES users (id)
 );`
+
+var CREATE_RECORDS_IF_NOT_EXISTS = `
+Create table if not exists RECORDS (
+	id serial,
+	user_id int not null,
+	bitcoin_address VARCHAR(255),
+	minter_address VARCHAR(255),
+	email VARCHAR(255),
+	PRIMARY KEY(id)
+);`

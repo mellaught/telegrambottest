@@ -4,14 +4,14 @@ import (
 	"testing"
 )
 
-// MinterAddress is my minter testnet address
+// MinterAddress is my minter testnet address.
 var MinterAddress = "Mxc19bf5558d8b374ad02557fd87d57ade178fc14a"
 
-// BitcoinAddress is my bitcoin testnet address
+// BitcoinAddress is my bitcoin testnet address.
 var BitcoinAddress = "mkWZZPqd1FebZM1MNFfZBQoYFqA4EpE8vD"
 
-// Test for GetPrice
-// Result: Success: Tests passed
+// Test for GetPrice.
+// Result: Success: Tests passed.
 func TestGetPrice(t *testing.T) {
 
 	a := InitApp("https://mbank.dl-dev.ru/api/")
@@ -26,7 +26,7 @@ func TestGetPrice(t *testing.T) {
 	}
 }
 
-// Test for GetBTCDeposAddress
+// Test for GetBTCDeposAddress.
 // Result: Success: Tests passed.
 func TestGetBTCDeposAddress(t *testing.T) {
 
@@ -43,7 +43,7 @@ func TestGetBTCDeposAddress(t *testing.T) {
 
 }
 
-// Test for GetBTCDepositStatus
+// Test for GetBTCDepositStatus.
 // Result: Success: Tests passed.
 func TestGetBTCDepositStatus(t *testing.T) {
 
@@ -65,7 +65,7 @@ func TestGetBTCDepositStatus(t *testing.T) {
 
 }
 
-// Test for GetTagInfo
+// Test for GetTagInfo.
 // Result: Success: Tests passed.
 func TestTagInfo(t *testing.T) {
 
@@ -87,7 +87,7 @@ func TestTagInfo(t *testing.T) {
 
 }
 
-// Test for GetBTCDepositStatus
+// Test for GetBTCDepositStatus.
 // Result: Success: Tests passed.
 func TestGetMinterDeposAddress(t *testing.T) {
 
@@ -107,7 +107,7 @@ func TestGetMinterDeposAddress(t *testing.T) {
 
 }
 
-// Test for MinterAddressHistory and also BTCAddressHistory
+// Test for MinterAddressHistory and also BTCAddressHistory.
 // Result: Success: Tests passed.
 func TestAddressHistory(t *testing.T) {
 
@@ -125,5 +125,20 @@ func TestAddressHistory(t *testing.T) {
 
 	if h.Data[1].Amount != "200000000000000000000" {
 		t.Errorf("Wrong amout of Data[1] %s, want: %s", h.Data[1].Amount, "200000000000000000000")
+	}
+}
+
+// Test for GetAvailablePrices.
+// Success: Tests passed.
+func TestAvailablePrices(t *testing.T) {
+
+	a := InitApp("https://mbank.dl-dev.ru/api/")
+	prices, err := a.GetAvailablePrices()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(prices) != 11 {
+		t.Errorf("I want see 11, but see %d", len(prices))
 	}
 }

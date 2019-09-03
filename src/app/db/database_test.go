@@ -2,11 +2,11 @@ package db
 
 import (
 	"database/sql"
-	api "telegrambottest/src/bipdev"
+	api "telegrambottest/src/app/bipdev"
 	"testing"
 )
 
-// Test for InitDB ( create tables ) and PutUser
+// Test for InitDB ( create tables ) and PutUser.
 // Result: Success: Tests passed.
 func TestCreateTablePutUser(t *testing.T) {
 
@@ -25,7 +25,7 @@ func TestCreateTablePutUser(t *testing.T) {
 	}
 }
 
-// Test For GetLanguage
+// Test For GetLanguage.
 // Result: Success: Tests passed.
 func TestGetLanguage(t *testing.T) {
 	dbsql, err := sql.Open("postgres", "user=postgres dbname=gorm password=simsim sslmode=disable")
@@ -43,7 +43,7 @@ func TestGetLanguage(t *testing.T) {
 	}
 }
 
-// Test for set language
+// Test for set language.
 // Result: Success: Tests passed.
 func TestSetLanguage(t *testing.T) {
 	dbsql, err := sql.Open("postgres", "user=postgres dbname=gorm password=simsim sslmode=disable")
@@ -65,7 +65,7 @@ func TestSetLanguage(t *testing.T) {
 	}
 }
 
-// Test for put user's loot to sell
+// Test for put user's loot to sell.
 // Result: Success: Tests passed.
 func TestPutLoot(t *testing.T) {
 	dbsql, err := sql.Open("postgres", "user=postgres dbname=gorm password=simsim sslmode=disable")
@@ -89,7 +89,7 @@ func TestPutLoot(t *testing.T) {
 	}
 }
 
-// Test for get user's loots
+// Test for get user's loots.
 // Result: Success: Tests passed.
 func TestGetLoots(t *testing.T) {
 	dbsql, err := sql.Open("postgres", "user=postgres dbname=gorm password=simsim sslmode=disable")
@@ -111,7 +111,7 @@ func TestGetLoots(t *testing.T) {
 	}
 }
 
-// Test for update user's loot: last_sell_at, amount
+// Test for update user's loot: last_sell_at, amount.
 // Result: Success: Tests passed.
 func TestUpdateLoots(t *testing.T) {
 	dbsql, err := sql.Open("postgres", "user=postgres dbname=gorm password=simsim sslmode=disable")
@@ -124,8 +124,87 @@ func TestUpdateLoots(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = db.UpdateLoots("1000", "FFY37X9kRfvfGeDT8hZv")
+	chatid, lang, err := db.UpdateLoots("2000", "FFY37X9kRfvfGeDT8hZv")
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	if chatid != 344178872 || lang != "ru" {
+		t.Errorf("I want see chatid , but %d and lang want see ,but lang = %s ", chatid, lang)
+	}
+}
+
+// Test for get user's entered bitcoin addresses.
+// Result: Success: Tests passed.
+func TestGetBTCAddresses(t *testing.T) {
+
+	dbsql, err := sql.Open("postgres", "user=postgres dbname=gorm password=simsim sslmode=disable")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db, err := InitDB(dbsql)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	addresses, err := db.GetBTCAddresses(344178872)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if addresses != nil {
+		t.Errorf("Addresses must be empty %d!" ,len(addresses))
+	}
+
+}
+
+// Test for get user's entered minter addresses.
+// Result: Success: Tests passed.
+func TestGetMinterAddresses(t *testing.T) {
+
+	dbsql, err := sql.Open("postgres", "user=postgres dbname=gorm password=simsim sslmode=disable")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db, err := InitDB(dbsql)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	addresses, err := db.GetMinterAddresses(344178872)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if addresses != nil {
+		t.Errorf("Addresses must be empty %d!" ,len(addresses))
+	}
+
+}
+
+// Test for get user's entered email addresses.
+// Result: Success: Tests passed.
+func TestGetEmails(t *testing.T) {
+
+	dbsql, err := sql.Open("postgres", "user=postgres dbname=gorm password=simsim sslmode=disable")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db, err := InitDB(dbsql)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	addresses, err := db.GetEmails(344178872)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if addresses != nil {
+		t.Errorf("Addresses must be empty %d!" ,len(addresses))
+	}
+
 }

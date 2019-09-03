@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
-	stct "telegrambottest/src/bipdev/structs"
+	stct "telegrambottest/src/app/bipdev/structs"
 	"time"
 )
 
@@ -141,6 +141,33 @@ func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error
 // -------------------------------- Sell ----------------------------------
 // -------------------------------- 1 --------------------------------
 
+// GetAvailablePrices
+func (a *App) GetAvailablePrices() ([]int, error) {
+
+	response, err := http.Get(a.URL + "availablePrices")
+	if err != nil {
+		return nil, errors.New("http://bip.dev is not respond")
+	}
+
+	defer response.Body.Close()
+
+	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	data := &stct.Available{}
+
+	err = json.Unmarshal([]byte(contents), data)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return data.Data, nil
+}
+
 // GetMinterDeposAddress return deposit struct.
 func (a *App) GetMinterDeposAddress(bitcoinAddress, coin string, price float64) (*stct.DeposMNT, error) {
 	pricestr := fmt.Sprintf("%d", int(price*10000.))
@@ -262,6 +289,7 @@ func AddressHistory(req string) (*stct.AddrHistory, error) {
 	return data, nil
 }
 
+// CheckStatus
 func (a *App) CheckStatus(address string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	willcoin := 0.

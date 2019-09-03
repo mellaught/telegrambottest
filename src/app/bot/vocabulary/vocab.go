@@ -25,13 +25,29 @@ var Translates = map[string]map[string]string{
 		"en": "Select, please, what you want:)",
 		"ru": "Выберете, пожалуйста, что вы хотите:)",
 	},
+	"Select email": {
+		"en": "Select email or enter a new one.",
+		"ru": "Выберите email или введите новый.",
+	},
+	"Select bitcoin": {
+		"en": "Select bitcoin address or enter a new one.",
+		"ru": "Выберите bitcoin адрес или введите новый.",
+	},
+	"Select minter": {
+		"en": "Select minter address or enter a new one.",
+		"ru": "Выберите minter адрес или введите новый.",
+	},
+	"Select price": {
+		"en": "Select price for your coins.",
+		"ru": "Выберете цену за ваши монеты.",
+	},
 	"Hello": {
 		"en": "Hello, i'm an exchange bot BIP/BTC or BTC/BIP",
 		"ru": "Привет, я бот для обмена BIP/BTC или BTC/BIP",
 	},
 	"Now": {
-		"en": "📈 Now currency BIP/USD %f $",
-		"ru": "📈 Сейчас курс BIP/USD %f $",
+		"en": "📈 Now currency BIP/USD %.4f $",
+		"ru": "📈 Сейчас курс BIP/USD %.4f $",
 	},
 	"Send minter": {
 		"en": "Send me your Minter address.",
@@ -46,32 +62,44 @@ var Translates = map[string]map[string]string{
 		"ru": "Твой minter адрес для депозита: %s\nTag: %s",
 	},
 	"BTC deposit": {
-		"en": "Your bitcoin deposit address %s",
-		"ru": "Твой bitcoin адрес для депозита: %s",
+		"en": "Your bitcoin deposit address:",
+		"ru": "Твой bitcoin адрес для депозита:",
 	},
 	"Email": {
 		"en": "Send me your email!\nExample: bip@thebest.com",
 		"ru": "Отправь мне свой email!\nПример: bip@thebest.com",
+	},
+	"New email": {
+		"en": "Enter new email",
+		"ru": "Ввести новый email",
+	},
+	"New BTC": {
+		"en": "Enter new bitcoin address",
+		"ru": "Ввести новый bitcoin адрес",
+	},
+	"New minter": {
+		"en": "Enter new minter address",
+		"ru": "Ввести новый minter адрес",
 	},
 	"Coin price": {
 		"en": "Send me a price for coins, format: 0.xxx.\nAllowable range: 0.1 - 0.32 $.",
 		"ru": "Пришли мне цену за свои монеты, формат: 0.xxx.\nДопустимый диапазон: 0.1 - 0.32 $.",
 	},
 	"New deposit": {
-		"en": "New deposit!\nYou will receive at least  %f BIP.",
-		"ru": "Новый депозит!\nВы получите минимум  %f BIP.",
+		"en": "New deposit!\nYou will receive at least  %.4f BIP.",
+		"ru": "Новый депозит!\nВы получите минимум  %.4f BIP.",
 	},
 	"Exchange is successful": {
-		"en": "Exchange is successful, you received  %f BIP.",
-		"ru": "Обмен успешен!\nВы получили  %f BIP.",
+		"en": "Exchange is successful, you received  %.4f BIP.",
+		"ru": "Обмен успешен!\nВы получили  %.4f BIP.",
 	},
 	"New deposit for sale": {
-		"en": "New deposit for sale: %f %f at %f $.",
-		"ru": "Новый депозит на продажу: %f %f по %f $.",
+		"en": "New deposit for sale: %.4f %.4f at %.4f $.",
+		"ru": "Новый депозит на продажу: %.4f %.4f по %.4f $.",
 	},
 	"BIP exchanged": {
-		"en": "%f BIP exchanged for %f BTC.",
-		"ru": "%f BIP обменяны на %f BTC.",
+		"en": "%.4f BIP exchanged for %.4f BTC.",
+		"ru": "%.4f BIP обменяны на %.4f BTC.",
 	},
 	"Development": {
 		"en": "In development stage",

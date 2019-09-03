@@ -1,18 +1,12 @@
 package bot
 
 import (
-	"database/sql"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
-	api "telegrambottest/src/bipdev"
-	stct "telegrambottest/src/bipdev/structs"
-	vocab "telegrambottest/src/bot/vocabulary"
-	"telegrambottest/src/db"
+	stct "telegrambottest/src/app/bipdev/structs"
+	vocab "telegrambottest/src/app/bot/vocabulary"
 	"time"
-
-	//strt "bipbot/src/bipdev/structs"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
@@ -28,248 +22,110 @@ const (
 	language        = "language"
 	engvocabCommand = "englanguage"
 	rusvocabCommand = "ruslanguage"
+	newBTC          = "newBTC"
+	newMinter       = "newMinter"
+	sendBTC         = "sendBTC"
+	sendMinter      = "sendMinter"
+	sendEmail       = "sendEmail"
+	sendPrice       = "sendPrice"
+	newEmail        = "newEmail"
 )
 
-var (
-	commands    = make(map[int]string)
-	CommandInfo = make(map[int]string)
-	CoinToSell  = make(map[int]string)
-	PriceToSell = make(map[int]float64)
-)
+//
+func (b *Bot) GetBTCAddresses() tgbotapi.InlineKeyboardMarkup {
 
-type Dialog struct {
-	ChatId    int64
-	UserId    int
-	MessageId int
-	Callback  string
-	Text      string
-	language  string
-	Command   string
-}
+	keyboard := tgbotapi.InlineKeyboardMarkup{}
+	var row []tgbotapi.InlineKeyboardButton
+	btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("New BTC", b.Dlg.language), newBTC)
+	row = append(row, btn)
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+	addresses, err := b.DB.GetBTCAddresses(b.Dlg.UserId)
+	if err != nil {
+		fmt.Println(err)
+		return keyboard
+	}
+	if len(addresses) > 0 {
+		for _, addr := range addresses {
+			var row []tgbotapi.InlineKeyboardButton
+			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendBTC)
+			row = append(row, btn)
+			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+		}
+	}
 
-// Bot is struct for Bot:   - Token: secret token from .env
-//							- Api:   Struct App for Rest Api methods
-//							- DB:    Postgres DB fro users and user's loots.
-//							- Bot:	 tgbotapi Bot(token)
-//							- Dlg:   For dialog struct
-
-type Bot struct {
-	Token string
-	Api   *api.App
-	DB    *db.DataBase
-	Bot   *tgbotapi.BotAPI
-	Dlg   *Dialog
+	return keyboard
 }
 
 //
-func InitBot(config stct.Config, dbsql *sql.DB) *Bot {
+func (b *Bot) GetMinterAddresses() tgbotapi.InlineKeyboardMarkup {
 
-	b := Bot{
-		Token: config.Token,
-		DB:    &db.DataBase{},
-		Dlg:   &Dialog{},
-	}
-
-	// Create table if not exists
-	db, err := db.InitDB(dbsql)
+	keyboard := tgbotapi.InlineKeyboardMarkup{}
+	var row []tgbotapi.InlineKeyboardButton
+	btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("New minter", b.Dlg.language), newMinter)
+	row = append(row, btn)
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+	addresses, err := b.DB.GetBTCAddresses(b.Dlg.UserId)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return keyboard
+	}
+	if len(addresses) > 0 {
+		for _, addr := range addresses {
+			var row []tgbotapi.InlineKeyboardButton
+			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendMinter)
+			row = append(row, btn)
+			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+		}
 	}
 
-	b.DB = db
-	// Define URL
-	b.Api = api.InitApp(config.URL)
+	return keyboard
 
-	// Create new bot
-	bot, err := tgbotapi.NewBotAPI(b.Token)
+}
+
+//
+func (b *Bot) GetEmail() tgbotapi.InlineKeyboardMarkup {
+
+	keyboard := tgbotapi.InlineKeyboardMarkup{}
+	var row []tgbotapi.InlineKeyboardButton
+	btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("New email", b.Dlg.language), newEmail)
+	row = append(row, btn)
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+	addresses, err := b.DB.GetBTCAddresses(b.Dlg.UserId)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return keyboard
 	}
-	b.Bot = bot
+	if len(addresses) > 0 {
+		for _, addr := range addresses {
+			var row []tgbotapi.InlineKeyboardButton
+			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendEmail)
+			row = append(row, btn)
+			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+		}
+	}
 
-	return &b
+	return keyboard
+
 }
 
-// Run is starting bot.
-func (b *Bot) Run() {
+func (b *Bot) GetPrice() tgbotapi.InlineKeyboardMarkup {
 
-	//Set update timeout
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
-	//Get updates from bot
-	updates, _ := b.Bot.GetUpdatesChan(u)
-
-	for update := range updates {
-
-		if update.Message == nil && update.CallbackQuery == nil {
-			continue
-		}
-
-		dialog, exist := b.assembleUpdate(update)
-		if !exist {
-			continue
-		}
-
-		b.Dlg = dialog
-
-		if update.Message != nil && update.Message.ReplyToMessage != nil {
-			if dialog.Command == "buy" {
-				b.Buy()
-				continue
-			} else if dialog.Command == "sell" {
-				b.Sell()
-				continue
-			}
-		}
-
-		if botCommand := b.getCommand(update); botCommand != "" {
-			b.RunCommand(botCommand)
-			continue
-		}
-
+	keyboard := tgbotapi.InlineKeyboardMarkup{}
+	prices, err := b.DB.GetBTCAddresses(b.Dlg.UserId)
+	if err != nil {
+		fmt.Println(err)
+		return keyboard
 	}
-}
-
-// assembleUpdate
-func (b *Bot) assembleUpdate(update tgbotapi.Update) (*Dialog, bool) {
-	dialog := &Dialog{}
-	if update.Message != nil {
-		dialog.language = b.DB.GetLanguage(update.Message.Chat.ID)
-		dialog.ChatId = update.Message.Chat.ID
-		dialog.MessageId = update.Message.MessageID
-		dialog.UserId = int(update.Message.Chat.ID)
-		dialog.Text = update.Message.Text
-	} else if update.CallbackQuery != nil {
-		dialog.language = b.DB.GetLanguage(update.CallbackQuery.Message.Chat.ID)
-		dialog.ChatId = update.CallbackQuery.Message.Chat.ID
-		dialog.MessageId = update.CallbackQuery.Message.MessageID
-		dialog.Callback = update.CallbackQuery.ID
-		dialog.UserId = int(update.CallbackQuery.Message.Chat.ID)
-		dialog.Text = ""
-	} else {
-		dialog.language = "en"
-		return dialog, false
+	if len(prices) > 0 {
+		for _, price := range prices {
+			var row []tgbotapi.InlineKeyboardButton
+			btn := tgbotapi.NewInlineKeyboardButtonData(price, sendPrice)
+			row = append(row, btn)
+			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+		}
 	}
 
-	command, isset := commands[dialog.UserId]
-	if isset {
-		dialog.Command = command
-	} else {
-		dialog.Command = ""
-	}
-
-	return dialog, true
-}
-
-// getCommand returns command from telegram update
-func (b *Bot) getCommand(update tgbotapi.Update) string {
-	if update.Message != nil {
-		if update.Message.IsCommand() {
-			return update.Message.Command()
-		}
-	} else if update.CallbackQuery != nil {
-		return update.CallbackQuery.Data
-	}
-
-	return ""
-}
-
-// RunCommand executes the input command.
-func (b *Bot) RunCommand(command string) {
-	commands[b.Dlg.UserId] = command
-	switch command {
-
-	// "/Start" interacting with the bot, bot description and available commands.
-	case startCommand:
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Hello", b.Dlg.language))
-		msg.ReplyMarkup = b.newVocabuageKeybord()
-		b.Bot.Send(msg)
-
-	case settingsMenu:
-		kb := b.newVocabuageKeybord()
-		msg := tgbotapi.EditMessageTextConfig{
-			BaseEdit: tgbotapi.BaseEdit{
-				ChatID:      b.Dlg.ChatId,
-				MessageID:   b.Dlg.MessageId,
-				ReplyMarkup: &kb,
-			},
-			Text: vocab.GetTranslate("Settings", b.Dlg.language),
-		}
-
-		b.Bot.Send(msg)
-
-	// engvocabCommand sets english lang for user.
-	case engvocabCommand:
-		b.DB.SetLanguage(b.Dlg.UserId, "en")
-		b.Dlg.language = "en"
-		b.SendMenu()
-
-	// rusvocabCommand sets russian lang for user.
-	case rusvocabCommand:
-		b.DB.SetLanguage(b.Dlg.UserId, "ru")
-		b.Dlg.language = "ru"
-		b.SendMenu()
-
-	// priceCommand requests the server for the current BIP / USD rate and sends a message to user with the server responce.
-	case priceCommand:
-		price, err := b.Api.GetPrice()
-		if err != nil {
-			fmt.Println(err)
-			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Error", b.Dlg.language))
-			b.Bot.Send(msg)
-			return
-		}
-		ans := fmt.Sprintf(vocab.GetTranslate("Now", b.Dlg.language), price)
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
-		msg.ReplyMarkup = b.newMainKeyboard()
-		b.Bot.Send(msg)
-
-	// buyCommand collects data from the user to transmit their request.
-	// The user will receive the address for the deposit.
-	// After he sends the money he will receive a notification from bot.
-	// After the money is confirmed, he will receive another notification from bot.
-	case buyCommand:
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Send minter", b.Dlg.language))
-		// requests a forced response from the user to collect data to send a request to the server
-		msg.ReplyMarkup = tgbotapi.ForceReply{
-			ForceReply: true,
-			Selective:  true,
-		}
-		b.Bot.Send(msg)
-
-	// sellCommand collects data from the user to transmit their request.
-	//
-	case sellCommand:
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Coin price", b.Dlg.language))
-		msg.ReplyMarkup = tgbotapi.ForceReply{
-			ForceReply: true,
-			Selective:  true,
-		}
-		b.Bot.Send(msg)
-
-	// salesCommand sends a request to the database to get user's loots.
-	case salesCommand:
-		loots, err := b.DB.GetLoots(b.Dlg.UserId)
-		if err != nil {
-			fmt.Println(err)
-			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Error", b.Dlg.language))
-			b.Bot.Send(msg)
-			return
-		} else if len(loots) == 0 {
-			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Empty loots", b.Dlg.language))
-			msg.ReplyMarkup = b.newMainKeyboard()
-			b.Bot.Send(msg)
-			return
-		}
-		b.ComposeResp(loots)
-
-	// getMainMenu return Inline Keyboard newMainMenuKeyboard()
-	case getMainMenu:
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Select", b.Dlg.language))
-		msg.ReplyMarkup = b.newMainMenuKeyboard()
-		b.Bot.Send(msg)
-	}
+	return keyboard
 }
 
 // SendMenu edit message and send Inline Keyboard newMainMenuKeyboard()
@@ -302,10 +158,12 @@ func (b *Bot) Buy() {
 			b.Bot.Send(msg)
 			return
 		}
-		ans := fmt.Sprintf(vocab.GetTranslate("BTC deposit", b.Dlg.language), addr)
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
-		msg.ReplyMarkup = b.newMainKeyboard()
+
 		b.Dlg.Command = ""
+		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("BTC deposit", b.Dlg.language))
+		b.Bot.Send(msg)
+		msg.ReplyMarkup = b.newMainKeyboard()
+		msg = tgbotapi.NewMessage(b.Dlg.ChatId, addr)
 		b.Bot.Send(msg)
 		go b.CheckStatusBuy(addr)
 		return
@@ -508,35 +366,3 @@ func (b *Bot) newMainKeyboard() tgbotapi.ReplyKeyboardMarkup {
 	keyboard.OneTimeKeyboard = true
 	return keyboard
 }
-
-//
-// func (b *Bot) AddressKeyboardHelp() tgbotapi.ReplyKeyboardMarkup {
-// 	keyboard := tgbotapi.ReplyKeyboardMarkup{}
-// 	addresses := b.DB.GetAddresses(Minter / BTC)
-// 	for _, addr := range addresses {
-// 		var row []tgbotapi.KeyboardButton
-// 		btn := tgbotapi.NewKeyboardButton(addr)
-// 		row = append(row, btn)
-// 		keyboard.Keyboard = append(keyboard.Keyboard, row)
-// 	}
-// 	return keyboard
-// }
-
-// func (a *App) CheckLootforSell(addr string) {
-// 	tick := time.Tick(1 * time.Hour)
-// 	lenght := 0
-// 	for {
-// 		select {
-// 		case <-tick:
-// 			history, err := a.MinterAddressHistory(addr)
-// 			if err != nil {
-// 				log.Fatal(err)
-// 				return
-// 			}
-// 			if len(history.Data) > lenght {
-
-// 			}
-
-// 		}
-// 	}
-// }

@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	stct "telegrambottest/src/bipdev/structs"
-	"telegrambottest/src/bot"
+	"telegrambottest/src/app"
+	stct "telegrambottest/src/app/bipdev/structs"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
@@ -20,7 +20,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	conf := stct.Config{
+	conf := &stct.Config{
 		URL:        os.Getenv("URL"),
 		Token:      os.Getenv("TOKEN"),
 		Driver:     os.Getenv("DRIVER"),
@@ -34,10 +34,7 @@ func main() {
 
 	defer dbsql.Close()
 
-	// Inizializaton users from DB, token for bot.
-	bot := bot.InitBot(conf, dbsql)
-	// Run bot
-	fmt.Println("Bot started!")
-	bot.Run()
-
+	app := app.NewApp(conf, dbsql)
+	fmt.Println("APP Started!")
+	app.Run(":8000")
 }
