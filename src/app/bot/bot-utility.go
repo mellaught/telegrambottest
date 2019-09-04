@@ -2,8 +2,6 @@ package bot
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 	stct "telegrambottest/src/app/bipdev/structs"
 	vocab "telegrambottest/src/app/bot/vocabulary"
 	"time"
@@ -47,7 +45,7 @@ func (b *Bot) GetBTCAddresses() tgbotapi.InlineKeyboardMarkup {
 	if len(addresses) > 0 {
 		for _, addr := range addresses {
 			var row []tgbotapi.InlineKeyboardButton
-			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendBTC)
+			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendBTC+addr)
 			row = append(row, btn)
 			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		}
@@ -72,7 +70,7 @@ func (b *Bot) GetMinterAddresses() tgbotapi.InlineKeyboardMarkup {
 	if len(addresses) > 0 {
 		for _, addr := range addresses {
 			var row []tgbotapi.InlineKeyboardButton
-			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendMinter)
+			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendMinter+addr)
 			row = append(row, btn)
 			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		}
@@ -98,7 +96,7 @@ func (b *Bot) GetEmail() tgbotapi.InlineKeyboardMarkup {
 	if len(addresses) > 0 {
 		for _, addr := range addresses {
 			var row []tgbotapi.InlineKeyboardButton
-			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendEmail)
+			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendEmail+addr)
 			row = append(row, btn)
 			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		}
@@ -111,7 +109,7 @@ func (b *Bot) GetEmail() tgbotapi.InlineKeyboardMarkup {
 func (b *Bot) GetPrice() tgbotapi.InlineKeyboardMarkup {
 
 	keyboard := tgbotapi.InlineKeyboardMarkup{}
-	prices, err := b.DB.GetBTCAddresses(b.Dlg.UserId)
+	prices, err := b.Api.GetAvailablePrices()
 	if err != nil {
 		fmt.Println(err)
 		return keyboard
@@ -119,7 +117,7 @@ func (b *Bot) GetPrice() tgbotapi.InlineKeyboardMarkup {
 	if len(prices) > 0 {
 		for _, price := range prices {
 			var row []tgbotapi.InlineKeyboardButton
-			btn := tgbotapi.NewInlineKeyboardButtonData(price, sendPrice)
+			btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d", price), sendPrice+fmt.Sprintf("%d", price))
 			row = append(row, btn)
 			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		}
@@ -144,41 +142,6 @@ func (b *Bot) SendMenu() {
 	b.Bot.Send(newmsg)
 }
 
-// Buy is function for command "/buy".
-// Requests an email from the user and Minter deposit address.
-// Requests the "bitcoinDepositAddress" method with the received data.
-func (b *Bot) Buy() {
-	if strings.Contains(b.Dlg.Text, "@") {
-		addr, err := b.Api.GetBTCDeposAddress(CommandInfo[b.Dlg.UserId], "BIP",
-			b.Dlg.Text)
-		if err != nil {
-			b.Dlg.Command = ""
-			msg := tgbotapi.NewMessage(b.Dlg.ChatId, err.Error())
-			msg.ReplyMarkup = b.newMainKeyboard()
-			b.Bot.Send(msg)
-			return
-		}
-
-		b.Dlg.Command = ""
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("BTC deposit", b.Dlg.language))
-		b.Bot.Send(msg)
-		msg.ReplyMarkup = b.newMainKeyboard()
-		msg = tgbotapi.NewMessage(b.Dlg.ChatId, addr)
-		b.Bot.Send(msg)
-		go b.CheckStatusBuy(addr)
-		return
-	} else {
-		CommandInfo[b.Dlg.UserId] = b.Dlg.Text
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Email", b.Dlg.language))
-		msg.ReplyMarkup = tgbotapi.ForceReply{
-			ForceReply: true,
-			Selective:  true,
-		}
-		b.Bot.Send(msg)
-		return
-	}
-}
-
 // CheckStatusBuy checks depos BTC and wait 2 confirmations
 func (b *Bot) CheckStatusBuy(address string) {
 	timeout := time.After(2 * time.Minute)
@@ -189,7 +152,7 @@ func (b *Bot) CheckStatusBuy(address string) {
 		case <-timeout:
 			if willcoin == 0. {
 				msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("timeout", b.Dlg.language))
-				msg.ReplyMarkup = b.newMainMenuKeyboard()
+				msg.ReplyMarkup = b.newMainKeyboard()
 				b.Bot.Send(msg)
 				return
 			} else {
@@ -214,6 +177,7 @@ func (b *Bot) CheckStatusBuy(address string) {
 				} else {
 					ans := fmt.Sprintf(vocab.GetTranslate("Exchange is successful", b.Dlg.language), willcoin)
 					msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
+					msg.ReplyMarkup = b.newMainKeyboard()
 					b.Bot.Send(msg)
 					return
 				}
@@ -223,43 +187,43 @@ func (b *Bot) CheckStatusBuy(address string) {
 }
 
 // Sell is function for command /sell.
-func (b *Bot) Sell() {
-	if len(b.Dlg.Text) > 3 {
-		// checkvalidbitcoin
-		CoinToSell[b.Dlg.UserId] = "MNT"
-		depos, err := b.Api.GetMinterDeposAddress(b.Dlg.Text, CoinToSell[b.Dlg.UserId], PriceToSell[b.Dlg.UserId])
-		if err != nil {
-			msg := tgbotapi.NewMessage(b.Dlg.ChatId, err.Error())
-			msg.ReplyMarkup = b.newMainKeyboard()
-			b.Bot.Send(msg)
-			return
-		}
-		ans := fmt.Sprintf(vocab.GetTranslate("Minter deposit and tag", b.Dlg.language), depos.Data.Address, depos.Data.Tag)
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
-		b.Dlg.Command = ""
-		msg.ReplyMarkup = b.newMainKeyboard()
-		b.Bot.Send(msg)
-		go b.CheckStatusSell(depos.Data.Tag)
-		return
-	} else {
-		price, err := strconv.ParseFloat(b.Dlg.Text, 64)
-		if err != nil {
-			fmt.Println(err)
-			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Wrong price", b.Dlg.language))
-			b.Bot.Send(msg)
-			return
-		}
+// func (b *Bot) Sell() {
+// 	if len(b.Dlg.Text) > 3 {
+// 		// checkvalidbitcoin
+// 		CoinToSell[b.Dlg.UserId] = "MNT"
+// 		depos, err := b.Api.GetMinterDeposAddress(b.Dlg.Text, CoinToSell[b.Dlg.UserId], PriceToSell[b.Dlg.UserId])
+// 		if err != nil {
+// 			msg := tgbotapi.NewMessage(b.Dlg.ChatId, err.Error())
+// 			msg.ReplyMarkup = b.newMainKeyboard()
+// 			b.Bot.Send(msg)
+// 			return
+// 		}
+// 		ans := fmt.Sprintf(vocab.GetTranslate("Minter deposit and tag", b.Dlg.language), depos.Data.Address, depos.Data.Tag)
+// 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
+// 		b.Dlg.Command = ""
+// 		msg.ReplyMarkup = b.newMainKeyboard()
+// 		b.Bot.Send(msg)
+// 		go b.CheckStatusSell(depos.Data.Tag)
+// 		return
+// 	} else {
+// 		price, err := strconv.ParseFloat(b.Dlg.Text, 64)
+// 		if err != nil {
+// 			fmt.Println(err)
+// 			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Wrong price", b.Dlg.language))
+// 			b.Bot.Send(msg)
+// 			return
+// 		}
 
-		PriceToSell[b.Dlg.UserId] = price
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Send BTC", b.Dlg.language))
-		msg.ReplyMarkup = tgbotapi.ForceReply{
-			ForceReply: true,
-			Selective:  true,
-		}
-		b.Bot.Send(msg)
-		return
-	}
-}
+// 		PriceToSell[b.Dlg.UserId] = price
+// 		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Send BTC", b.Dlg.language))
+// 		msg.ReplyMarkup = tgbotapi.ForceReply{
+// 			ForceReply: true,
+// 			Selective:  true,
+// 		}
+// 		b.Bot.Send(msg)
+// 		return
+// 	}
+// }
 
 // CheckStatusSell checks status of deposit for method Sell().
 func (b *Bot) CheckStatusSell(tag string) {

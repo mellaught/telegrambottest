@@ -89,6 +89,9 @@ type Loot struct {
 
 // REST API request for update loot with current tag
 type UPDLoot struct {
-	Tag    string `json:"tag"`
-	Amount string `json:"amount"`
+	Tag        string `json:"tag"`
+	Amount     string `json:"amount"`
+	SellAmount string `json:"sells"`
+	Coin       string `json:"coin"`
+	Price      int    `json:"price"`
 }

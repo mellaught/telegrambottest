@@ -154,7 +154,7 @@ func TestGetBTCAddresses(t *testing.T) {
 	}
 
 	if addresses != nil {
-		t.Errorf("Addresses must be empty %d!" ,len(addresses))
+		t.Errorf("Addresses must be empty %d!", len(addresses))
 	}
 
 }
@@ -179,7 +179,7 @@ func TestGetMinterAddresses(t *testing.T) {
 	}
 
 	if addresses != nil {
-		t.Errorf("Addresses must be empty %d!" ,len(addresses))
+		t.Errorf("Addresses must be empty %d!", len(addresses))
 	}
 
 }
@@ -204,7 +204,37 @@ func TestGetEmails(t *testing.T) {
 	}
 
 	if addresses != nil {
-		t.Errorf("Addresses must be empty %d!" ,len(addresses))
+		t.Errorf("Addresses must be empty %d!", len(addresses))
+	}
+
+}
+
+// Test for put new user's email.
+// Result: Success: Tests passed.
+func TestPutEmail(t *testing.T) {
+	dbsql, err := sql.Open("postgres", "user=postgres dbname=gorm password=simsim sslmode=disable")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db, err := InitDB(dbsql)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = db.PutEmail(344178872, "torres-dan@yandex.ru")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = db.PutMinterAddress(344178872, "Mxc19bf5558d8b374ad02557fd87d57ade178fc14a")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = db.PutBTCAddress(344178872, "mkWZZPqd1FebZM1MNFfZBQoYFqA4EpE8vD")
+	if err != nil {
+		t.Fatal(err)
 	}
 
 }

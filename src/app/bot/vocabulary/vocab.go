@@ -41,6 +41,10 @@ var Translates = map[string]map[string]string{
 		"en": "Select price for your coins.",
 		"ru": "Выберете цену за ваши монеты.",
 	},
+	"Coin": {
+		"en": "Send name of the coin that you want to sell.",
+		"ru": "Отправь название монеты которую ты хочешь продать.",
+	},
 	"Hello": {
 		"en": "Hello, i'm an exchange bot BIP/BTC or BTC/BIP",
 		"ru": "Привет, я бот для обмена BIP/BTC или BTC/BIP",
@@ -58,8 +62,8 @@ var Translates = map[string]map[string]string{
 		"ru": "Отправь мне свой биткоин адрес.",
 	},
 	"Minter deposit and tag": {
-		"en": "Your minter deposit address: %s\nTag: %s",
-		"ru": "Твой minter адрес для депозита: %s\nTag: %s",
+		"en": "Your minter deposit address and tag:",
+		"ru": "Твой minter адрес для депозита и tag:",
 	},
 	"BTC deposit": {
 		"en": "Your bitcoin deposit address:",
@@ -97,9 +101,9 @@ var Translates = map[string]map[string]string{
 		"en": "New deposit for sale: %.4f %.4f at %.4f $.",
 		"ru": "Новый депозит на продажу: %.4f %.4f по %.4f $.",
 	},
-	"BIP exchanged": {
-		"en": "%.4f BIP exchanged for %.4f BTC.",
-		"ru": "%.4f BIP обменяны на %.4f BTC.",
+	"Coin exchanged": {
+		"en": "%.4f %s exchanged for %.4f BTC.",
+		"ru": "%.4f %s обменяны на %.4f BTC.",
 	},
 	"Development": {
 		"en": "In development stage",
@@ -131,7 +135,7 @@ var Translates = map[string]map[string]string{
 	},
 	"Wrong price": {
 		"en": "Wrong price format!",
-		"ru": "Нерпавильный формат цены!",
+		"ru": "Неправильный формат цены!",
 	},
 	"timeout": {
 		"en": "Deposit timed out.",

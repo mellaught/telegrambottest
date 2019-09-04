@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	stct "telegrambottest/src/app/bipdev/structs"
+	vocab "telegrambottest/src/app/bot/vocabulary"
 	"telegrambottest/src/app/handler"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
@@ -23,18 +24,20 @@ func (b *Bot) UpdateLoots(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	chatid, _, err := b.DB.UpdateLoots(loot.Amount, loot.Tag)
+	chatid, lang, err := b.DB.UpdateLoots(loot.Amount, loot.Tag)
 	if err != nil {
 		handler.ResponJSON(w, http.StatusBadGateway, err.Error())
 		return
 	}
 
-	amount, err := strconv.ParseInt(loot.Amount, 10, 64)
+	amount, err := strconv.ParseFloat(loot.SellAmount, 64)
 	if err != nil {
 		handler.ResponJSON(w, http.StatusBadGateway, err.Error())
 		return
 	}
-	msg := tgbotapi.NewMessage(chatid, fmt.Sprintf("Now you have got %d", amount))
+	amountSell := float64((float64(loot.Price)/100000.)*amount)
+	ans := fmt.Sprintf(vocab.GetTranslate("Coin exchanged", lang), amount, loot.Coin, amountSell)
+	msg := tgbotapi.NewMessage(chatid, ans)
 	b.Bot.Send(msg)
 
 	handler.ResponJSON(w, http.StatusOK, "Notification has been sent")

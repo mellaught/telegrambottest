@@ -29,7 +29,17 @@ func InitDB(db *sql.DB) (*DataBase, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec(CREATE_RECORDS_IF_NOT_EXISTS)
+	_, err = db.Exec(CREATE_BITCOIN_DATA_IF_NOT_EXISTS)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec(CREATE_MINTER_DATA_IF_NOT_EXISTS)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec(CREATE_EMAIL_DATA_IF_NOT_EXISTS)
 	if err != nil {
 		return nil, err
 	}
@@ -226,34 +236,32 @@ func (d *DataBase) GetEmails(userID int) ([]string, error) {
 	return emails, nil
 }
 
-// // PutBTCAddress puts new user's bitcoin address.
-// func (d *DataBase) PutBTCAddress(UserId int, minterAddress string) {
-// 	_, err := d.DB.Exec("INSERT INTO RECORDS(user_id, bitcoin_address, coin, price, amount, minter_address, created_at)"+
-// 		"VALUES ($1,$2,$3,$4,$5,$6,$7)", UserId, tag, taginfo.Data.Coin, taginfo.Data.Price, taginfo.Data.Amount, taginfo.Data.MinterAddress, time.Now())
-// 	if err != nil {
-// 		return err
-// 	}
+// PutBTCAddress puts new user's bitcoin address.
+func (d *DataBase) PutBTCAddress(UserId int, bitcoinAddress string) error {
+	_, err := d.DB.Exec("INSERT INTO BITCOIN_DATA(user_id, bitcoin_address) VALUES ($1,$2)", UserId, bitcoinAddress)
+	if err != nil {
+		return err
+	}
 
-// 	return nil
-// }
+	return nil
+}
 
-// // PutMinterAddress puts new user's minter address.
-// func (d *DataBase) PutMinterAddress(UserId int, minterAddress string) {
-// 	_, err := d.DB.Exec("INSERT INTO LOOTS(user_id, tag, coin, price, amount, minter_address, created_at)"+
-// 		"VALUES ($1,$2,$3,$4,$5,$6,$7)", UserId, tag, taginfo.Data.Coin, taginfo.Data.Price, taginfo.Data.Amount, taginfo.Data.MinterAddress, time.Now())
-// 	if err != nil {
-// 		return err
-// 	}
+// PutMinterAddress puts new user's minter address.
+func (d *DataBase) PutMinterAddress(UserId int, minterAddress string) error {
+	_, err := d.DB.Exec("INSERT INTO MINTER_DATA(user_id, minter_address) VALUES ($1,$2)", UserId, minterAddress)
+	if err != nil {
+		return err
+	}
 
-// 	return nil
-// }
-// // PutEmail puts new user's email.
-// func (d *DataBase) PutEmail(UserId int, minterAddress string) {
-// 	_, err := d.DB.Exec("INSERT INTO LOOTS(user_id, tag, coin, price, amount, minter_address, created_at)"+
-// 		"VALUES ($1,$2,$3,$4,$5,$6,$7)", UserId, tag, taginfo.Data.Coin, taginfo.Data.Price, taginfo.Data.Amount, taginfo.Data.MinterAddress, time.Now())
-// 	if err != nil {
-// 		return err
-// 	}
+	return nil
+}
 
-// 	return nil
-// }
+// PutEmail puts new user's email.
+func (d *DataBase) PutEmail(UserId int, email string) error {
+	_, err := d.DB.Exec("INSERT INTO EMAIL_DATA(user_id, email) VALUES ($1,$2)", UserId, email)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
