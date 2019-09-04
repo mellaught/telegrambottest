@@ -211,7 +211,7 @@ func TestGetEmails(t *testing.T) {
 
 // Test for put new user's email.
 // Result: Success: Tests passed.
-func TestPutEmail(t *testing.T) {
+func TestPut(t *testing.T) {
 	dbsql, err := sql.Open("postgres", "user=postgres dbname=gorm password=simsim sslmode=disable")
 	if err != nil {
 		t.Fatal(err)

@@ -31,10 +31,10 @@ func NewApp(conf *stct.Config, dbsql *sql.DB) *App {
 	return &a
 }
 
-// Get wraps the router for GET method
-func (a *App) Get(path string, f func(w http.ResponseWriter, r *http.Request)) {
-	a.Router.HandleFunc(path, f).Methods("GET")
-}
+// // Get wraps the router for GET method
+// func (a *App) Get(path string, f func(w http.ResponseWriter, r *http.Request)) {
+// 	a.Router.HandleFunc(path, f).Methods("GET")
+// }
 
 // Post wraps the router for POST method
 func (a *App) Post(path string, f func(w http.ResponseWriter, r *http.Request)) {

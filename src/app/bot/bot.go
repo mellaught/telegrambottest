@@ -49,7 +49,7 @@ type Bot struct {
 	Api   *api.App
 	DB    *db.DataBase
 	Bot   *tgbotapi.BotAPI
-	Dlg   *Dialog
+	Dlg   map[int64]*Dialog
 }
 
 //InitBot initialization: loading the database, creating a bot by token from the config.
@@ -58,7 +58,7 @@ func InitBot(config *stct.Config, dbsql *sql.DB) *Bot {
 	b := Bot{
 		Token: config.Token,
 		DB:    &db.DataBase{},
-		Dlg:   &Dialog{},
+		Dlg:   map[int64]*Dialog{},
 	}
 
 	// Create table if not exists
@@ -102,28 +102,28 @@ func (b *Bot) Run() {
 			continue
 		}
 
-		b.Dlg = dialog
+		b.Dlg[dialog.ChatId] = dialog
 
 		if update.Message != nil && update.Message.ReplyToMessage != nil {
 			// Buy command
 			// SECOND STEP
 			if dialog.Command == "newMinter" {
-				b.BuySecondStep()
+				b.BuySecondStep(update.Message.Chat.ID)
 				continue
 			} else if dialog.Command == "newEmail" {
-				b.BuyFinal()
+				b.BuyFinal(update.Message.Chat.ID)
 				continue
 			} else if dialog.Command == "sell" {
-				b.CoinName()
+				b.CoinName(update.Message.Chat.ID)
 				continue
 			} else if dialog.Command == "newBTC" {
-				b.SellFinal()
+				b.SellFinal(update.Message.Chat.ID)
 				continue
 			}
 		}
 
 		if botCommand := b.getCommand(update); botCommand != "" {
-			b.RunCommand(botCommand)
+			b.RunCommand(botCommand, dialog.ChatId)
 			continue
 		}
 
@@ -140,6 +140,7 @@ func (b *Bot) assembleUpdate(update tgbotapi.Update) (*Dialog, bool) {
 		dialog.UserId = int(update.Message.Chat.ID)
 		dialog.Text = update.Message.Text
 	} else if update.CallbackQuery != nil {
+		fmt.Println(update.CallbackQuery.Data)
 		dialog.language = b.DB.GetLanguage(update.CallbackQuery.Message.Chat.ID)
 		dialog.ChatId = update.CallbackQuery.Message.Chat.ID
 		dialog.MessageId = update.CallbackQuery.Message.MessageID
@@ -151,11 +152,15 @@ func (b *Bot) assembleUpdate(update tgbotapi.Update) (*Dialog, bool) {
 			dialog.Text = update.CallbackQuery.Data[7:]
 			update.CallbackQuery.Data = update.CallbackQuery.Data[:7]
 		} else if strings.Contains(update.CallbackQuery.Data, sendMinter) {
+			fmt.Println(update.CallbackQuery.Data[10:])
+			fmt.Println(update.CallbackQuery.Data[:10])
 			dialog.Text = update.CallbackQuery.Data[10:]
 			update.CallbackQuery.Data = update.CallbackQuery.Data[:10]
 		} else if strings.Contains(update.CallbackQuery.Data, sendEmail) {
-			dialog.Text = update.CallbackQuery.Data[8:]
-			update.CallbackQuery.Data = update.CallbackQuery.Data[:8]
+			fmt.Println(update.CallbackQuery.Data[9:])
+			fmt.Println(update.CallbackQuery.Data[:9])
+			dialog.Text = update.CallbackQuery.Data[9:]
+			update.CallbackQuery.Data = update.CallbackQuery.Data[:9]
 		}
 	} else {
 		dialog.language = "en"
@@ -186,13 +191,13 @@ func (b *Bot) getCommand(update tgbotapi.Update) string {
 }
 
 // RunCommand executes the input command.
-func (b *Bot) RunCommand(command string) {
-	commands[b.Dlg.UserId] = command
+func (b *Bot) RunCommand(command string, ChatId int64) {
+	commands[b.Dlg[ChatId].UserId] = command
 	switch command {
 
 	// "/Start" interacting with the bot, bot description and available commands.
 	case startCommand:
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Hello", b.Dlg.language))
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Hello", b.Dlg[ChatId].language))
 		msg.ReplyMarkup = b.newVocabuageKeybord()
 		b.Bot.Send(msg)
 
@@ -201,38 +206,38 @@ func (b *Bot) RunCommand(command string) {
 		kb := b.newVocabuageKeybord()
 		msg := tgbotapi.EditMessageTextConfig{
 			BaseEdit: tgbotapi.BaseEdit{
-				ChatID:      b.Dlg.ChatId,
-				MessageID:   b.Dlg.MessageId,
+				ChatID:      b.Dlg[ChatId].ChatId,
+				MessageID:   b.Dlg[ChatId].MessageId,
 				ReplyMarkup: &kb,
 			},
-			Text: vocab.GetTranslate("Settings", b.Dlg.language),
+			Text: vocab.GetTranslate("Settings", b.Dlg[ChatId].language),
 		}
 
 		b.Bot.Send(msg)
 
 	// engvocabCommand sets english lang for user.
 	case engvocabCommand:
-		b.DB.SetLanguage(b.Dlg.UserId, "en")
-		b.Dlg.language = "en"
-		b.SendMenu()
+		b.DB.SetLanguage(b.Dlg[ChatId].UserId, "en")
+		b.Dlg[ChatId].language = "en"
+		b.SendMenu(ChatId)
 
 	// rusvocabCommand sets russian lang for user.
 	case rusvocabCommand:
-		b.DB.SetLanguage(b.Dlg.UserId, "ru")
-		b.Dlg.language = "ru"
-		b.SendMenu()
+		b.DB.SetLanguage(b.Dlg[ChatId].UserId, "ru")
+		b.Dlg[ChatId].language = "ru"
+		b.SendMenu(ChatId)
 
-	// priceCommand requests the server for the current BIP / USD rate and sends a message to user with the server responce.
+	// priceCommand requests the server for the current BIP / USD rate and sends a message to user with the server responce. ( PRICE )
 	case priceCommand:
 		price, err := b.Api.GetPrice()
 		if err != nil {
 			fmt.Println(err)
-			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Error", b.Dlg.language))
+			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
 			b.Bot.Send(msg)
 			return
 		}
-		ans := fmt.Sprintf(vocab.GetTranslate("Now", b.Dlg.language), price)
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, ans)
+		ans := fmt.Sprintf(vocab.GetTranslate("Now", b.Dlg[ChatId].language), price)
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, ans)
 		msg.ReplyMarkup = b.newMainKeyboard()
 		b.Bot.Send(msg)
 
@@ -240,190 +245,197 @@ func (b *Bot) RunCommand(command string) {
 	// The user will receive the address for the deposit.
 	// After he sends the money he will receive a notification from bot.
 	// After the money is confirmed, he will receive another notification from bot.
-	// FIRST STEP
+	// ( BUY )
 	case buyCommand:
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Select minter", b.Dlg.language))
-		msg.ReplyMarkup = b.GetMinterAddresses()
+		kb := b.GetMinterAddresses(ChatId)
+		msg := tgbotapi.EditMessageTextConfig{
+			BaseEdit: tgbotapi.BaseEdit{
+				ChatID:      b.Dlg[ChatId].ChatId,
+				MessageID:   b.Dlg[ChatId].MessageId,
+				ReplyMarkup: &kb,
+			},
+			Text: vocab.GetTranslate("Select minter", b.Dlg[ChatId].language),
+		}
 		b.Bot.Send(msg)
 
-	// Buy command
-	// FIRST STEP(IF new minter address)
+	// newMinter after the user decided to enter a new minter address. ( BUY )
 	case newMinter:
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Send minter", b.Dlg.language))
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Send minter", b.Dlg[ChatId].language))
 		msg.ReplyMarkup = tgbotapi.ForceReply{
 			ForceReply: true,
 			Selective:  true,
 		}
 		b.Bot.Send(msg)
 
-	// Buy command
-	// SECOND STEP
+	// sendMinter after the user has selected the minter address from the proposed. ( BUY )
 	case sendMinter:
-		kb := b.GetEmail()
+		CommandInfo[b.Dlg[ChatId].UserId] = b.Dlg[ChatId].Text
+		kb := b.GetEmail(ChatId)
 		msg := tgbotapi.EditMessageTextConfig{
 			BaseEdit: tgbotapi.BaseEdit{
-				ChatID:      b.Dlg.ChatId,
-				MessageID:   b.Dlg.MessageId,
+				ChatID:      b.Dlg[ChatId].ChatId,
+				MessageID:   b.Dlg[ChatId].MessageId,
 				ReplyMarkup: &kb,
 			},
-			Text: vocab.GetTranslate("Select email", b.Dlg.language),
+			Text: vocab.GetTranslate("Select email", b.Dlg[ChatId].language),
 		}
 		b.Bot.Send(msg)
-	// newEmail
+
+	// newEmail after the user decided to enter a new email. ( BUY )
 	case newEmail:
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Email", b.Dlg.language))
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Email", b.Dlg[ChatId].language))
 		msg.ReplyMarkup = tgbotapi.ForceReply{
 			ForceReply: true,
 			Selective:  true,
 		}
 		b.Bot.Send(msg)
 
-	// sendEmail
+	// sendEmail after the user has selected email from the proposed. ( BUY )
 	case sendEmail:
-		b.BuyFinal()
+		b.BuyFinal(ChatId)
 
-	// sellCommand collects data from the user to transmit their request.
+	// sellCommand collects data from the user to transmit their request. ( SELL )
 	case sellCommand:
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Coin", b.Dlg.language))
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Coin", b.Dlg[ChatId].language))
 		msg.ReplyMarkup = tgbotapi.ForceReply{
 			ForceReply: true,
 			Selective:  true,
 		}
 		b.Bot.Send(msg)
 
+	// sendPrice after the user has chosen a price for his coin. ( SELL )
 	case sendPrice:
-		PriceToSell[b.Dlg.UserId] = b.Dlg.Text
-		kb := b.GetBTCAddresses()
+		PriceToSell[b.Dlg[ChatId].UserId] = b.Dlg[ChatId].Text
+		kb := b.GetBTCAddresses(ChatId)
 		msg := tgbotapi.EditMessageTextConfig{
 			BaseEdit: tgbotapi.BaseEdit{
-				ChatID:      b.Dlg.ChatId,
-				MessageID:   b.Dlg.MessageId,
+				ChatID:      b.Dlg[ChatId].ChatId,
+				MessageID:   b.Dlg[ChatId].MessageId,
 				ReplyMarkup: &kb,
 			},
-			Text: vocab.GetTranslate("Select bitcoin", b.Dlg.language),
+			Text: vocab.GetTranslate("Select bitcoin", b.Dlg[ChatId].language),
 		}
 		b.Bot.Send(msg)
-
-	// salesCommand sends a request to the database to get user's loots.
+	// newBTC after the user decided to enter a new bitcoin address. ( SELL )
 	case newBTC:
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Send BTC", b.Dlg.language))
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Send BTC", b.Dlg[ChatId].language))
 		msg.ReplyMarkup = tgbotapi.ForceReply{
 			ForceReply: true,
 			Selective:  true,
 		}
 		b.Bot.Send(msg)
 
-		// sendBTC
+	// sendBTC after the user has sent his bitcoin address. ( SELL )
 	case sendBTC:
-		b.SellFinal()
+		b.SellFinal(ChatId)
 		// sendPrice
 
-	// salesCommand
+	// salesCommand sends a request to the database to get user's loots. ( LOOTS )
 	case salesCommand:
-		loots, err := b.DB.GetLoots(b.Dlg.UserId)
+		loots, err := b.DB.GetLoots(b.Dlg[ChatId].UserId)
 		if err != nil {
 			fmt.Println(err)
-			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Error", b.Dlg.language))
+			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
 			b.Bot.Send(msg)
 			return
 		} else if len(loots) == 0 {
-			msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Empty loots", b.Dlg.language))
+			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Empty loots", b.Dlg[ChatId].language))
 			msg.ReplyMarkup = b.newMainKeyboard()
 			b.Bot.Send(msg)
 			return
 		}
-		b.ComposeResp(loots)
+		b.ComposeResp(loots, ChatId)
 
 	// getMainMenu return Inline Keyboard newMainMenuKeyboard()
 	case getMainMenu:
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Select", b.Dlg.language))
-		msg.ReplyMarkup = b.newMainMenuKeyboard()
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Select", b.Dlg[ChatId].language))
+		msg.ReplyMarkup = b.newMainMenuKeyboard(ChatId)
 		b.Bot.Send(msg)
 	}
 }
 
 // BuySecondStep
-func (b *Bot) BuySecondStep() {
-	CommandInfo[b.Dlg.UserId] = b.Dlg.Text
-	msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Select email", b.Dlg.language))
-	msg.ReplyMarkup = b.GetEmail()
+func (b *Bot) BuySecondStep(ChatId int64) {
+	CommandInfo[b.Dlg[ChatId].UserId] = b.Dlg[ChatId].Text
+	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Select email", b.Dlg[ChatId].language))
+	msg.ReplyMarkup = b.GetEmail(ChatId)
 	b.Bot.Send(msg)
 }
 
 // BuyFinal is function for command "/buy".
 // Requests an email from the user and Minter deposit address.
 // Requests the "bitcoinDepositAddress" method with the received data.
-func (b *Bot) BuyFinal() {
-
-	fmt.Println("Final:", b.Dlg.Text)
-	addr, err := b.Api.GetBTCDeposAddress(CommandInfo[b.Dlg.UserId], "BIP", b.Dlg.Text)
+func (b *Bot) BuyFinal(ChatId int64) {
+	dialog := b.Dlg[ChatId]
+	fmt.Println("In FINAL", CommandInfo[dialog.UserId], dialog.Text)
+	addr, err := b.Api.GetBTCDeposAddress(CommandInfo[dialog.UserId], "BIP", dialog.Text)
 	if err != nil {
-		b.Dlg.Command = ""
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, err.Error())
+		dialog.Command = ""
+		msg := tgbotapi.NewMessage(dialog.ChatId, err.Error())
 		msg.ReplyMarkup = b.newMainKeyboard()
 		b.Bot.Send(msg)
 		return
 	}
-	err = b.DB.PutMinterAddress(b.Dlg.UserId, CommandInfo[b.Dlg.UserId])
+	err = b.DB.PutMinterAddress(b.Dlg[ChatId].UserId, CommandInfo[b.Dlg[ChatId].UserId])
 	if err != nil {
 		fmt.Println(err)
 	}
-	err = b.DB.PutEmail(b.Dlg.UserId, b.Dlg.Text)
+	err = b.DB.PutEmail(b.Dlg[ChatId].UserId, b.Dlg[ChatId].Text)
 	if err != nil {
 		fmt.Println(err)
 	}
-	b.Dlg.Command = ""
-	msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("BTC deposit", b.Dlg.language))
+	b.Dlg[ChatId].Command = ""
+	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("BTC deposit", b.Dlg[ChatId].language))
 	b.Bot.Send(msg)
-	newmsg := tgbotapi.NewMessage(b.Dlg.ChatId, addr)
+	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, addr)
 	newmsg.ReplyMarkup = b.newMainKeyboard()
 	b.Bot.Send(newmsg)
-	go b.CheckStatusBuy(addr)
+	go b.CheckStatusBuy(addr, ChatId)
 	return
 }
 
-func (b *Bot) CoinName() {
+func (b *Bot) CoinName(ChatId int64) {
 
-	CoinToSell[b.Dlg.UserId] = b.Dlg.Text
-	msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Select price", b.Dlg.language))
-	msg.ReplyMarkup = b.GetPrice()
+	CoinToSell[b.Dlg[ChatId].UserId] = b.Dlg[ChatId].Text
+	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Select price", b.Dlg[ChatId].language))
+	msg.ReplyMarkup = b.GetPrice(ChatId)
 
 	b.Bot.Send(msg)
 }
 
 // SellFinal
-func (b *Bot) SellFinal() {
+func (b *Bot) SellFinal(ChatId int64) {
 
-	price, err := strconv.ParseFloat(PriceToSell[b.Dlg.UserId], 64)
-	fmt.Println("Final sell:", price, b.Dlg.Text, CoinToSell[b.Dlg.UserId])
+	price, err := strconv.ParseFloat(PriceToSell[b.Dlg[ChatId].UserId], 64)
+	fmt.Println("Final sell:", price, b.Dlg[ChatId].Text, CoinToSell[b.Dlg[ChatId].UserId])
 	if err != nil {
 		fmt.Println(err)
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Error", b.Dlg.language))
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
 		msg.ReplyMarkup = b.newMainKeyboard()
 		b.Bot.Send(msg)
 		return
 	}
 
-	depos, err := b.Api.GetMinterDeposAddress(b.Dlg.Text, CoinToSell[b.Dlg.UserId], price)
+	depos, err := b.Api.GetMinterDeposAddress(b.Dlg[ChatId].Text, CoinToSell[b.Dlg[ChatId].UserId], price)
 	if err != nil {
-		msg := tgbotapi.NewMessage(b.Dlg.ChatId, err.Error())
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, err.Error())
 		msg.ReplyMarkup = b.newMainKeyboard()
 		b.Bot.Send(msg)
 		return
 	}
-	err = b.DB.PutBTCAddress(b.Dlg.UserId, b.Dlg.Text)
+	err = b.DB.PutBTCAddress(b.Dlg[ChatId].UserId, b.Dlg[ChatId].Text)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	b.Dlg.Command = ""
-	msg := tgbotapi.NewMessage(b.Dlg.ChatId, vocab.GetTranslate("Minter deposit and tag", b.Dlg.language))
+	b.Dlg[ChatId].Command = ""
+	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Minter deposit and tag", b.Dlg[ChatId].language))
 	b.Bot.Send(msg)
-	newmsg := tgbotapi.NewMessage(b.Dlg.ChatId, depos.Data.Address)
+	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, depos.Data.Address)
 	b.Bot.Send(newmsg)
-	newmsg2 := tgbotapi.NewMessage(b.Dlg.ChatId, depos.Data.Tag)
+	newmsg2 := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, depos.Data.Tag)
 	newmsg2.ReplyMarkup = b.newMainKeyboard()
 	b.Bot.Send(newmsg2)
-	go b.CheckStatusSell(depos.Data.Tag)
+	go b.CheckStatusSell(depos.Data.Tag, ChatId)
 	return
 }

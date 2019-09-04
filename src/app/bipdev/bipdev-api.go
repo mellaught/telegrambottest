@@ -5,11 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"sync"
 	stct "telegrambottest/src/app/bipdev/structs"
-	"time"
 )
 
 // App is main app for API Methods
@@ -288,49 +285,3 @@ func AddressHistory(req string) (*stct.AddrHistory, error) {
 
 	return data, nil
 }
-
-// CheckStatus
-func (a *App) CheckStatus(address string, wg *sync.WaitGroup) {
-	defer wg.Done()
-	willcoin := 0.
-	for {
-		stat, err := a.GetBTCDepositStatus(address)
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		if stat.Data.WillReceive != willcoin {
-			// Сообщить что придет столько то и
-			if willcoin == 0. {
-				// b.Bot.Send(msg)
-				fmt.Println(stat.Data.WillReceive)
-				willcoin = stat.Data.WillReceive
-				time.Sleep(60 * time.Second)
-			} else {
-				// b.Bot.Send(msg)
-				return
-			}
-		}
-
-		fmt.Println(stat.Data.WillReceive)
-		time.Sleep(3 * time.Second)
-	}
-}
-
-// func (a *App) CheckStatus(address string) {
-
-// 	for {
-// 		stat, err := a.GetBTCDepositStatus(address)
-// 		if err != nil {
-// 			log.Fatal(err)
-// 			return
-// 		}
-// 		if stat.Data.WillReceive != 0 {
-// 			// Сообщить что придет столько то и
-// 			fmt.Println(stat.Data.WillReceive)
-// 			return
-// 		}
-// 		fmt.Println(stat.Data.WillReceive)
-// 		time.Sleep(2 * time.Second)
-// 	}
-// }

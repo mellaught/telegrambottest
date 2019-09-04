@@ -159,7 +159,7 @@ func (d *DataBase) UpdateLoots(amount, tag string) (int64, string, error) {
 // GetBTCAddresses returns previously entered bitcoin addresses by UserID.
 func (d *DataBase) GetBTCAddresses(userID int) ([]string, error) {
 
-	rows, err := d.DB.Query("SELECT bitcoin_address FROM RECORDS WHERE USER_ID = $1", userID)
+	rows, err := d.DB.Query("SELECT bitcoin_address FROM BITCOIN_DATA WHERE USER_ID = $1", userID)
 	if err != nil { // && err.Error() == "sql: no rows in result set" {
 		return nil, err
 	}
@@ -185,7 +185,7 @@ func (d *DataBase) GetBTCAddresses(userID int) ([]string, error) {
 // GetMinterAddresses returns previously entered minter addresses by UserID.
 func (d *DataBase) GetMinterAddresses(userID int) ([]string, error) {
 
-	rows, err := d.DB.Query("SELECT MINTER_ADDRESS FROM RECORDS WHERE USER_ID = $1", userID)
+	rows, err := d.DB.Query("SELECT MINTER_ADDRESS FROM MINTER_DATA WHERE USER_ID = $1", userID)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		fmt.Println("HERE!")
 		return nil, nil
@@ -212,7 +212,7 @@ func (d *DataBase) GetMinterAddresses(userID int) ([]string, error) {
 // GetEmails returns previously entered emails by UserID.
 func (d *DataBase) GetEmails(userID int) ([]string, error) {
 
-	rows, err := d.DB.Query("SELECT EMAIL FROM RECORDS WHERE USER_ID = $1", userID)
+	rows, err := d.DB.Query("SELECT EMAIL FROM EMAIL_DATA WHERE USER_ID = $1", userID)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		fmt.Println("HERE!")
 		return nil, nil
