@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 	api "telegrambottest/src/app/bipdev"
@@ -152,13 +153,9 @@ func (b *Bot) assembleUpdate(update tgbotapi.Update) (*Dialog, bool) {
 			dialog.Text = update.CallbackQuery.Data[7:]
 			update.CallbackQuery.Data = update.CallbackQuery.Data[:7]
 		} else if strings.Contains(update.CallbackQuery.Data, sendMinter) {
-			fmt.Println(update.CallbackQuery.Data[10:])
-			fmt.Println(update.CallbackQuery.Data[:10])
 			dialog.Text = update.CallbackQuery.Data[10:]
 			update.CallbackQuery.Data = update.CallbackQuery.Data[:10]
 		} else if strings.Contains(update.CallbackQuery.Data, sendEmail) {
-			fmt.Println(update.CallbackQuery.Data[9:])
-			fmt.Println(update.CallbackQuery.Data[:9])
 			dialog.Text = update.CallbackQuery.Data[9:]
 			update.CallbackQuery.Data = update.CallbackQuery.Data[:9]
 		}
@@ -378,7 +375,6 @@ func (b *Bot) BuySecondStep(ChatId int64) {
 // Requests the "bitcoinDepositAddress" method with the received data.
 func (b *Bot) BuyFinal(ChatId int64) {
 	dialog := b.Dlg[ChatId]
-	fmt.Println("In FINAL", CommandInfo[dialog.UserId], dialog.Text)
 	addr, err := b.Api.GetBTCDeposAddress(CommandInfo[dialog.UserId], "BIP", dialog.Text)
 	if err != nil {
 		dialog.Command = ""
@@ -407,6 +403,13 @@ func (b *Bot) BuyFinal(ChatId int64) {
 
 func (b *Bot) CoinName(ChatId int64) {
 
+	re := regexp.MustCompile("^[0-9-A-Z]{3,10}$")
+	if !re.MatchString(b.Dlg[ChatId].Text) {
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Coin name", b.Dlg[ChatId].language))
+		msg.ReplyMarkup = b.newMainKeyboard()
+		b.Bot.Send(msg)
+		return
+	}
 	CoinToSell[b.Dlg[ChatId].UserId] = b.Dlg[ChatId].Text
 	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Select price", b.Dlg[ChatId].language))
 	msg.ReplyMarkup = b.GetPrice(ChatId)
@@ -418,7 +421,6 @@ func (b *Bot) CoinName(ChatId int64) {
 func (b *Bot) SellFinal(ChatId int64) {
 
 	price, err := strconv.ParseFloat(PriceToSell[b.Dlg[ChatId].UserId], 64)
-	fmt.Println("Final sell:", price, b.Dlg[ChatId].Text, CoinToSell[b.Dlg[ChatId].UserId])
 	if err != nil {
 		fmt.Println(err)
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))

@@ -78,12 +78,12 @@ func TestPutLoot(t *testing.T) {
 		t.Fatal(err)
 	}
 	app := api.InitApp("https://mbank.dl-dev.ru/api/")
-	taginfo, err := app.GetTagInfo("FFY37X9kRfvfGeDT8hZv")
+	taginfo, err := app.GetTagInfo("kxCUNnIQdJkFfVPTuE4V")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = db.PutLoot(344178872, "FFY37X9kRfvfGeDT8hZv", taginfo)
+	err = db.PutLoot(344178872, "kxCUNnIQdJkFfVPTuE4V", taginfo)
 	if err != nil {
 		t.Fatal(err)
 	}

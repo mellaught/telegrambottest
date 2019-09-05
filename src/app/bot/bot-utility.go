@@ -195,7 +195,7 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 		case <-timeout:
 			if amount == "0" {
 				msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("timeout", b.Dlg[ChatId].language))
-				msg.ReplyMarkup = b.newMainMenuKeyboard(ChatId)
+				msg.ReplyMarkup = b.newMainKeyboard()
 				b.Bot.Send(msg)
 				return
 			} else {
@@ -212,7 +212,8 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 				amount = taginfo.Data.Amount
 				// Put in DB.
 				b.DB.PutLoot(b.Dlg[ChatId].UserId, tag, taginfo)
-				ans := fmt.Sprintf(vocab.GetTranslate("New deposit for sale", b.Dlg[ChatId].language), taginfo.Data.Amount, taginfo.Data.Coin, taginfo.Data.Price)
+				ans := fmt.Sprintf(vocab.GetTranslate("New deposit for sale", b.Dlg[ChatId].language),
+					taginfo.Data.Amount, taginfo.Data.Coin, float64(float64(taginfo.Data.Price)/10000.))
 				msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, ans)
 				b.Bot.Send(msg)
 				//go a.CheckLootforSell(taginfo.Data.MinterAddress)

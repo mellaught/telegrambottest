@@ -89,6 +89,10 @@ var Translates = map[string]map[string]string{
 		"en": "Send me a price for coins, format: 0.xxx.\nAllowable range: 0.1 - 0.32 $.",
 		"ru": "Пришли мне цену за свои монеты, формат: 0.xxx.\nДопустимый диапазон: 0.1 - 0.32 $.",
 	},
+	"Coin name": {
+		"en": "Wrong name of coin.\nExample: BIP, MNT ",
+		"ru": "Неправильоне название монеты.\nПример: BIP, MNT.",
+	},
 	"New deposit": {
 		"en": "New deposit!\nYou will receive at least  %.4f BIP.",
 		"ru": "Новый депозит!\nВы получите минимум  %.4f BIP.",
@@ -98,8 +102,8 @@ var Translates = map[string]map[string]string{
 		"ru": "Обмен успешен!\nВы получили  %.4f BIP.",
 	},
 	"New deposit for sale": {
-		"en": "New deposit for sale: %.4f %.4f at %.4f $.",
-		"ru": "Новый депозит на продажу: %.4f %.4f по %.4f $.",
+		"en": "New deposit for sale: %s %s at %.4f $.",
+		"ru": "Новый депозит на продажу: %s %s по %.4f $.",
 	},
 	"Coin exchanged": {
 		"en": "%.4f %s exchanged for %.4f BTC.",

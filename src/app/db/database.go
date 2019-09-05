@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	stct "telegrambottest/src/app/bipdev/structs"
 	"time"
 
@@ -62,9 +61,8 @@ func (d *DataBase) PutUser(ChatId int64) error {
 // GetLanguage returns language for user by UserId.
 func (d *DataBase) GetLanguage(ChatId int64) string {
 
-	rows := d.DB.QueryRow("SELECT lang FROM USERS WHERE id = $1 limit 1", int(ChatId))
 	var lang string
-	err := rows.Scan(&lang)
+	err := d.DB.QueryRow("SELECT lang FROM USERS WHERE id = $1 limit 1", int(ChatId)).Scan(&lang)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		d.PutUser(ChatId)
 		return "en"
@@ -86,8 +84,9 @@ func (d *DataBase) SetLanguage(UserId int, lang string) error {
 
 // PutLoot puts new loot for sale.
 func (d *DataBase) PutLoot(UserId int, tag string, taginfo *stct.TagInfo) error {
-	_, err := d.DB.Exec("INSERT INTO LOOTS(user_id, tag, coin, price, amount, minter_address, created_at)"+
-		"VALUES ($1,$2,$3,$4,$5,$6,$7)", UserId, tag, taginfo.Data.Coin, taginfo.Data.Price, taginfo.Data.Amount, taginfo.Data.MinterAddress, time.Now())
+	_, err := d.DB.Exec("INSERT INTO LOOTS(user_id, tag, coin, price, amount, minter_address, created_at, last_sell_at)"+
+		"VALUES ($1,$2,$3,$4,$5,$6,$7,$8)", UserId, tag, taginfo.Data.Coin, taginfo.Data.Price, taginfo.Data.Amount,
+		taginfo.Data.MinterAddress, time.Now(), time.Time{})
 	if err != nil {
 		return err
 	}
@@ -126,12 +125,10 @@ func (d *DataBase) GetLoots(UserId int) ([]*stct.Loot, error) {
 // GetChatIDLang return user's chatID and Language.
 func (d *DataBase) GetChatIDLang(UserId int) (int64, string, error) {
 
-	row := d.DB.QueryRow("SELECT CHAT_ID, LANG FROM USERS WHERE ID = $1 LIMIT 1", UserId)
-
 	var chatID int64
 	var lang string
 
-	err := row.Scan(&chatID, &lang)
+	err := d.DB.QueryRow("SELECT CHAT_ID, LANG FROM USERS WHERE ID = $1 LIMIT 1", UserId).Scan(&chatID, &lang)
 	if err != nil {
 		return 0, "", err
 	}
@@ -160,7 +157,7 @@ func (d *DataBase) UpdateLoots(amount, tag string) (int64, string, error) {
 func (d *DataBase) GetBTCAddresses(userID int) ([]string, error) {
 
 	rows, err := d.DB.Query("SELECT bitcoin_address FROM BITCOIN_DATA WHERE USER_ID = $1", userID)
-	if err != nil { // && err.Error() == "sql: no rows in result set" {
+	if err != nil {
 		return nil, err
 	}
 
@@ -186,11 +183,9 @@ func (d *DataBase) GetBTCAddresses(userID int) ([]string, error) {
 func (d *DataBase) GetMinterAddresses(userID int) ([]string, error) {
 
 	rows, err := d.DB.Query("SELECT MINTER_ADDRESS FROM MINTER_DATA WHERE USER_ID = $1", userID)
-	if err != nil && err.Error() == "sql: no rows in result set" {
-		fmt.Println("HERE!")
-		return nil, nil
+	if err != nil {
+		return nil, err
 	}
-
 	var addresses []string
 	for rows.Next() {
 		var addr string
@@ -213,9 +208,8 @@ func (d *DataBase) GetMinterAddresses(userID int) ([]string, error) {
 func (d *DataBase) GetEmails(userID int) ([]string, error) {
 
 	rows, err := d.DB.Query("SELECT EMAIL FROM EMAIL_DATA WHERE USER_ID = $1", userID)
-	if err != nil && err.Error() == "sql: no rows in result set" {
-		fmt.Println("HERE!")
-		return nil, nil
+	if err != nil {
+		return nil, err
 	}
 
 	var emails []string
