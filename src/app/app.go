@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	stct "telegrambottest/src/app/bipdev/structs"
-	"telegrambottest/src/app/bot"
+
+	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
+	"github.com/mrKitikat/telegrambottest/src/app/bot"
 
 	"github.com/gorilla/mux"
 )

@@ -2,8 +2,9 @@ package db
 
 import (
 	"database/sql"
-	api "telegrambottest/src/app/bipdev"
 	"testing"
+
+	api "github.com/mrKitikat/telegrambottest/src/app/bipdev"
 )
 
 // Test for InitDB ( create tables ) and PutUser.
@@ -238,7 +239,7 @@ func TestPut(t *testing.T) {
 	if len(emails) != 1 {
 		t.Errorf("I want see 1, but see %d", len(emails))
 	}
-	
+
 	err = db.PutMinterAddress(344178872, "Mxc19bf5558d8b374ad02557fd87d57ade178fc14a")
 	if err != nil {
 		t.Fatal(err)

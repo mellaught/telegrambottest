@@ -7,10 +7,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	api "telegrambottest/src/app/bipdev"
-	stct "telegrambottest/src/app/bipdev/structs"
-	vocab "telegrambottest/src/app/bot/vocabulary"
-	"telegrambottest/src/app/db"
+
+	api "github.com/mrKitikat/telegrambottest/src/app/bipdev"
+	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
+	vocab "github.com/mrKitikat/telegrambottest/src/app/bot/vocabulary"
+	"github.com/mrKitikat/telegrambottest/src/app/db"
 
 	//strt "bipbot/src/bipdev/structs"
 

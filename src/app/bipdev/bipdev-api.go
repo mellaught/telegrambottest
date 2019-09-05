@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	stct "telegrambottest/src/app/bipdev/structs"
+
+	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
 )
 
 // App is main app for API Methods

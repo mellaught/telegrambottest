@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"telegrambottest/src/app"
-	stct "telegrambottest/src/app/bipdev/structs"
+
+	"github.com/mrKitikat/telegrambottest/src/app"
+	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"

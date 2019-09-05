@@ -2,9 +2,10 @@ package bot
 
 import (
 	"fmt"
-	stct "telegrambottest/src/app/bipdev/structs"
-	vocab "telegrambottest/src/app/bot/vocabulary"
 	"time"
+
+	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
+	vocab "github.com/mrKitikat/telegrambottest/src/app/bot/vocabulary"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )

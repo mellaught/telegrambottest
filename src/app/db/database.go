@@ -2,8 +2,9 @@ package db
 
 import (
 	"database/sql"
-	stct "telegrambottest/src/app/bipdev/structs"
 	"time"
+
+	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
