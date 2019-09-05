@@ -25,22 +25,11 @@ func InitApp(URL string) *App {
 	return &a
 }
 
-// BadReq func for statusCode == 400 , for GetBTCDeposAddress
-func BadReq(contents []byte) (string, error) {
-	data := &stct.Err{}
-	err := json.Unmarshal([]byte(contents), data)
+func GetMethod(req string) ([]byte, error) {
+	//req := a.URL + "bitcoinDepositAddress?minterAddress=" + minterAddress + "&coin=" + coin + "&email=" + email
+	response, err := http.Get(req)
 	if err != nil {
-		return "", err
-	}
-	return data.Error.Message, errors.New(data.Error.Message)
-}
-
-// GetPrice return current price BIP/USD
-func (a *App) GetPrice() (float64, error) {
-
-	response, err := http.Get(a.URL + "price")
-	if err != nil {
-		return -1., errors.New("http://bip.dev is not respond")
+		return nil, errors.New("http://bip.dev is not respond")
 	}
 
 	defer response.Body.Close()
@@ -48,6 +37,27 @@ func (a *App) GetPrice() (float64, error) {
 	contents, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		fmt.Println(err)
+		return nil, errors.New("Something going wrong, sorry:(")
+	}
+
+	if response.StatusCode == 400 || response.StatusCode == 404 {
+		data := &stct.Err{}
+		err := json.Unmarshal([]byte(contents), data)
+		if err != nil {
+			return nil, err
+		}
+		return nil, errors.New(data.Error.Message)
+	}
+
+	return contents, nil
+}
+
+// GetPrice return current price BIP/USD
+func (a *App) GetPrice() (float64, error) {
+
+	req := a.URL + "price"
+	contents, err := GetMethod(req)
+	if err != nil {
 		return -1., err
 	}
 
@@ -72,21 +82,9 @@ func (a *App) GetPrice() (float64, error) {
 func (a *App) GetBTCDeposAddress(minterAddress, coin, email string) (string, error) {
 
 	req := a.URL + "bitcoinDepositAddress?minterAddress=" + minterAddress + "&coin=" + coin + "&email=" + email
-	response, err := http.Get(req)
+	contents, err := GetMethod(req)
 	if err != nil {
-		return "", errors.New("http://bip.dev is not respond")
-	}
-
-	defer response.Body.Close()
-
-	contents, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println(err)
-		return "", errors.New("Something going wrong, sorry:(")
-	}
-
-	if response.StatusCode == 400 {
-		return BadReq(contents)
+		return "", err
 	}
 
 	data := &stct.DeposBTC{}
@@ -105,28 +103,12 @@ func (a *App) GetBTCDeposAddress(minterAddress, coin, email string) (string, err
 func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error) {
 
 	req := a.URL + "bitcoinAddressStatus?address=" + bitcoinAddress
-	response, err := http.Get(req)
+	contents, err := GetMethod(req)
 	if err != nil {
-		return nil, errors.New("http://bip.dev is not respond")
+		return nil, err
 	}
-
-	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println(err)
-		return nil, errors.New("Something going wrong, sorry:(")
-	}
-
-	if response.StatusCode == 404 {
-		data := &stct.Err{}
-		err := json.Unmarshal([]byte(contents), data)
-		if err != nil {
-			return nil, err
-		}
-		return nil, errors.New(data.Error.Message)
-	}
-
 	data := &stct.BTCStatus{}
+
 	err = json.Unmarshal([]byte(contents), data)
 	if err != nil {
 		fmt.Println(err)
@@ -142,16 +124,9 @@ func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error
 // GetAvailablePrices
 func (a *App) GetAvailablePrices() ([]float64, error) {
 
-	response, err := http.Get(a.URL + "availablePrices")
+	req := a.URL + "availablePrices"
+	contents, err := GetMethod(req)
 	if err != nil {
-		return nil, errors.New("http://bip.dev is not respond")
-	}
-
-	defer response.Body.Close()
-
-	contents, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
@@ -174,27 +149,12 @@ func (a *App) GetAvailablePrices() ([]float64, error) {
 
 // GetMinterDeposAddress return deposit struct.
 func (a *App) GetMinterDeposAddress(bitcoinAddress, coin string, price float64) (*stct.DeposMNT, error) {
+
 	pricestr := fmt.Sprintf("%d", int(price*10000.))
 	req := a.URL + "minterDepositAddress?bitcoinAddress=" + bitcoinAddress + "&price=" + pricestr + "&coin=" + coin
-	response, err := http.Get(req)
+	contents, err := GetMethod(req)
 	if err != nil {
-		return nil, errors.New("http://bip.dev is not respond")
-	}
-
-	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println(err)
-		return nil, errors.New("Something going wrong, sorry:(")
-	}
-
-	if response.StatusCode == 400 {
-		data := &stct.Err{}
-		err := json.Unmarshal([]byte(contents), data)
-		if err != nil {
-			return nil, err
-		}
-		return nil, errors.New(data.Error.Message)
+		return nil, err
 	}
 
 	data := &stct.DeposMNT{}
@@ -213,28 +173,13 @@ func (a *App) GetMinterDeposAddress(bitcoinAddress, coin string, price float64) 
 func (a *App) GetTagInfo(tag string) (*stct.TagInfo, error) {
 
 	req := a.URL + "tag?tag=" + tag
-	response, err := http.Get(req)
+	contents, err := GetMethod(req)
 	if err != nil {
-		return nil, errors.New("http://bip.dev is not respond")
-	}
-
-	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println(err)
-		return nil, errors.New("Something going wrong, sorry:(")
-	}
-	if response.StatusCode == 404 {
-		data := &stct.Err{}
-		err := json.Unmarshal([]byte(contents), data)
-		if err != nil {
-			fmt.Println(err)
-			return nil, errors.New("Something going wrong, sorry:(")
-		}
-		return nil, errors.New(data.Error.Message)
+		return nil, err
 	}
 
 	data := &stct.TagInfo{}
+
 	err = json.Unmarshal([]byte(contents), data)
 	if err != nil {
 		fmt.Println(err)

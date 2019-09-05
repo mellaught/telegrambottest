@@ -60,6 +60,7 @@ func TestGetBTCDepositStatus(t *testing.T) {
 
 	stat, err = a.GetBTCDepositStatus("saawdadadw")
 	if err.Error() != "Address not found" {
+		t.Fatal(err)
 		t.Errorf("Cannot found err")
 	}
 
@@ -119,12 +120,12 @@ func TestAddressHistory(t *testing.T) {
 	if h == nil {
 		t.Errorf("Empty responce")
 	}
-	if len(h.Data) != 2 {
-		t.Errorf("Wrong len of Data %d, want : %d", len(h.Data), 2)
+	if len(h.Data) != 3 {
+		t.Errorf("Wrong len of Data %d, want : %d", len(h.Data), 3)
 	}
 
-	if h.Data[1].Amount != "200000000000000000000" {
-		t.Errorf("Wrong amout of Data[1] %s, want: %s", h.Data[1].Amount, "200000000000000000000")
+	if h.Data[1].Amount != "100000000000000000000" {
+		t.Errorf("Wrong amout of Data[1] %s, want: %s", h.Data[1].Amount, "100000000000000000000")
 	}
 }
 
