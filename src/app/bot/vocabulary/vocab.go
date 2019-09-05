@@ -50,8 +50,8 @@ var Translates = map[string]map[string]string{
 		"ru": "Привет, я бот для обмена BIP/BTC или BTC/BIP",
 	},
 	"Now": {
-		"en": "📈 Now currency BIP/USD %.4f $",
-		"ru": "📈 Сейчас курс BIP/USD %.4f $",
+		"en": "📈 Now currency BIP/USD:",
+		"ru": "📈 Сейчас курс BIP/USD:",
 	},
 	"Send minter": {
 		"en": "Send me your Minter address.",

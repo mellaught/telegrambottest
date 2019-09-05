@@ -238,7 +238,8 @@ func (d *DataBase) GetEmails(userID int) ([]string, error) {
 
 // PutBTCAddress puts new user's bitcoin address.
 func (d *DataBase) PutBTCAddress(UserId int, bitcoinAddress string) error {
-	_, err := d.DB.Exec("INSERT INTO BITCOIN_DATA(user_id, bitcoin_address) VALUES ($1,$2)", UserId, bitcoinAddress)
+	_, err := d.DB.Exec("INSERT INTO bitcoin_data(user_id, bitcoin_address)  VALUES ($1, $2)"+
+		"ON CONFLICT(bitcoin_address) DO NOTHING;", UserId, bitcoinAddress)
 	if err != nil {
 		return err
 	}
@@ -248,7 +249,8 @@ func (d *DataBase) PutBTCAddress(UserId int, bitcoinAddress string) error {
 
 // PutMinterAddress puts new user's minter address.
 func (d *DataBase) PutMinterAddress(UserId int, minterAddress string) error {
-	_, err := d.DB.Exec("INSERT INTO MINTER_DATA(user_id, minter_address) VALUES ($1,$2)", UserId, minterAddress)
+	_, err := d.DB.Exec("INSERT INTO minter_data(user_id, minter_address)  VALUES ($1, $2)"+
+		"ON CONFLICT(minter_address) DO NOTHING;", UserId, minterAddress)
 	if err != nil {
 		return err
 	}
@@ -258,7 +260,8 @@ func (d *DataBase) PutMinterAddress(UserId int, minterAddress string) error {
 
 // PutEmail puts new user's email.
 func (d *DataBase) PutEmail(UserId int, email string) error {
-	_, err := d.DB.Exec("INSERT INTO EMAIL_DATA(user_id, email) VALUES ($1,$2)", UserId, email)
+	_, err := d.DB.Exec("INSERT INTO email_data(user_id, email)  VALUES ($1, $2)"+
+		"ON CONFLICT(email) DO NOTHING;", UserId, email)
 	if err != nil {
 		return err
 	}

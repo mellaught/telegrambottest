@@ -117,7 +117,7 @@ func (b *Bot) GetPrice(ChatId int64) tgbotapi.InlineKeyboardMarkup {
 	if len(prices) > 0 {
 		for _, price := range prices {
 			var row []tgbotapi.InlineKeyboardButton
-			btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d", price), sendPrice+fmt.Sprintf("%d", price))
+			btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%.4f $", price), sendPrice+fmt.Sprintf("%.4f", price))
 			row = append(row, btn)
 			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		}

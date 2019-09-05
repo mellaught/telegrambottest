@@ -27,22 +27,25 @@ var CREATE_BITCOIN_DATA_IF_NOT_EXISTS = `
 Create table if not exists BITCOIN_DATA (
 	id serial,
 	user_id int not null,
-	bitcoin_address VARCHAR(255),
-	PRIMARY KEY(id, user_id)
+	bitcoin_address VARCHAR(255) UNIQUE,
+	PRIMARY KEY(id),
+	FOREIGN KEY (user_id) REFERENCES users (id)
 );`
 
 var CREATE_MINTER_DATA_IF_NOT_EXISTS = `
 Create table if not exists MINTER_DATA (
 	id serial,
 	user_id int not null,
-	minter_address VARCHAR(255),
-	PRIMARY KEY(id, user_id)
+	minter_address VARCHAR(255) UNIQUE,
+	PRIMARY KEY(id),
+	FOREIGN KEY (user_id) REFERENCES users (id)
 );`
 
 var CREATE_EMAIL_DATA_IF_NOT_EXISTS = `
 Create table if not exists EMAIL_DATA (
 	id serial,
 	user_id int not null,
-	email VARCHAR(255),
-	PRIMARY KEY(id, user_id)
+	email VARCHAR(255) UNIQUE,
+	PRIMARY KEY(id),
+	FOREIGN KEY (user_id) REFERENCES users (id)
 );`

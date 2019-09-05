@@ -236,10 +236,21 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 			b.Bot.Send(msg)
 			return
 		}
-		ans := fmt.Sprintf(vocab.GetTranslate("Now", b.Dlg[ChatId].language), price)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, ans)
-		msg.ReplyMarkup = b.newMainKeyboard()
+		msg := tgbotapi.EditMessageTextConfig{
+			BaseEdit: tgbotapi.BaseEdit{
+				ChatID:    b.Dlg[ChatId].ChatId,
+				MessageID: b.Dlg[ChatId].MessageId,
+			},
+			Text: vocab.GetTranslate("Now", b.Dlg[ChatId].language),
+		}
 		b.Bot.Send(msg)
+		newmsg := tgbotapi.NewMessage(ChatId, fmt.Sprintf("%.4f $", price))
+		newmsg.ReplyMarkup = b.newMainKeyboard()
+		b.Bot.Send(newmsg)
+		// ans := fmt.Sprintf(vocab.GetTranslate("Now", b.Dlg[ChatId].language), price)
+		// msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, ans)
+		// msg.ReplyMarkup = b.newMainKeyboard()
+		// b.Bot.Send(msg)
 
 	// buyCommand collects data from the user to transmit their request.
 	// The user will receive the address for the deposit.

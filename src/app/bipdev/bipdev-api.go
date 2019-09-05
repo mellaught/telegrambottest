@@ -139,7 +139,7 @@ func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error
 // -------------------------------- 1 --------------------------------
 
 // GetAvailablePrices
-func (a *App) GetAvailablePrices() ([]int, error) {
+func (a *App) GetAvailablePrices() ([]float64, error) {
 
 	response, err := http.Get(a.URL + "availablePrices")
 	if err != nil {
@@ -162,7 +162,13 @@ func (a *App) GetAvailablePrices() ([]int, error) {
 		return nil, err
 	}
 
-	return data.Data, nil
+	var currentData []float64
+
+	for _, n := range data.Data {
+		currentData = append(currentData, float64(float64(n)/10000))
+	}
+
+	return currentData, nil
 }
 
 // GetMinterDeposAddress return deposit struct.
