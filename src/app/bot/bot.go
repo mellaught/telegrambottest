@@ -58,7 +58,7 @@ type Bot struct {
 func InitBot(config *stct.Config, dbsql *sql.DB) *Bot {
 
 	b := Bot{
-		Token: config.Token,
+		Token: config.BotToken,
 		DB:    &db.DataBase{},
 		Dlg:   map[int64]*Dialog{},
 	}
@@ -71,7 +71,7 @@ func InitBot(config *stct.Config, dbsql *sql.DB) *Bot {
 
 	b.DB = db
 	// Define URL
-	b.Api = api.InitApp(config.URL)
+	b.Api = api.InitApp(config.BipdevApiHost)
 	// Create new bot
 	bot, err := tgbotapi.NewBotAPI(b.Token)
 	if err != nil {

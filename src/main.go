@@ -3,32 +3,28 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"os"
-
-	"github.com/mrKitikat/telegrambottest/src/app"
-	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/joho/godotenv"
+	"github.com/mrKitikat/telegrambottest/src/app"
+	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
 
 	"log"
 )
 
 func main() {
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	conf := stct.Config{
+		DBName:        cfg.GetString("database.name"),
+		DbUser:        cfg.GetString("database.user"),
+		DbPassword:    cfg.GetString("database.password"),
+		DbDriver:      cfg.GetString("database.driver"),
+		BotToken       cfg.GetString("bot.token"),
+		ServerPort:    cfg.GetString("server.port"),
+		BipdevApiHost: cfg.GetString("bipdev.api"),
 	}
 
-	conf := &stct.Config{
-		URL:        os.Getenv("URL"),
-		Token:      os.Getenv("TOKEN"),
-		Driver:     os.Getenv("DRIVER"),
-		DataSource: os.Getenv("DATASOURCE"),
-	}
-
-	dbsql, err := sql.Open(conf.Driver, conf.DataSource)
+	DatasourseName := "user" + conf.DbUser + "dbname=" + conf.DbName + "password=" + conf.DbPassword + "sslmode=disable"
+	dbsql, err := sql.Open(conf.DbDriver, DatasourseName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,5 +33,5 @@ func main() {
 
 	app := app.NewApp(conf, dbsql)
 	fmt.Println("APP Started!")
-	app.Run(":8000")
+	app.Run(conf.ServerPort)
 }

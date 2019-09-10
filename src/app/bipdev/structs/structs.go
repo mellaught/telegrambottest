@@ -7,10 +7,13 @@ import (
 
 //Config ..
 type Config struct {
-	Token      string
-	URL        string
-	Driver     string
-	DataSource string
+	DbName        string
+	DbUser        string
+	DbPassword    string
+	DbDriver      string
+	BotToken      string
+	ServerPort    string
+	BipdevApiHost string
 }
 
 // Price is a structure of resp method GetPrice()
