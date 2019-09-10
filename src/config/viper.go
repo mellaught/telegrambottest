@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -27,7 +28,9 @@ func (v *viperConfig) Init() {
 	viper.SetConfigType(`json`)
 	viper.SetConfigFile(`config.json`)
 	err := viper.ReadInConfig()
-
+	if err != nil {
+		fmt.Println(err)
+	}
 	//panic
 }
 

@@ -7,18 +7,21 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/mrKitikat/telegrambottest/src/app"
 	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
+	"github.com/mrKitikat/telegrambottest/src/config"
 
 	"log"
 )
 
 func main() {
 
-	conf := stct.Config{
-		DBName:        cfg.GetString("database.name"),
+	cfg := config.NewViperConfig()
+
+	conf := &stct.Config{
+		DbName:        cfg.GetString("database.name"),
 		DbUser:        cfg.GetString("database.user"),
 		DbPassword:    cfg.GetString("database.password"),
 		DbDriver:      cfg.GetString("database.driver"),
-		BotToken       cfg.GetString("bot.token"),
+		BotToken:      cfg.GetString("bot.token"),
 		ServerPort:    cfg.GetString("server.port"),
 		BipdevApiHost: cfg.GetString("bipdev.api"),
 	}
