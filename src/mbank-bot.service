@@ -10,7 +10,7 @@ TimeoutStartSec=10
 Restart=always
 RestartSec=15s
 WorkingDirectory=/opt/minter/mbankbot/current
-ExecStart=/opt/minter/mbankbot/current/mbankbot -config=/opt/minter/mbankbot/current/src/config.json
+ExecStart=/opt/minter/mbankbot/current/mbankbot -config=/opt/minter/mbankbot/current/config.json
 
 User=minter
 Group=minter
