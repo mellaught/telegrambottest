@@ -9,8 +9,8 @@ KillMode=process
 TimeoutStartSec=10
 Restart=always
 RestartSec=15s
-WorkingDirectory=/opt/minter/explorer/current
-ExecStart=/opt/minter/explorer/current/explorer -config=/opt/minter/explorer/current/config.json
+WorkingDirectory=/opt/minter/mbankbot/current
+ExecStart=/opt/minter/mbankbot/current/mbankbot -config=/opt/minter/mbankbot/current/config.json
 
 User=minter
 Group=minter
