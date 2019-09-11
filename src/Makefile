@@ -1,4 +1,4 @@
-APP ?= explorer
+APP ?= mbankbot
 VERSION ?= $(strip $(shell cat VERSION))
 GOOS ?= linux
 SRC = ./
@@ -8,9 +8,9 @@ BRANCH = $(strip $(shell git rev-parse --abbrev-ref HEAD))
 CHANGES = $(shell git rev-list --count ${COMMIT})
 BUILDED ?= $(shell date -u '+%Y-%m-%dT%H:%M:%S')
 BUILD_FLAGS = "-X main.Version=$(VERSION) -X main.GitCommit=$(COMMIT) -X main.BuildedDate=$(BUILDED)"
-BUILD_TAGS?=minter-explorer-api
+BUILD_TAGS?=mbankbot
 DOCKER_TAG = latest
-SERVER ?= explorer.minter.network
+SERVER ?= mbankbot.minter.network
 PACKAGES=$(shell go list ./... | grep -v '/vendor/')
 
 GOTOOLS = \
