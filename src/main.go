@@ -26,7 +26,9 @@ func main() {
 		BipdevApiHost: cfg.GetString("bipdev.api"),
 	}
 
-	DatasourseName := "user" + conf.DbUser + "dbname=" + conf.DbName + "password=" + conf.DbPassword + "sslmode=disable"
+	fmt.Println(conf)
+
+	DatasourseName := "user=" + conf.DbUser + " " + "dbname=" + conf.DbName + " " + "password=" + conf.DbPassword + " " + "sslmode=disable"
 	dbsql, err := sql.Open(conf.DbDriver, DatasourseName)
 	if err != nil {
 		log.Fatal(err)
