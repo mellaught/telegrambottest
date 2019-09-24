@@ -129,17 +129,17 @@ func TestAddressHistory(t *testing.T) {
 	}
 }
 
-// Test for GetAvailablePrices.
-// Success: Tests passed.
-func TestAvailablePrices(t *testing.T) {
+// // Test for GetAvailablePrices.
+// // Success: Tests passed.
+// func TestAvailablePrices(t *testing.T) {
 
-	a := InitApp("https://mbank.dl-dev.ru/api/")
-	prices, err := a.GetAvailablePrices()
-	if err != nil {
-		t.Fatal(err)
-	}
+// 	a := InitApp("https://mbank.dl-dev.ru/api/")
+// 	prices, err := a.GetAvailablePrices()
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	if len(prices) != 11 {
-		t.Errorf("I want see 11, but see %d", len(prices))
-	}
-}
+// 	if len(prices) != 11 {
+// 		t.Errorf("I want see 11, but see %d", len(prices))
+// 	}
+// }

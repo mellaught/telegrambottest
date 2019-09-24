@@ -121,31 +121,31 @@ func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error
 // -------------------------------- Sell ----------------------------------
 // -------------------------------- 1 --------------------------------
 
-// GetAvailablePrices
-func (a *App) GetAvailablePrices() ([]float64, error) {
+// // GetAvailablePrices
+// func (a *App) GetAvailablePrices() ([]float64, error) {
 
-	req := a.URL + "availablePrices"
-	contents, err := GetMethod(req)
-	if err != nil {
-		return nil, err
-	}
+// 	req := a.URL + "availablePrices"
+// 	contents, err := GetMethod(req)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	data := &stct.Available{}
+// 	data := &stct.Available{}
 
-	err = json.Unmarshal([]byte(contents), data)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
+// 	err = json.Unmarshal([]byte(contents), data)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return nil, err
+// 	}
 
-	var currentData []float64
+// 	var currentData []float64
 
-	for _, n := range data.Data {
-		currentData = append(currentData, float64(float64(n)/10000))
-	}
+// 	for _, n := range data.Data {
+// 		currentData = append(currentData, float64(float64(n)/10000))
+// 	}
 
-	return currentData, nil
-}
+// 	return currentData, nil
+// }
 
 // GetMinterDeposAddress return deposit struct.
 func (a *App) GetMinterDeposAddress(bitcoinAddress, coin string, price float64) (*stct.DeposMNT, error) {

@@ -17,6 +17,10 @@ var Translates = map[string]map[string]string{
 		"en": "Installed",
 		"ru": "Установлен",
 	},
+	"Menu":  {
+		"en": "📕 Menu",
+		"ru": "📕 Меню",
+	},
 	"Settings": {
 		"en": "🔧 Settings",
 		"ru": "🔧 Настройки",
@@ -128,6 +132,10 @@ var Translates = map[string]map[string]string{
 	"Loots": {
 		"en": "📃 My loots",
 		"ru": "📃 Мои продажи",
+	},
+	"Your loots": {
+		"en": "Your loots to sell.",
+		"ru": "Ваши лоты на продажу.",
 	},
 	"Empty loots": {
 		"en": "You haven't got loots for sale.",

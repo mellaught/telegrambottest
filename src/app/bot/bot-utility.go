@@ -107,26 +107,6 @@ func (b *Bot) GetEmail(ChatId int64) tgbotapi.InlineKeyboardMarkup {
 
 }
 
-func (b *Bot) GetPrice(ChatId int64) tgbotapi.InlineKeyboardMarkup {
-
-	keyboard := tgbotapi.InlineKeyboardMarkup{}
-	prices, err := b.Api.GetAvailablePrices()
-	if err != nil {
-		fmt.Println(err)
-		return keyboard
-	}
-	if len(prices) > 0 {
-		for _, price := range prices {
-			var row []tgbotapi.InlineKeyboardButton
-			btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%.4f $", price), sendPrice+fmt.Sprintf("%.4f", price))
-			row = append(row, btn)
-			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
-		}
-	}
-
-	return keyboard
-}
-
 // SendMenu edit message and send Inline Keyboard newMainMenuKeyboard()
 func (b *Bot) SendMenu(ChatId int64) {
 
@@ -145,7 +125,7 @@ func (b *Bot) SendMenu(ChatId int64) {
 
 // CheckStatusBuy checks depos BTC and wait 2 confirmations
 func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
-	timeout := time.After(2 * time.Minute)
+	timeout := time.After(30 * time.Minute)
 	tick := time.Tick(5 * time.Second)
 	willcoin := 0.
 	for {
@@ -153,7 +133,7 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 		case <-timeout:
 			if willcoin == 0. {
 				msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("timeout", b.Dlg[ChatId].language))
-				msg.ReplyMarkup = b.newMainKeyboard()
+				msg.ReplyMarkup = b.newMainKeyboard(ChatId)
 				b.Bot.Send(msg)
 				return
 			} else {
@@ -177,7 +157,7 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 				} else {
 					ans := fmt.Sprintf(vocab.GetTranslate("Exchange is successful", b.Dlg[ChatId].language), willcoin)
 					msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, ans)
-					msg.ReplyMarkup = b.newMainKeyboard()
+					msg.ReplyMarkup = b.newMainKeyboard(ChatId)
 					b.Bot.Send(msg)
 					return
 				}
@@ -188,7 +168,7 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 
 // CheckStatusSell checks status of deposit for method Sell().
 func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
-	timeout := time.After(2 * time.Minute)
+	timeout := time.After(30 * time.Minute)
 	tick := time.Tick(5 * time.Second)
 	amount := "0"
 	for {
@@ -196,7 +176,7 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 		case <-timeout:
 			if amount == "0" {
 				msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("timeout", b.Dlg[ChatId].language))
-				msg.ReplyMarkup = b.newMainKeyboard()
+				msg.ReplyMarkup = b.newMainKeyboard(ChatId)
 				b.Bot.Send(msg)
 				return
 			} else {
@@ -246,9 +226,11 @@ func (b *Bot) ComposeResp(loots []*stct.Loot, ChatId int64) {
 
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, text)
 		msg.ParseMode = "markdown"
-		msg.ReplyMarkup = b.newMainKeyboard()
 		b.Bot.Send(msg)
 	}
+	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Your loots", b.Dlg[ChatId].language))
+	msg.ReplyMarkup = b.newMainKeyboard(ChatId)
+	b.Bot.Send(msg)
 }
 
 // newMainMenuKeyboard is main menu keyboar: price, buy, sell, sales.
@@ -281,13 +263,33 @@ func (b *Bot) newVocabuageKeybord() tgbotapi.InlineKeyboardMarkup {
 }
 
 // newMainKeyboard is keyboard for main menu.
-func (b *Bot) newMainKeyboard() tgbotapi.ReplyKeyboardMarkup {
-	keyboard := tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("/getmenu"),
+func (b *Bot) newMainKeyboard(ChatId int64) tgbotapi.InlineKeyboardMarkup {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Menu", b.Dlg[ChatId].language), getMainMenu),
 		),
 	)
 
-	keyboard.OneTimeKeyboard = true
+	//keyboard.OneTimeKeyboard = true
 	return keyboard
 }
+
+// func (b *Bot) GetPrice(ChatId int64) tgbotapi.InlineKeyboardMarkup {
+
+// 	keyboard := tgbotapi.InlineKeyboardMarkup{}
+// 	prices, err := b.Api.GetAvailablePrices()
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return keyboard
+// 	}
+// 	if len(prices) > 0 {
+// 		for _, price := range prices {
+// 			var row []tgbotapi.InlineKeyboardButton
+// 			btn := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%.4f $", price), sendPrice+fmt.Sprintf("%.4f", price))
+// 			row = append(row, btn)
+// 			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+// 		}
+// 	}
+
+// 	return keyboard
+// }
