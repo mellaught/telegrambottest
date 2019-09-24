@@ -14,7 +14,7 @@ var BitcoinAddress = "mkWZZPqd1FebZM1MNFfZBQoYFqA4EpE8vD"
 // Result: Success: Tests passed.
 func TestGetPrice(t *testing.T) {
 
-	a := InitApp("https://mbank.dl-dev.ru/api/")
+	a := InitApp("https://api.bip.dev/api/")
 
 	p, err := a.GetPrice()
 	if err != nil {

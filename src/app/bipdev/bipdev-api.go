@@ -69,7 +69,7 @@ func (a *App) GetPrice() (float64, error) {
 		return -1., err
 	}
 
-	currentPrice := float64(data.Data.Price / 1000)
+	currentPrice := float64(float64(data.Data.Price) / float64(1000))
 
 	return currentPrice, nil
 
