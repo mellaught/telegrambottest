@@ -90,8 +90,8 @@ var Translates = map[string]map[string]string{
 		"ru": "Ввести новый minter адрес",
 	},
 	"Coin price": {
-		"en": "Send me a price for coins, format: 0.xxx.\nAllowable range: 0.1 - 0.32 $.",
-		"ru": "Пришли мне цену за свои монеты, формат: 0.xxx.\nДопустимый диапазон: 0.1 - 0.32 $.",
+		"en": "Send me a price for coins, format: 0.xxx.\nAllowable range: 0.01 - 0.32 $.",
+		"ru": "Пришли мне цену за свои монеты, формат: 0.xxx.\nДопустимый диапазон: 0.01 - 0.32 $.",
 	},
 	"Coin name": {
 		"en": "Wrong name of coin.\nExample: BIP, MNT ",
