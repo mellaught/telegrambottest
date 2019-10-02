@@ -2,6 +2,8 @@ package bot
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"time"
 
 	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
@@ -11,12 +13,14 @@ import (
 )
 
 const (
+	lootlink        = "https://bip.dev/trade/"
 	startCommand    = "start"
 	priceCommand    = "price"
 	buyCommand      = "buy"
 	sellCommand     = "sell"
 	salesCommand    = "lookat"
 	getMainMenu     = "getmenu"
+	checkcommand    = "check"
 	settingsMenu    = "settings"
 	language        = "language"
 	engvocabCommand = "englanguage"
@@ -28,118 +32,231 @@ const (
 	sendEmail       = "sendEmail"
 	sendPrice       = "sendPrice"
 	newEmail        = "newEmail"
+	cancelComm      = "cancel"
+	yescommand      = "yes"
+	nocommand       = "not"
 )
 
 //
-func (b *Bot) GetBTCAddresses(ChatId int64) tgbotapi.InlineKeyboardMarkup {
+var (
+	N         float64 = 0
+	BuyStatus         = make(map[int64]string)
+)
+
+func (b *Bot) ChangeCurrency(ChatId int64, MessageId int, Id string) {
+	timeout := time.After(10 * time.Minute)
+	tick := time.Tick(20 * time.Second)
+	for {
+		select {
+		case <-timeout:
+			return
+
+		case <-tick:
+			fmt.Println(b.Dlg[ChatId].MessageId, MessageId)
+			price, diff, err := b.Api.GetPrice()
+			if err != nil {
+				fmt.Println(err)
+				msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
+				b.Bot.Send(msg)
+				return
+			}
+			//PreviousMessage[ChatId] = msg
+			if MessageId == b.Dlg[ChatId].MessageId {
+				N++
+				fmt.Println(b.Dlg[ChatId].CallBackId, Id)
+				kb := b.newMainMenuKeyboard(ChatId)
+				msg := tgbotapi.EditMessageTextConfig{
+					BaseEdit: tgbotapi.BaseEdit{
+						//ChatID: ChatId,
+						//MessageID:       MessageId,
+						InlineMessageID: Id,
+						ReplyMarkup:     &kb,
+					},
+					Text:      fmt.Sprintf(vocab.GetTranslate("Select", b.Dlg[ChatId].language), price+N, diff),
+					ParseMode: "markdown",
+				}
+
+				b.Bot.Send(msg)
+				continue
+			} else {
+				return
+			}
+
+		}
+	}
+}
+
+//
+func (b *Bot) StepsZero(ChatId int64) {
+	SellSteps[ChatId] = 0
+	BuySteps[ChatId] = 0
+}
+
+//
+func (b *Bot) SendBTCAddresses(ChatId int64) error {
 
 	keyboard := tgbotapi.InlineKeyboardMarkup{}
-	var row []tgbotapi.InlineKeyboardButton
-	btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("New BTC", b.Dlg[ChatId].language), newBTC)
-	row = append(row, btn)
-	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 	addresses, err := b.DB.GetBTCAddresses(b.Dlg[ChatId].UserId)
 	if err != nil {
-		fmt.Println(err)
-		return keyboard
+		return err
 	}
 	if len(addresses) > 0 {
+		txt := vocab.GetTranslate("Select bitcoin", b.Dlg[ChatId].language)
 		for _, addr := range addresses {
 			var row []tgbotapi.InlineKeyboardButton
 			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendBTC+addr)
 			row = append(row, btn)
 			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		}
+
+		btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
+		var row []tgbotapi.InlineKeyboardButton
+		row = append(row, btn)
+		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
+		msg.ReplyMarkup = keyboard
+		msg.ParseMode = "markdown"
+		b.Bot.Send(msg)
+		Message[ChatId] = msg
+
+	} else {
+		txt := vocab.GetTranslate("New bitcoin", b.Dlg[ChatId].language)
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
+		btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
+		var row []tgbotapi.InlineKeyboardButton
+		row = append(row, btn)
+		msg.ReplyMarkup = keyboard
+		msg.ParseMode = "markdown"
+		msg.ReplyMarkup = keyboard
+		b.Bot.Send(msg)
+		Message[ChatId] = msg
 	}
 
-	return keyboard
+	return nil
 }
 
-//
-func (b *Bot) GetMinterAddresses(ChatId int64) tgbotapi.InlineKeyboardMarkup {
+// SendMinterAddresses --
+func (b *Bot) SendMinterAddresses(ChatId int64) error {
 
+	//PreviousMessage[ChatId] = Message[ChatId]
 	keyboard := tgbotapi.InlineKeyboardMarkup{}
-	var row []tgbotapi.InlineKeyboardButton
-	btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("New minter", b.Dlg[ChatId].language), newMinter)
-	row = append(row, btn)
-	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 	addresses, err := b.DB.GetMinterAddresses(b.Dlg[ChatId].UserId)
 	if err != nil {
-		fmt.Println(err)
-		return keyboard
+		return err
 	}
 	if len(addresses) > 0 {
+		txt := vocab.GetTranslate("Select minter", b.Dlg[ChatId].language)
 		for _, addr := range addresses {
 			var row []tgbotapi.InlineKeyboardButton
 			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendMinter+addr)
 			row = append(row, btn)
 			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		}
+
+		btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
+		var row []tgbotapi.InlineKeyboardButton
+		row = append(row, btn)
+		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
+		msg.ReplyMarkup = keyboard
+		msg.ParseMode = "markdown"
+		b.Bot.Send(msg)
+		Message[ChatId] = msg
+
+	} else {
+		txt := vocab.GetTranslate("New minter", b.Dlg[ChatId].language)
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
+		btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
+		var row []tgbotapi.InlineKeyboardButton
+		row = append(row, btn)
+		msg.ReplyMarkup = keyboard
+		msg.ParseMode = "markdown"
+		b.Bot.Send(msg)
+		Message[ChatId] = msg
 	}
 
-	return keyboard
-
+	return nil
 }
 
-//
-func (b *Bot) GetEmail(ChatId int64) tgbotapi.InlineKeyboardMarkup {
+// SendEmail --
+func (b *Bot) SendEmail(ChatId int64) error {
 
+	PreviousMessage[ChatId] = Message[ChatId]
 	keyboard := tgbotapi.InlineKeyboardMarkup{}
-	var row []tgbotapi.InlineKeyboardButton
-	btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("New email", b.Dlg[ChatId].language), newEmail)
-	row = append(row, btn)
-	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 	addresses, err := b.DB.GetEmails(b.Dlg[ChatId].UserId)
 	if err != nil {
-		fmt.Println(err)
-		return keyboard
+		return err
 	}
+
 	if len(addresses) > 0 {
+		txt := vocab.GetTranslate("Select email", b.Dlg[ChatId].language)
 		for _, addr := range addresses {
 			var row []tgbotapi.InlineKeyboardButton
 			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendEmail+addr)
 			row = append(row, btn)
 			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		}
+		btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
+		var row []tgbotapi.InlineKeyboardButton
+		row = append(row, btn)
+		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
+		msg.ReplyMarkup = keyboard
+		msg.ParseMode = "markdown"
+		Message[ChatId] = msg
+		b.Bot.Send(msg)
+
+	} else {
+		txt := vocab.GetTranslate("New email", b.Dlg[ChatId].language)
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
+		btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
+		var row []tgbotapi.InlineKeyboardButton
+		row = append(row, btn)
+		msg.ReplyMarkup = keyboard
+		msg.ParseMode = "markdown"
+		b.Bot.Send(msg)
+		Message[ChatId] = msg
 	}
 
-	return keyboard
-
+	return nil
 }
 
-// SendMenu edit message and send Inline Keyboard newMainMenuKeyboard()
-func (b *Bot) SendMenu(ChatId int64) {
-
-	kb := b.newMainMenuKeyboard(ChatId)
-	newmsg := tgbotapi.EditMessageTextConfig{
-		BaseEdit: tgbotapi.BaseEdit{
-			ChatID:      b.Dlg[ChatId].ChatId,
-			MessageID:   b.Dlg[ChatId].MessageId,
-			ReplyMarkup: &kb,
-		},
-		Text: vocab.GetTranslate("Select", b.Dlg[ChatId].language),
+// SendDepos --
+func (b *Bot) SendDepos(ChatId int64) {
+	price, diff, err := b.Api.GetPrice()
+	if err != nil {
+		fmt.Println(err)
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
+		b.Bot.Send(msg)
+		return
 	}
+	txt := fmt.Sprintf(vocab.GetTranslate("Send deposit", b.Dlg[ChatId].language), price, diff)
+	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
+	msg.ParseMode = "markdown"
+	// msg.ReplyMarkup = b.CancelKeyboard(ChatId)
+	b.Bot.Send(msg)
+}
 
-	b.Bot.Send(newmsg)
+//
+func (b *Bot) GetStatusBuy(ChatId int64) string {
+	return BuyStatus[ChatId]
 }
 
 // CheckStatusBuy checks depos BTC and wait 2 confirmations
 func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
-	timeout := time.After(30 * time.Minute)
+	timeout := time.After(60 * time.Minute)
 	tick := time.Tick(5 * time.Second)
 	willcoin := 0.
+	BuyStatus[ChatId] = vocab.GetTranslate("Wait deposit", b.Dlg[ChatId].language)
 	for {
 		select {
 		case <-timeout:
 			if willcoin == 0. {
-				msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("timeout", b.Dlg[ChatId].language))
-				msg.ReplyMarkup = b.newMainKeyboard(ChatId)
-				b.Bot.Send(msg)
+				BuyStatus[ChatId] = vocab.GetTranslate("No buy", b.Dlg[ChatId].language)
 				return
 			} else {
 				continue
 			}
-
 		case <-tick:
 			stat, err := b.Api.GetBTCDepositStatus(address)
 			if err != nil {
@@ -150,15 +267,15 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 			if stat.Data.WillReceive != willcoin {
 				if willcoin == 0. {
 					willcoin = stat.Data.WillReceive
-					ans := fmt.Sprintf(vocab.GetTranslate("New deposit", b.Dlg[ChatId].language), stat.Data.WillReceive)
-					msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, ans)
-					b.Bot.Send(msg)
+					BuyStatus[ChatId] = fmt.Sprintf(vocab.GetTranslate("New deposit", b.Dlg[ChatId].language), stat.Data.WillReceive)
 					time.Sleep(60 * time.Second)
 				} else {
 					ans := fmt.Sprintf(vocab.GetTranslate("Exchange is successful", b.Dlg[ChatId].language), willcoin)
 					msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, ans)
 					msg.ReplyMarkup = b.newMainKeyboard(ChatId)
+					BuyStatus[ChatId] = vocab.GetTranslate("No buy", b.Dlg[ChatId].language)
 					b.Bot.Send(msg)
+					b.SendMenuMessage(ChatId)
 					return
 				}
 			}
@@ -170,14 +287,14 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 	timeout := time.After(30 * time.Minute)
 	tick := time.Tick(5 * time.Second)
-	amount := "0"
+	amount := "0.0"
 	for {
 		select {
 		case <-timeout:
-			if amount == "0" {
-				msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("timeout", b.Dlg[ChatId].language))
-				msg.ReplyMarkup = b.newMainKeyboard(ChatId)
-				b.Bot.Send(msg)
+			if amount == "0.0" {
+				// msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("timeout", b.Dlg[ChatId].language))
+				// msg.ReplyMarkup = b.newMainKeyboard(ChatId)
+				// b.Bot.Send(msg)
 				return
 			} else {
 				continue
@@ -194,7 +311,7 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 				// Put in DB.
 				b.DB.PutLoot(b.Dlg[ChatId].UserId, tag, taginfo)
 				ans := fmt.Sprintf(vocab.GetTranslate("New deposit for sale", b.Dlg[ChatId].language),
-					taginfo.Data.Amount, taginfo.Data.Coin, float64(float64(taginfo.Data.Price)/10000.))
+					taginfo.Data.Amount, taginfo.Data.Coin, taginfo.Data.Price)
 				msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, ans)
 				b.Bot.Send(msg)
 				//go a.CheckLootforSell(taginfo.Data.MinterAddress)
@@ -207,71 +324,63 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 
 // Method for sending loots in markdown style to user.
 func (b *Bot) ComposeResp(loots []*stct.Loot, ChatId int64) {
-	for _, loot := range loots {
-		text := fmt.Sprintf(
-			"*Tag:*  %s\n"+
-				"*Coin:*  %s  "+
-				"   *Price:*  %v\n"+
-				"*Amount:*  %s\n"+
-				"*Minted address:*  %s\n"+
-				"*Created at:*  %s\n"+
-				"*Last sell at:*  %s",
-			loot.Tag,
-			loot.Coin,
-			loot.Price,
-			loot.Amout,
-			loot.MinterAddress,
-			loot.CreatedAt.Format("2006-01-02 15:04:05"),
-			loot.LastSell.Format("2006-01-02 15:04:05"))
 
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, text)
-		msg.ParseMode = "markdown"
-		b.Bot.Send(msg)
+	keyboard := tgbotapi.InlineKeyboardMarkup{}
+
+	for _, loot := range loots {
+		var row []tgbotapi.InlineKeyboardButton
+		lText := fmt.Sprintf(vocab.GetTranslate("Loot", b.Dlg[ChatId].language), loot.Amout, loot.Coin, loot.Price)
+		btn := tgbotapi.NewInlineKeyboardButtonURL(lText, lootlink+loot.Tag)
+		row = append(row, btn)
+		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 	}
+
+	var row []tgbotapi.InlineKeyboardButton
 	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Your loots", b.Dlg[ChatId].language))
-	msg.ReplyMarkup = b.newMainKeyboard(ChatId)
+	btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
+	row = append(row, btn)
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
+	msg.ReplyMarkup = keyboard
 	b.Bot.Send(msg)
 }
 
-// newMainMenuKeyboard is main menu keyboar: price, buy, sell, sales.
-func (b *Bot) newMainMenuKeyboard(ChatId int64) tgbotapi.InlineKeyboardMarkup {
-	return tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Price", b.Dlg[ChatId].language), priceCommand),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Buy", b.Dlg[ChatId].language), buyCommand),
-			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Sell", b.Dlg[ChatId].language), sellCommand),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Loots", b.Dlg[ChatId].language), salesCommand),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Settings", b.Dlg[ChatId].language), settingsMenu),
-		),
-	)
+func (b *Bot) CheckMinter(address string) bool {
+	return len(address) != 42 || address[:2] != "Mx" || address == "Mx00000000000000000000000000000000000001"
 }
 
-// vocabuageKeybord is keybouad for select vocabuage.
-func (b *Bot) newVocabuageKeybord() tgbotapi.InlineKeyboardMarkup {
-	return tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🇷🇺 Русский", rusvocabCommand),
-			tgbotapi.NewInlineKeyboardButtonData("🇬🇧 English", engvocabCommand),
-		),
-	)
+// CheckEmail ..
+func (b *Bot) CheckEmail(email string) bool {
+	re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	if !re.MatchString(email) || email == "mail@example.com" {
+		return false
+	}
+	return true
 }
 
-// newMainKeyboard is keyboard for main menu.
-func (b *Bot) newMainKeyboard(ChatId int64) tgbotapi.InlineKeyboardMarkup {
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Menu", b.Dlg[ChatId].language), getMainMenu),
-		),
-	)
+// CheckBitcoin ..
+func (b *Bot) CheckBitcoin(address string) bool {
+	re := regexp.MustCompile("^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$")
+	return re.MatchString(address)
+}
 
-	//keyboard.OneTimeKeyboard = true
-	return keyboard
+// CheckCoin ..
+func (b *Bot) CheckCoin(coin string) bool {
+	re := regexp.MustCompile("^[0-9-A-Z]{3,10}$")
+	return re.MatchString(coin)
+}
+
+// CheckPrice ..
+func (b *Bot) CheckPrice(chatId int64, price string) bool {
+	if s, err := strconv.ParseFloat(price, 64); err == nil {
+		if 0.01 <= s && s <= 0.32 {
+			PriceToSell[chatId] = s
+			return true
+		} else {
+			return false
+		}
+	} else {
+		return false
+	}
 }
 
 // func (b *Bot) GetPrice(ChatId int64) tgbotapi.InlineKeyboardMarkup {

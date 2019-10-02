@@ -59,7 +59,7 @@ type TagInfo struct {
 	Data struct {
 		MinterAddress string  `json:"minter_address"`
 		BTCPrice      big.Int `json:"btc_price"`
-		Price         int     `json:"price"`
+		Price         float64 `json:"price"`
 		Coin          string  `json:"coin"`
 		Amount        string  `json:"amount"`
 	} `json:"data"`

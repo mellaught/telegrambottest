@@ -36,11 +36,13 @@ func (b *Bot) UpdateLoots(w http.ResponseWriter, r *http.Request) {
 		handler.ResponJSON(w, http.StatusBadGateway, err.Error())
 		return
 	}
+
 	amountSell := float64((float64(loot.Price) / 100000.) * amount)
 	ans := fmt.Sprintf(vocab.GetTranslate("Coin exchanged", lang), amount, loot.Coin, amountSell)
 	msg := tgbotapi.NewMessage(chatid, ans)
 	b.Bot.Send(msg)
 
 	handler.ResponJSON(w, http.StatusOK, "Notification has been sent")
+
 	return
 }

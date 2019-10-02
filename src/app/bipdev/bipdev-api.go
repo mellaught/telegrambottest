@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math/big"
 	"net/http"
 
 	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
@@ -53,12 +54,12 @@ func GetMethod(req string) ([]byte, error) {
 }
 
 // GetPrice return current price BIP/USD
-func (a *App) GetPrice() (float64, error) {
+func (a *App) GetPrice() (float64, string, error) {
 
 	req := a.URL + "price"
 	contents, err := GetMethod(req)
 	if err != nil {
-		return -1., err
+		return 0, "", err
 	}
 
 	data := &stct.Price{}
@@ -66,13 +67,20 @@ func (a *App) GetPrice() (float64, error) {
 	err = json.Unmarshal([]byte(contents), data)
 	if err != nil {
 		fmt.Println(err)
-		return -1., err
+		return 0, "", err
 	}
 
 	currentPrice := float64(float64(data.Data.Price) / float64(10000))
+	currnetDelta := float64(float64(data.Data.Delta) * float64(100))
 
-	return currentPrice, nil
+	var delatastr string
+	if currnetDelta > 0 {
+		delatastr = fmt.Sprintf("+%.2f", currnetDelta)
+	} else {
+		delatastr = fmt.Sprintf("%.2f", currnetDelta)
+	}
 
+	return currentPrice, delatastr, nil
 }
 
 // --------------------------- Buy ----------------------------------
@@ -121,32 +129,6 @@ func (a *App) GetBTCDepositStatus(bitcoinAddress string) (*stct.BTCStatus, error
 // -------------------------------- Sell ----------------------------------
 // -------------------------------- 1 --------------------------------
 
-// // GetAvailablePrices
-// func (a *App) GetAvailablePrices() ([]float64, error) {
-
-// 	req := a.URL + "availablePrices"
-// 	contents, err := GetMethod(req)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	data := &stct.Available{}
-
-// 	err = json.Unmarshal([]byte(contents), data)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return nil, err
-// 	}
-
-// 	var currentData []float64
-
-// 	for _, n := range data.Data {
-// 		currentData = append(currentData, float64(float64(n)/10000))
-// 	}
-
-// 	return currentData, nil
-// }
-
 // GetMinterDeposAddress return deposit struct.
 func (a *App) GetMinterDeposAddress(bitcoinAddress, coin string, price float64) (*stct.DeposMNT, error) {
 
@@ -185,6 +167,13 @@ func (a *App) GetTagInfo(tag string) (*stct.TagInfo, error) {
 		fmt.Println(err)
 		return nil, errors.New("Something going wrong, sorry:(")
 	}
+
+	r := new(big.Rat)
+	r.SetString(data.Data.Amount + "/" + "1000000000000000000")
+
+	data.Data.Amount = r.FloatString(1)
+
+	data.Data.Price = float64(float64(data.Data.Price) / float64(10000))
 
 	return data, nil
 }
@@ -237,3 +226,29 @@ func AddressHistory(req string) (*stct.AddrHistory, error) {
 
 	return data, nil
 }
+
+// GetAvailablePrices
+// func (a *App) GetAvailablePrices() ([]float64, error) {
+
+// 	req := a.URL + "availablePrices"
+// 	contents, err := GetMethod(req)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	data := &stct.Available{}
+
+// 	err = json.Unmarshal([]byte(contents), data)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return nil, err
+// 	}
+
+// 	var currentData []float64
+
+// 	for _, n := range data.Data {
+// 		currentData = append(currentData, float64(float64(n)/10000))
+// 	}
+
+// 	return currentData, nil
+// }

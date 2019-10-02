@@ -16,7 +16,7 @@ func TestGetPrice(t *testing.T) {
 
 	a := InitApp("https://api.bip.dev/api/")
 
-	p, err := a.GetPrice()
+	p, _, err := a.GetPrice()
 	if err != nil {
 		t.Fatal(err)
 	}
