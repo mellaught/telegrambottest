@@ -98,9 +98,11 @@ func (b *Bot) CancelHandler(ChatId int64) {
 
 }
 
-func (b *Bot) ChangeCurrency(ChatId int64, MessageId int, Id string) {
+func (b *Bot) ChangeCurrency(ChatId int64) {
 	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(20 * time.Second)
+	CallId := b.Dlg[ChatId].CallBackId
+	MessageId := b.Dlg[ChatId].MessageId
 	for {
 		select {
 		case <-timeout:
@@ -115,15 +117,16 @@ func (b *Bot) ChangeCurrency(ChatId int64, MessageId int, Id string) {
 				b.Bot.Send(msg)
 				return
 			}
+			b.Dlg[ChatId].MessageId
 			//PreviousMessage[ChatId] = msg
 			if MessageId == b.Dlg[ChatId].MessageId {
-				fmt.Println(b.Dlg[ChatId].CallBackId, Id)
+				fmt.Println(b.Dlg[ChatId].CallBackId, CallId)
 				kb := b.newMainMenuKeyboard(ChatId)
 				msg := tgbotapi.EditMessageTextConfig{
 					BaseEdit: tgbotapi.BaseEdit{
 						//ChatID: ChatId,
 						//MessageID:       MessageId,
-						InlineMessageID: Id,
+						InlineMessageID: CallId,
 						ReplyMarkup:     &kb,
 					},
 					Text:      fmt.Sprintf(vocab.GetTranslate("Select", b.Dlg[ChatId].language), price, diff),
