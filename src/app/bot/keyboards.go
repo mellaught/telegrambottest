@@ -20,7 +20,6 @@ func (b *Bot) SendMenuMessage(ChatId int64) (tgbotapi.InlineKeyboardMarkup, stri
 	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 	msg.ReplyMarkup = kb
 	msg.ParseMode = "markdown"
-
 	return kb, txt, nil
 }
 
@@ -108,28 +107,3 @@ func (b *Bot) ShareCancel(ChatId int64, link string) tgbotapi.InlineKeyboardMark
 		),
 	)
 }
-
-// SendMenu edit message and send Inline Keyboard newMainMenuKeyboard()
-// func (b *Bot) SendMenu(ChatId int64) {
-
-// 	kb := b.newMainMenuKeyboard(ChatId)
-// 	price, diff, err := b.Api.GetPrice()
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
-// 		b.Bot.Send(msg)
-// 		return
-// 	}
-// 	txt := fmt.Sprintf(vocab.GetTranslate("Select", b.Dlg[ChatId].language), price, diff)
-// 	newmsg := tgbotapi.EditMessageTextConfig{
-// 		BaseEdit: tgbotapi.BaseEdit{
-// 			ChatID:      b.Dlg[ChatId].ChatId,
-// 			MessageID:   b.Dlg[ChatId].MessageId,
-// 			ReplyMarkup: &kb,
-// 		},
-// 		Text:      txt,
-// 		ParseMode: "markdown",
-// 	}
-// 	PreviousMessage[ChatId] = newmsg
-// 	b.Bot.Send(newmsg)
-// }

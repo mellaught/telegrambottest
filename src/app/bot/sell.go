@@ -88,6 +88,7 @@ func (b *Bot) SellFinal(ChatId int64) {
 			b.PrintAndSendError(err, ChatId)
 			return
 		}
+		go b.ChangeCurrency(ChatId)
 		b.SendMessage(txt, ChatId, kb)
 		return
 	}
@@ -108,6 +109,7 @@ func (b *Bot) SellFinal(ChatId int64) {
 		b.PrintAndSendError(err, ChatId)
 		return
 	}
+	go b.ChangeCurrency(ChatId)
 	b.SendMessage(txt, ChatId, kb)
 	return
 }

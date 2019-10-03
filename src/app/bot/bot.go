@@ -26,8 +26,6 @@ var (
 	CoinToSell      = make(map[int64]string)
 	EmailAddress    = make(map[int64]string)
 	PriceToSell     = make(map[int64]float64)
-	//SellSteps       = make(map[int64]int)
-	//BuySteps        = make(map[int64]int)
 )
 
 // Dialog is struct for dialog with user:   - ChatId: User's ChatID
@@ -282,11 +280,8 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 			b.PrintAndSendError(err, ChatId)
 			return
 		}
-		b.EditAndSend(&kb, txt, ChatId)
 		go b.ChangeCurrency(ChatId)
-		//PreviousMessage[ChatId] = msg
-		//fmt.Println("Message id:", b.Dlg[ChatId].MessageId)
-		//go b.ChangeCurrency(ChatId, b.Dlg[ChatId].MessageId, b.Dlg[ChatId].CallBackId)
+		b.EditAndSend(&kb, txt, ChatId)
 		return
 
 	// rusvocabCommand sets russian lang for user.
@@ -299,9 +294,8 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 			b.PrintAndSendError(err, ChatId)
 			return
 		}
-
-		b.EditAndSend(&kb, txt, ChatId)
 		go b.ChangeCurrency(ChatId)
+		b.EditAndSend(&kb, txt, ChatId)
 		return
 
 	case cancelComm:

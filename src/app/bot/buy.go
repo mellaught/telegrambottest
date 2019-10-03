@@ -184,7 +184,14 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 					msg.ReplyMarkup = b.newMainMenuKeyboard(ChatId)
 					BuyStatus[ChatId] = vocab.GetTranslate("No buy", b.Dlg[ChatId].language)
 					b.Bot.Send(msg)
-					b.SendMenuMessage(ChatId)
+					time.Sleep(5 * time.Second)
+					kb, txt, err := b.SendMenuMessage(ChatId)
+					if err != nil {
+						b.PrintAndSendError(err, ChatId)
+						return
+					}
+					go b.ChangeCurrency(ChatId)
+					b.SendMessage(txt, ChatId, kb)
 					return
 				}
 			}
