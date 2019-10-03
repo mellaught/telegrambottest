@@ -40,7 +40,7 @@ const (
 // )
 
 func (b *Bot) CancelHandler(ChatId int64) {
-
+	fmt.Println("Cancel", UserHistory[ChatId])
 	if strings.Contains(UserHistory[ChatId], "buy") {
 		if UserHistory[ChatId][4:] == "1" {
 			kb, txt, err := b.SendMenuMessage(ChatId)
@@ -60,6 +60,7 @@ func (b *Bot) CancelHandler(ChatId int64) {
 		}
 
 	} else if strings.Contains(UserHistory[ChatId], "sell") {
+		fmt.Println(UserHistory[ChatId])
 		if UserHistory[ChatId][5:] == "1" {
 			kb, txt, err := b.SendMenuMessage(ChatId)
 			if err != nil {
@@ -72,6 +73,19 @@ func (b *Bot) CancelHandler(ChatId int64) {
 			kb := b.CancelKeyboard(ChatId)
 			txt := vocab.GetTranslate("Coin", b.Dlg[ChatId].language)
 			b.EditAndSend(&kb, txt, ChatId)
+		} else if UserHistory[ChatId][5:] == "3" {
+			UserHistory[ChatId] = "sell_2"
+			txt := vocab.GetTranslate("Select price", b.Dlg[ChatId].language)
+			kb := b.CancelKeyboard(ChatId)
+			b.EditAndSend(&kb, txt, ChatId)
+		} else if UserHistory[ChatId][5:] == "4" {
+			fmt.Println("HERE")
+			kb, txt, err := b.SendBTCAddresses(ChatId)
+			if err != nil {
+				b.PrintAndSendError(err, ChatId)
+				return
+			}
+			b.SendMessage(txt, ChatId, kb)
 		}
 	} else if strings.Contains(UserHistory[ChatId], "loot") {
 		kb, txt, err := b.SendMenuMessage(ChatId)

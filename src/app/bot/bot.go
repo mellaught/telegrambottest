@@ -124,7 +124,7 @@ func (b *Bot) Run() {
 
 // RunMessageText
 func (b *Bot) RunMessageText(text string, ChatId int64) {
-	fmt.Printf("UserHistory: %s", UserHistory[ChatId])
+	fmt.Printf("UserHistory: %s \n", UserHistory[ChatId])
 	// Проверка команды <<купить>>.
 	if strings.Contains(UserHistory[ChatId], "buy") {
 		// команда не выбрана.
@@ -239,7 +239,6 @@ func (b *Bot) assembleUpdate(update tgbotapi.Update) (*Dialog, bool) {
 		dialog.language = "en"
 		return dialog, false
 	}
-	fmt.Println("DIALOG:", dialog)
 	command, isset := commands[dialog.ChatId]
 	if isset {
 		dialog.Command = command
@@ -388,7 +387,6 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 
 	// sendBTC after the user has sent his bitcoin address. ( SELL )
 	case sendBTC:
-
 		BitcoinAddress[ChatId] = b.Dlg[ChatId].Text
 		b.SellFinal(ChatId)
 
@@ -437,9 +435,15 @@ func (b *Bot) SellFinal(ChatId int64) {
 	if err != nil {
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, err.Error())
 		b.Bot.Send(msg)
-		b.SendMenuMessage(ChatId)
+		kb, txt, err := b.SendMenuMessage(ChatId)
+		if err != nil {
+			b.PrintAndSendError(err, ChatId)
+			return
+		}
+		b.SendMessage(txt, ChatId, kb)
 		return
 	}
+
 	b.SendMenuChoose(ChatId)
 	b.Dlg[ChatId].Command = ""
 	txt := fmt.Sprintf(vocab.GetTranslate("Send your coins", b.Dlg[ChatId].language), CoinToSell[ChatId], CoinToSell[ChatId], "https://bip.dev/trade/"+depos.Data.Tag)
@@ -450,8 +454,13 @@ func (b *Bot) SellFinal(ChatId int64) {
 	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, depos.Data.Address)
 	b.Bot.Send(newmsg)
 	go b.CheckStatusSell(depos.Data.Tag, ChatId)
-	time.Sleep(5 * time.Second)
-	b.SendMenuMessage(ChatId)
+	time.Sleep(3 * time.Second)
+	kb, txt, err := b.SendMenuMessage(ChatId)
+	if err != nil {
+		b.PrintAndSendError(err, ChatId)
+		return
+	}
+	b.SendMessage(txt, ChatId, kb)
 	return
 }
 

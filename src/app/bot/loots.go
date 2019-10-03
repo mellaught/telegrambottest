@@ -24,10 +24,8 @@ func (b *Bot) SendLoots(loots []*stct.Loot, ChatId int64) {
 	}
 
 	var row []tgbotapi.InlineKeyboardButton
-	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Your loots", b.Dlg[ChatId].language))
 	btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
 	row = append(row, btn)
 	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
-	msg.ReplyMarkup = keyboard
-	b.Bot.Send(msg)
+	b.EditAndSend(&keyboard, vocab.GetTranslate("Your loots", b.Dlg[ChatId].language), ChatId)
 }
