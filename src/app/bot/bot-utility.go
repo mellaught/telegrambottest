@@ -106,10 +106,7 @@ func (b *Bot) ChangeCurrency(ChatId int64) {
 		case <-timeout:
 			return
 		case <-tick:
-			fmt.Println(b.Dlg[ChatId].MessageId, MessageId)
 			if MessageId == b.Dlg[ChatId].MessageId && CallId == b.Dlg[ChatId].CallBackId {
-				fmt.Println("HERE")
-				fmt.Println(b.Dlg[ChatId].CallBackId, CallId)
 				kb, txt, err := b.SendMenuMessage(ChatId)
 				if err != nil {
 					fmt.Println(err)
