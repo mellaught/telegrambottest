@@ -130,6 +130,27 @@ func (b *Bot) SendDepos(ChatId int64) {
 	b.Bot.Send(msg)
 }
 
+// BuyFinal is function for command "/buy".
+// Requests an email from the user and Minter deposit address.
+// Requests the "bitcoinDepositAddress" method with the received data.
+func (b *Bot) BuyFinal(ChatId int64) {
+	fmt.Println("Buy data:", MinterAddress[b.Dlg[ChatId].ChatId], EmailAddress[b.Dlg[ChatId].ChatId])
+	addr, err := b.Api.GetBTCDeposAddress(MinterAddress[b.Dlg[ChatId].ChatId], "BIP", EmailAddress[b.Dlg[ChatId].ChatId])
+	if err != nil {
+		b.Dlg[ChatId].Command = ""
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, err.Error())
+		msg.ReplyMarkup = b.newMainMenuKeyboard(ChatId)
+		b.Bot.Send(msg)
+		return
+	}
+	b.Dlg[ChatId].Command = ""
+	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, addr)
+	newmsg.ReplyMarkup = b.CheckKeyboard(ChatId)
+	b.Bot.Send(newmsg)
+	go b.CheckStatusBuy(addr, ChatId)
+	return
+}
+
 // CheckStatusBuy checks depos BTC and wait 2 confirmations
 func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 	timeout := time.After(60 * time.Minute)

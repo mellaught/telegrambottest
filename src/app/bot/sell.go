@@ -76,6 +76,42 @@ func (b *Bot) SendBTCAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, str
 	}
 }
 
+// SellFinal
+func (b *Bot) SellFinal(ChatId int64) {
+	fmt.Println("Sell data:", BitcoinAddress[b.Dlg[ChatId].ChatId], CoinToSell[b.Dlg[ChatId].ChatId], PriceToSell[b.Dlg[ChatId].ChatId])
+	depos, err := b.Api.GetMinterDeposAddress(BitcoinAddress[b.Dlg[ChatId].ChatId], CoinToSell[b.Dlg[ChatId].ChatId], PriceToSell[b.Dlg[ChatId].ChatId])
+	if err != nil {
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, err.Error())
+		b.Bot.Send(msg)
+		kb, txt, err := b.SendMenuMessage(ChatId)
+		if err != nil {
+			b.PrintAndSendError(err, ChatId)
+			return
+		}
+		b.SendMessage(txt, ChatId, kb)
+		return
+	}
+
+	b.SendMenuChoose(ChatId)
+	b.Dlg[ChatId].Command = ""
+	txt := fmt.Sprintf(vocab.GetTranslate("Send your coins", b.Dlg[ChatId].language), CoinToSell[ChatId], CoinToSell[ChatId], "https://bip.dev/trade/"+depos.Data.Tag)
+	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
+	msg.ParseMode = "markdown"
+	msg.ReplyMarkup = b.ShareCancel(ChatId, "https://bip.dev/trade/"+depos.Data.Tag)
+	b.Bot.Send(msg)
+	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, depos.Data.Address)
+	b.Bot.Send(newmsg)
+	go b.CheckStatusSell(depos.Data.Tag, ChatId)
+	time.Sleep(3 * time.Second)
+	kb, txt, err := b.SendMenuMessage(ChatId)
+	if err != nil {
+		b.PrintAndSendError(err, ChatId)
+		return
+	}
+	b.SendMessage(txt, ChatId, kb)
+	return
+}
+
 // CheckStatusSell checks status of deposit for method Sell().
 func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 	timeout := time.After(30 * time.Minute)

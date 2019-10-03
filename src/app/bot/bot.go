@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	api "github.com/mrKitikat/telegrambottest/src/app/bipdev"
 	vocab "github.com/mrKitikat/telegrambottest/src/app/bot/vocabulary"
@@ -407,62 +406,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	}
 }
 
-// BuyFinal is function for command "/buy".
-// Requests an email from the user and Minter deposit address.
-// Requests the "bitcoinDepositAddress" method with the received data.
-func (b *Bot) BuyFinal(ChatId int64) {
-	fmt.Println("Buy data:", MinterAddress[b.Dlg[ChatId].ChatId], EmailAddress[b.Dlg[ChatId].ChatId])
-	addr, err := b.Api.GetBTCDeposAddress(MinterAddress[b.Dlg[ChatId].ChatId], "BIP", EmailAddress[b.Dlg[ChatId].ChatId])
-	if err != nil {
-		b.Dlg[ChatId].Command = ""
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, err.Error())
-		msg.ReplyMarkup = b.newMainMenuKeyboard(ChatId)
-		b.Bot.Send(msg)
-		return
-	}
-	b.Dlg[ChatId].Command = ""
-	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, addr)
-	newmsg.ReplyMarkup = b.CheckKeyboard(ChatId)
-	b.Bot.Send(newmsg)
-	go b.CheckStatusBuy(addr, ChatId)
-	return
-}
 
-// SellFinal
-func (b *Bot) SellFinal(ChatId int64) {
-	fmt.Println("Sell data:", BitcoinAddress[b.Dlg[ChatId].ChatId], CoinToSell[b.Dlg[ChatId].ChatId], PriceToSell[b.Dlg[ChatId].ChatId])
-	depos, err := b.Api.GetMinterDeposAddress(BitcoinAddress[b.Dlg[ChatId].ChatId], CoinToSell[b.Dlg[ChatId].ChatId], PriceToSell[b.Dlg[ChatId].ChatId])
-	if err != nil {
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, err.Error())
-		b.Bot.Send(msg)
-		kb, txt, err := b.SendMenuMessage(ChatId)
-		if err != nil {
-			b.PrintAndSendError(err, ChatId)
-			return
-		}
-		b.SendMessage(txt, ChatId, kb)
-		return
-	}
-
-	b.SendMenuChoose(ChatId)
-	b.Dlg[ChatId].Command = ""
-	txt := fmt.Sprintf(vocab.GetTranslate("Send your coins", b.Dlg[ChatId].language), CoinToSell[ChatId], CoinToSell[ChatId], "https://bip.dev/trade/"+depos.Data.Tag)
-	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
-	msg.ParseMode = "markdown"
-	msg.ReplyMarkup = b.ShareCancel(ChatId, "https://bip.dev/trade/"+depos.Data.Tag)
-	b.Bot.Send(msg)
-	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, depos.Data.Address)
-	b.Bot.Send(newmsg)
-	go b.CheckStatusSell(depos.Data.Tag, ChatId)
-	time.Sleep(3 * time.Second)
-	kb, txt, err := b.SendMenuMessage(ChatId)
-	if err != nil {
-		b.PrintAndSendError(err, ChatId)
-		return
-	}
-	b.SendMessage(txt, ChatId, kb)
-	return
-}
 
 // settingsMenu return Inline KeyBoard newVocabuageKeybord to select a language.
 // case settingsMenu:
