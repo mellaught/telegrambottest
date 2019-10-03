@@ -9,7 +9,7 @@ import (
 )
 
 func (b *Bot) SendMenuMessage(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, error) {
-
+	UserHistory[ChatId] = ""
 	kb := b.newMainMenuKeyboard(ChatId)
 	price, diff, err := b.Api.GetPrice()
 	if err != nil {
@@ -24,7 +24,7 @@ func (b *Bot) SendMenuMessage(ChatId int64) (tgbotapi.InlineKeyboardMarkup, stri
 	return kb, txt, nil
 }
 
-// GetChooseKb ..
+// SendMenuChoose ..
 func (b *Bot) SendMenuChoose(ChatId int64) {
 	kb := b.GetChooseKb(ChatId)
 	msg := tgbotapi.EditMessageTextConfig{
@@ -87,17 +87,6 @@ func (b *Bot) newVocabuageKeybord() tgbotapi.InlineKeyboardMarkup {
 			tgbotapi.NewInlineKeyboardButtonData("English", engvocabCommand),
 		),
 	)
-}
-
-// newMainKeyboard is keyboard for main menu.
-func (b *Bot) newMainKeyboard(ChatId int64) tgbotapi.InlineKeyboardMarkup {
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Menu", b.Dlg[ChatId].language), getMainMenu),
-		),
-	)
-	//keyboard.OneTimeKeyboard = true
-	return keyboard
 }
 
 // CancelKeyboard ..

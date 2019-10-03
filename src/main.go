@@ -6,7 +6,7 @@ import (
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/mrKitikat/telegrambottest/src/app"
-	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
+	stct "github.com/mrKitikat/telegrambottest/src/app/structs"
 	"github.com/mrKitikat/telegrambottest/src/config"
 
 	"log"

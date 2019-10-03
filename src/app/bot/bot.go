@@ -8,9 +8,9 @@ import (
 	"time"
 
 	api "github.com/mrKitikat/telegrambottest/src/app/bipdev"
-	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
 	vocab "github.com/mrKitikat/telegrambottest/src/app/bot/vocabulary"
 	"github.com/mrKitikat/telegrambottest/src/app/db"
+	stct "github.com/mrKitikat/telegrambottest/src/app/structs"
 
 	//strt "bipbot/src/bipdev/structs"
 
@@ -19,16 +19,16 @@ import (
 
 var (
 	commands        = make(map[int64]string)
-	CommandInfo     = make(map[int64]string)
+	UserHistory     = make(map[int64]string)
 	PreviousMessage = make(map[int64]tgbotapi.MessageConfig)
 	Message         = make(map[int64]tgbotapi.MessageConfig)
 	MinterAddress   = make(map[int64]string)
+	BitcoinAddress  = make(map[int64]string)
 	CoinToSell      = make(map[int64]string)
 	EmailAddress    = make(map[int64]string)
 	PriceToSell     = make(map[int64]float64)
-	BitcoinAddress  = make(map[int64]string)
-	SellSteps       = make(map[int64]int)
-	BuySteps        = make(map[int64]int)
+	//SellSteps       = make(map[int64]int)
+	//BuySteps        = make(map[int64]int)
 )
 
 // Dialog is struct for dialog with user:   - ChatId: User's ChatID
@@ -124,104 +124,87 @@ func (b *Bot) Run() {
 
 // RunMessageText
 func (b *Bot) RunMessageText(text string, ChatId int64) {
-	fmt.Printf("Buy step: %d, Sell step: %d\n", BuySteps[ChatId], SellSteps[ChatId])
+	fmt.Printf("UserHistory: %s", UserHistory[ChatId])
 	// Проверка команды <<купить>>.
-	switch BuySteps[ChatId] {
-	// команда не выбрана.
-	case 1:
-		// Проверка минтер адреса.
-		if !b.CheckMinter(text) {
-			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Wrong minter", b.Dlg[ChatId].language))
-			msg.ParseMode = "markdown"
-			b.Bot.Send(msg)
-			return
-		} else {
-			MinterAddress[ChatId] = text
-			// Отправьте почту.
-			BuySteps[ChatId] = 2
-			kb, txt, err := b.SendEmail(ChatId)
-			if err != nil {
-				fmt.Println(err)
+	if strings.Contains(UserHistory[ChatId], "buy") {
+		// команда не выбрана.
+		if UserHistory[ChatId][4:] == "1" {
+			// Проверка минтер адреса.
+			if !b.CheckMinter(text) {
+				b.SendMessage(vocab.GetTranslate("Wrong minter", b.Dlg[ChatId].language), ChatId, nil)
+				return
+			} else {
+				MinterAddress[ChatId] = text
+				// Отправьте почту.
+				UserHistory[ChatId] = "buy_2"
+				kb, txt, err := b.SendEmail(ChatId)
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				b.EditAndSend(&kb, txt, ChatId)
+				return
 			}
-			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
-			msg.ReplyMarkup = kb
-			msg.ParseMode = "markdown"
-			return
+		} else if UserHistory[ChatId][4:] == "2" {
+			// Проверка почты.
+			if !b.CheckEmail(text) {
+				b.SendMessage(vocab.GetTranslate("Wrong email", b.Dlg[ChatId].language), ChatId, nil)
+				return
+			} else {
+				EmailAddress[ChatId] = text
+				// Отправьте депозит на биткоин адрес.
+				b.SendMenuChoose(ChatId)
+				b.SendDepos(ChatId)
+				b.BuyFinal(ChatId)
+				return
+			}
 		}
-	case 2:
-		// Проверка почты.
-		if !b.CheckEmail(text) {
-			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Wrong email", b.Dlg[ChatId].language))
-			msg.ParseMode = "markdown"
-			b.Bot.Send(msg)
-			return
-		} else {
-			EmailAddress[ChatId] = text
-			// Отправьте депозит на биткоин адрес.
-			b.StepsZero(ChatId)
-			b.SendMenuChoose(ChatId)
-			b.SendDepos(ChatId)
-			b.BuyFinal(ChatId)
+	} else {
+		if UserHistory[ChatId][5:] == "1" {
+			// Проверка названия монеты.
+			if !b.CheckCoin(text) {
+				b.SendMessage(vocab.GetTranslate("Wrong coin name", b.Dlg[ChatId].language), ChatId, nil)
+				return
+			} else {
+				// Отравьте цены за монеты.
+				UserHistory[ChatId] = "sell_2"
+				CoinToSell[ChatId] = text
+				b.SendMessage(vocab.GetTranslate("Select price", b.Dlg[ChatId].language), ChatId, b.CancelKeyboard(ChatId))
+				// PreviousMessage[ChatId] = Message[ChatId]
+				// Message[ChatId] = msg
+				return
+			}
+		} else if UserHistory[ChatId][5:] == "2" {
+			// Проверка цены за монеты.
+			if !b.CheckPrice(ChatId, text) {
+				b.SendMessage(vocab.GetTranslate("Wrong price", b.Dlg[ChatId].language), ChatId, nil)
+				return
+			} else {
+				// Отправьте биткоин адрес.
+				UserHistory[ChatId] = "sell_3"
+				kb, txt, err := b.SendBTCAddresses(ChatId)
+				if err != nil {
+					b.PrintAndSendError(err, ChatId)
+					return
+				}
+				b.SendMessage(txt, ChatId, kb)
+				return
+			}
+		} else if UserHistory[ChatId][5:] == "3" {
+			// Проверка биткоин адреса.
+			if !b.CheckBitcoin(text) {
+				b.SendMessage(vocab.GetTranslate("Wrong bitcoin", b.Dlg[ChatId].language), ChatId, nil)
+				return
+			} else {
+				// Сохранить ли введенные данные?
+				// Отправьте монеты на адрес.
+				BitcoinAddress[ChatId] = text
+				b.SellFinal(ChatId)
+				return
+			}
 		}
 	}
 
-	// Проверка команды <<продать>>.
-	switch SellSteps[ChatId] {
-	// команда не выбрана.
-	case 1:
-		// Проверка названия монеты.
-		if !b.CheckCoin(text) {
-			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Wrong coin name", b.Dlg[ChatId].language))
-			msg.ParseMode = "markdown"
-			b.Bot.Send(msg)
-			return
-		} else {
-			// Отравьте цены за монеты.
-			SellSteps[ChatId] = 2
-			CoinToSell[ChatId] = text
-			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Select price", b.Dlg[ChatId].language))
-			msg.ReplyMarkup = b.CancelKeyboard(ChatId)
-			msg.ParseMode = "markdown"
-			PreviousMessage[ChatId] = Message[ChatId]
-			b.Bot.Send(msg)
-			Message[ChatId] = msg
-			return
-		}
-	case 2:
-		// Проверка цены за монеты.
-		if !b.CheckPrice(ChatId, text) {
-			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Wrong price", b.Dlg[ChatId].language))
-			msg.ParseMode = "markdown"
-			b.Bot.Send(msg)
-			return
-		} else {
-			// Отправьте биткоин адрес.
-			SellSteps[ChatId] = 3
-			kb, txt, err := b.SendBTCAddresses(ChatId)
-			if err != nil {
-				fmt.Println(err)
-			}
-			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
-			msg.ReplyMarkup = kb
-			msg.ParseMode = "markdown"
-			return
-		}
-	case 3:
-		// Проверка биткоин адреса.
-		if !b.CheckBitcoin(text) {
-			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Wrong bitcoin", b.Dlg[ChatId].language))
-			msg.ParseMode = "markdown"
-			b.Bot.Send(msg)
-			return
-		} else {
-			// Сохранить ли введенные данные?
-			// Отправьте монеты на адрес.
-			BitcoinAddress[ChatId] = text
-			b.SellFinal(ChatId)
-			return
-		}
-	}
-	return
 }
 
 // assembleUpdate
@@ -286,17 +269,14 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	switch command {
 	// "/Start" interacting with the bot, bot description and available commands.
 	case startCommand:
-		b.StepsZero(ChatId)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Hello", b.Dlg[ChatId].language))
-		msg.ParseMode = "markdown"
-		msg.ReplyMarkup = b.newVocabuageKeybord()
-		b.Bot.Send(msg)
+		UserHistory[ChatId] = "start"
+		b.SendMessage(vocab.GetTranslate("Hello", b.Dlg[ChatId].language), ChatId, b.newVocabuageKeybord())
 		return
 
 	// engvocabCommand sets english lang for user.
 	case engvocabCommand:
 		commands[ChatId] = ""
-		b.StepsZero(ChatId)
+
 		b.DB.SetLanguage(b.Dlg[ChatId].UserId, "en")
 		b.Dlg[ChatId].language = "en"
 		kb, txt, err := b.SendMenuMessage(ChatId)
@@ -313,7 +293,6 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	// rusvocabCommand sets russian lang for user.
 	case rusvocabCommand:
 		commands[ChatId] = ""
-		b.StepsZero(ChatId)
 		b.DB.SetLanguage(b.Dlg[ChatId].UserId, "ru")
 		b.Dlg[ChatId].language = "ru"
 		kb, txt, err := b.SendMenuMessage(ChatId)
@@ -327,32 +306,11 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 		return
 
 	case cancelComm:
-		if msg, ok := PreviousMessage[ChatId]; ok {
-			if BuySteps[ChatId] == 1 || SellSteps[ChatId] == 1 {
-				b.StepsZero(ChatId)
-				b.SendMenuMessage(ChatId)
-			} else if BuySteps[ChatId] != 0 {
-				BuySteps[ChatId]--
-				b.Bot.Send(msg)
-			} else if SellSteps[ChatId] != 0 {
-				SellSteps[ChatId]--
-				b.Bot.Send(msg)
-			} else {
-				b.SendMenuMessage(ChatId)
-			}
-		} else {
-			if SellSteps[ChatId] != 0 {
-				SellSteps[ChatId]--
-			} else if BuySteps[ChatId] != 0 {
-				BuySteps[ChatId]--
-			}
-
-			b.SendMenuMessage(ChatId)
-		}
+		b.CancelHandler(ChatId)
 
 	// Save user's data in DataBase.
 	case yescommand:
-		err := b.DB.PutMinterAddress(b.Dlg[ChatId].UserId, CommandInfo[ChatId])
+		err := b.DB.PutMinterAddress(b.Dlg[ChatId].UserId, MinterAddress[ChatId])
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -381,8 +339,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	// After the money is confirmed, he will receive another notification from bot.
 	// ( BUY )
 	case buyCommand:
-		b.StepsZero(ChatId)
-		BuySteps[ChatId] = 1
+		UserHistory[ChatId] = "buy_1"
 		_, ok := PreviousMessage[ChatId]
 		if ok {
 			delete(PreviousMessage, ChatId)
@@ -398,7 +355,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 
 	//sendMinter after the user has selected the minter address from the proposed. ( BUY )
 	case sendMinter:
-		BuySteps[ChatId] = 2
+		UserHistory[ChatId] = "buy_2"
 		MinterAddress[ChatId] = b.Dlg[ChatId].Text
 		kb, txt, err := b.SendEmail(ChatId)
 		if err != nil {
@@ -410,7 +367,6 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 
 	// sendEmail after the user has selected email from the proposed. ( BUY )
 	case sendEmail:
-		b.StepsZero(ChatId)
 		EmailAddress[ChatId] = b.Dlg[ChatId].Text
 		b.SendMenuChoose(ChatId)
 		b.SendDepos(ChatId)
@@ -418,8 +374,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 
 	// sellCommand collects data from the user to transmit their request. ( SELL )
 	case sellCommand:
-		b.StepsZero(ChatId)
-		SellSteps[ChatId] = 1
+		UserHistory[ChatId] = "sell_1"
 		_, ok := PreviousMessage[ChatId]
 		if ok {
 			delete(PreviousMessage, ChatId)
@@ -433,26 +388,23 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 
 	// sendBTC after the user has sent his bitcoin address. ( SELL )
 	case sendBTC:
-		b.StepsZero(ChatId)
+
 		BitcoinAddress[ChatId] = b.Dlg[ChatId].Text
 		b.SellFinal(ChatId)
 
 	// salesCommand sends a request to the database to get user's loots. ( LOOTS )
 	case salesCommand:
+		UserHistory[ChatId] = "loots"
 		loots, err := b.DB.GetLoots(b.Dlg[ChatId].UserId)
 		if err != nil {
-			fmt.Println(err)
-			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
-			b.Bot.Send(msg)
+			b.PrintAndSendError(err, ChatId)
 			return
 		} else if len(loots) == 0 {
-			msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Empty loots", b.Dlg[ChatId].language))
-			msg.ReplyMarkup = b.newMainKeyboard(ChatId)
-			b.Bot.Send(msg)
+			b.SendMessage(vocab.GetTranslate("Empty loots", b.Dlg[ChatId].language), ChatId, b.newMainMenuKeyboard(ChatId))
 			return
 		}
 
-		b.ComposeResp(loots, ChatId)
+		b.SendLoots(loots, ChatId)
 		return
 	}
 }
@@ -466,7 +418,7 @@ func (b *Bot) BuyFinal(ChatId int64) {
 	if err != nil {
 		b.Dlg[ChatId].Command = ""
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, err.Error())
-		msg.ReplyMarkup = b.newMainKeyboard(ChatId)
+		msg.ReplyMarkup = b.newMainMenuKeyboard(ChatId)
 		b.Bot.Send(msg)
 		return
 	}

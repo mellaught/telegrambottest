@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
+	stct "github.com/mrKitikat/telegrambottest/src/app/structs"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )

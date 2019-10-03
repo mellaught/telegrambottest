@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
 	"github.com/mrKitikat/telegrambottest/src/app/bot"
+	stct "github.com/mrKitikat/telegrambottest/src/app/structs"
 
 	"github.com/gorilla/mux"
 )

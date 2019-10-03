@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strconv"
 
-	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
 	vocab "github.com/mrKitikat/telegrambottest/src/app/bot/vocabulary"
 	"github.com/mrKitikat/telegrambottest/src/app/handler"
+	stct "github.com/mrKitikat/telegrambottest/src/app/structs"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )

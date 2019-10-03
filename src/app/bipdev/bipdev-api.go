@@ -8,7 +8,7 @@ import (
 	"math/big"
 	"net/http"
 
-	stct "github.com/mrKitikat/telegrambottest/src/app/bipdev/structs"
+	stct "github.com/mrKitikat/telegrambottest/src/app/structs"
 )
 
 // App is main app for API Methods
