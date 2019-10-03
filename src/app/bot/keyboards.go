@@ -8,31 +8,35 @@ import (
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
 
-func (b *Bot) SendMenuMessage(ChatId int64) {
+func (b *Bot) SendMenuMessage(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, error) {
+
 	kb := b.newMainMenuKeyboard(ChatId)
 	price, diff, err := b.Api.GetPrice()
 	if err != nil {
-		fmt.Println(err)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
-		b.Bot.Send(msg)
-		return
+		return kb, "", err
 	}
 
 	txt := fmt.Sprintf(vocab.GetTranslate("Select", b.Dlg[ChatId].language), price, diff)
 	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 	msg.ReplyMarkup = kb
 	msg.ParseMode = "markdown"
-	//PreviousMessage[ChatId] = msg
-	b.Bot.Send(msg)
-	//fmt.Println("Message id:", b.Dlg[ChatId].MessageId)
-	//go b.ChangeCurrency(ChatId, b.Dlg[ChatId].MessageId, b.Dlg[ChatId].CallBackId)
-	return
+
+	return kb, txt, nil
 }
 
 // GetChooseKb ..
 func (b *Bot) SendMenuChoose(ChatId int64) {
-	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Save", b.Dlg[ChatId].language))
-	msg.ReplyMarkup = b.GetChooseKb(ChatId)
+	kb := b.GetChooseKb(ChatId)
+	msg := tgbotapi.EditMessageTextConfig{
+		BaseEdit: tgbotapi.BaseEdit{
+			ChatID:      b.Dlg[ChatId].ChatId,
+			MessageID:   b.Dlg[ChatId].MessageId,
+			ReplyMarkup: &kb,
+		},
+		Text:      vocab.GetTranslate("Save", b.Dlg[ChatId].language),
+		ParseMode: "markdown",
+	}
+
 	b.Bot.Send(msg)
 }
 

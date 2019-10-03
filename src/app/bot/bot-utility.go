@@ -93,12 +93,12 @@ func (b *Bot) StepsZero(ChatId int64) {
 }
 
 //
-func (b *Bot) SendBTCAddresses(ChatId int64) error {
+func (b *Bot) SendBTCAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, error) {
 
 	keyboard := tgbotapi.InlineKeyboardMarkup{}
 	addresses, err := b.DB.GetBTCAddresses(b.Dlg[ChatId].UserId)
 	if err != nil {
-		return err
+		return keyboard, "", err
 	}
 	if len(addresses) > 0 {
 		txt := vocab.GetTranslate("Select bitcoin", b.Dlg[ChatId].language)
@@ -116,9 +116,8 @@ func (b *Bot) SendBTCAddresses(ChatId int64) error {
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
-		b.Bot.Send(msg)
 		Message[ChatId] = msg
-
+		return keyboard, txt, nil
 	} else {
 		txt := vocab.GetTranslate("New bitcoin", b.Dlg[ChatId].language)
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
@@ -128,22 +127,21 @@ func (b *Bot) SendBTCAddresses(ChatId int64) error {
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = keyboard
-		b.Bot.Send(msg)
 		Message[ChatId] = msg
+		return keyboard, txt, nil
 	}
-
-	return nil
 }
 
 // SendMinterAddresses --
-func (b *Bot) SendMinterAddresses(ChatId int64) error {
+func (b *Bot) SendMinterAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, error) {
 
 	//PreviousMessage[ChatId] = Message[ChatId]
 	keyboard := tgbotapi.InlineKeyboardMarkup{}
 	addresses, err := b.DB.GetMinterAddresses(b.Dlg[ChatId].UserId)
 	if err != nil {
-		return err
+		return keyboard, "", err
 	}
+
 	if len(addresses) > 0 {
 		txt := vocab.GetTranslate("Select minter", b.Dlg[ChatId].language)
 		for _, addr := range addresses {
@@ -160,9 +158,9 @@ func (b *Bot) SendMinterAddresses(ChatId int64) error {
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
-		b.Bot.Send(msg)
 		Message[ChatId] = msg
-
+		Message[ChatId] = msg
+		return keyboard, txt, nil
 	} else {
 		txt := vocab.GetTranslate("New minter", b.Dlg[ChatId].language)
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
@@ -171,21 +169,20 @@ func (b *Bot) SendMinterAddresses(ChatId int64) error {
 		row = append(row, btn)
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
-		b.Bot.Send(msg)
 		Message[ChatId] = msg
+		return keyboard, txt, nil
 	}
 
-	return nil
 }
 
 // SendEmail --
-func (b *Bot) SendEmail(ChatId int64) error {
+func (b *Bot) SendEmail(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, error) {
 
 	PreviousMessage[ChatId] = Message[ChatId]
 	keyboard := tgbotapi.InlineKeyboardMarkup{}
 	addresses, err := b.DB.GetEmails(b.Dlg[ChatId].UserId)
 	if err != nil {
-		return err
+		return keyboard, "", err
 	}
 
 	if len(addresses) > 0 {
@@ -204,7 +201,7 @@ func (b *Bot) SendEmail(ChatId int64) error {
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
 		Message[ChatId] = msg
-		b.Bot.Send(msg)
+		return keyboard, txt, nil
 
 	} else {
 		txt := vocab.GetTranslate("New email", b.Dlg[ChatId].language)
@@ -214,11 +211,10 @@ func (b *Bot) SendEmail(ChatId int64) error {
 		row = append(row, btn)
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
-		b.Bot.Send(msg)
 		Message[ChatId] = msg
+		return keyboard, txt, nil
 	}
 
-	return nil
 }
 
 // SendDepos --
@@ -381,6 +377,25 @@ func (b *Bot) CheckPrice(chatId int64, price string) bool {
 	} else {
 		return false
 	}
+}
+
+func (b *Bot) EditAndSend(kb *tgbotapi.InlineKeyboardMarkup, txt string, ChatId int64) {
+	msg := tgbotapi.EditMessageTextConfig{
+		BaseEdit: tgbotapi.BaseEdit{
+			ChatID:      b.Dlg[ChatId].ChatId,
+			MessageID:   b.Dlg[ChatId].MessageId,
+			ReplyMarkup: kb,
+		},
+		Text:      txt,
+		ParseMode: "markdown",
+	}
+	b.Bot.Send(msg)
+}
+
+func (b *Bot) PrintAndSendError(err error, ChatId int64) {
+	fmt.Println(err)
+	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
+	b.Bot.Send(msg)
 }
 
 // func (b *Bot) GetPrice(ChatId int64) tgbotapi.InlineKeyboardMarkup {
