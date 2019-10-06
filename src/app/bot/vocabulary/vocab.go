@@ -178,7 +178,7 @@ var Translates = map[string]map[string]string{
 		"ru": "Мои заявки",
 	},
 	"Cancel": {
-		"en": "« Canlcel",
+		"en": "« Cancel",
 		"ru": "« Назад",
 	},
 	// ------------------------------------------------------

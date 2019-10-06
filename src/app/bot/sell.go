@@ -10,6 +10,12 @@ import (
 	vocab "github.com/mrKitikat/telegrambottest/src/app/bot/vocabulary"
 )
 
+var SellStatus = make(map[int64]string)
+
+func (b *Bot) GetStatusSell(ChatId int64) string {
+	return SellStatus[ChatId]
+}
+
 // CheckPrice ..
 func (b *Bot) CheckPrice(chatId int64, price string) bool {
 	if s, err := strconv.ParseFloat(price, 64); err == nil {
@@ -119,10 +125,12 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 	timeout := time.After(30 * time.Minute)
 	tick := time.Tick(5 * time.Second)
 	amount := "0.0"
+	SellStatus[ChatId] = vocab.GetTranslate("Wait deposit", b.Dlg[ChatId].language)
 	for {
 		select {
 		case <-timeout:
 			if amount == "0.0" {
+				SellStatus[ChatId] = vocab.GetTranslate("No Sell", b.Dlg[ChatId].language)
 				// msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("timeout", b.Dlg[ChatId].language))
 				// msg.ReplyMarkup = b.newMainKeyboard(ChatId)
 				// b.Bot.Send(msg)
