@@ -98,8 +98,10 @@ func (b *Bot) SellFinal(ChatId int64) {
 		b.SendMessage(txt, ChatId, kb)
 		return
 	}
-
-	b.SendMenuChoose(ChatId)
+	if SaveSell[ChatId] {
+		b.SendMenuChoose(ChatId)
+	}
+	SaveSell[ChatId] = false
 	b.Dlg[ChatId].Command = ""
 	txt := fmt.Sprintf(vocab.GetTranslate("Send your coins", b.Dlg[ChatId].language), CoinToSell[ChatId], CoinToSell[ChatId], "https://bip.dev/trade/"+depos.Data.Tag)
 	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)

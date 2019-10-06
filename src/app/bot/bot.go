@@ -26,6 +26,8 @@ var (
 	CoinToSell      = make(map[int64]string)
 	EmailAddress    = make(map[int64]string)
 	PriceToSell     = make(map[int64]float64)
+	SaveBuy         = make(map[int64]bool)
+	SaveSell        = make(map[int64]bool)
 )
 
 // Dialog is struct for dialog with user:   - ChatId: User's ChatID
@@ -114,13 +116,13 @@ func (b *Bot) Run() {
 			continue
 		}
 
-		b.RunMessageText(update.Message.Text, dialog.ChatId)
+		b.TextMessageHandler(update.Message.Text, dialog.ChatId)
 		continue
 	}
 }
 
-// RunMessageText
-func (b *Bot) RunMessageText(text string, ChatId int64) {
+// TextMessageHandler
+func (b *Bot) TextMessageHandler(text string, ChatId int64) {
 	fmt.Printf("UserHistory: %s \n", UserHistory[ChatId])
 	// Проверка команды <<купить>>.
 	if strings.Contains(UserHistory[ChatId], "buy") {
@@ -131,6 +133,7 @@ func (b *Bot) RunMessageText(text string, ChatId int64) {
 				b.SendMessage(vocab.GetTranslate("Wrong minter", b.Dlg[ChatId].language), ChatId, nil)
 				return
 			} else {
+				SaveBuy[ChatId] = true
 				MinterAddress[ChatId] = text
 				// Отправьте почту.
 				UserHistory[ChatId] = "buy_2"
@@ -193,6 +196,7 @@ func (b *Bot) RunMessageText(text string, ChatId int64) {
 				b.SendMessage(vocab.GetTranslate("Wrong bitcoin", b.Dlg[ChatId].language), ChatId, nil)
 				return
 			} else {
+				SaveSell[ChatId] = true
 				// Сохранить ли введенные данные?
 				// Отправьте монеты на адрес.
 				BitcoinAddress[ChatId] = text
@@ -272,7 +276,6 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	// engvocabCommand sets english lang for user.
 	case engvocabCommand:
 		commands[ChatId] = ""
-
 		b.DB.SetLanguage(b.Dlg[ChatId].UserId, "en")
 		b.Dlg[ChatId].language = "en"
 		kb, txt, err := b.SendMenuMessage(ChatId)
@@ -327,7 +330,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	case checkcommandBuy:
 		b.Bot.AnswerCallbackQuery(tgbotapi.NewCallbackWithAlert(b.Dlg[ChatId].CallBackId, b.GetStatusBuy(ChatId)))
 	// Returns status of buy operation:
-	// 1. Ожидание транзакции BTC…	
+	// 1. Ожидание транзакции BTC…
 	case checkcommandSell:
 		b.Bot.AnswerCallbackQuery(tgbotapi.NewCallbackWithAlert(b.Dlg[ChatId].CallBackId, b.GetStatusSell(ChatId)))
 	// buyCommand collects data from the user to transmit their request.
@@ -336,6 +339,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	// After the money is confirmed, he will receive another notification from bot.
 	// ( BUY )
 	case buyCommand:
+		SaveBuy[ChatId] = false
 		UserHistory[ChatId] = "buy_1"
 		_, ok := PreviousMessage[ChatId]
 		if ok {
@@ -366,11 +370,15 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	case sendEmail:
 		EmailAddress[ChatId] = b.Dlg[ChatId].Text
 		b.SendMenuChoose(ChatId)
-		b.SendDepos(ChatId)
+		if SaveBuy[ChatId] {
+			b.SendDepos(ChatId)
+		}
+		SaveBuy[ChatId] = false
 		b.BuyFinal(ChatId)
 
 	// sellCommand collects data from the user to transmit their request. ( SELL )
 	case sellCommand:
+		SaveSell[ChatId] = false
 		UserHistory[ChatId] = "sell_1"
 		_, ok := PreviousMessage[ChatId]
 		if ok {
