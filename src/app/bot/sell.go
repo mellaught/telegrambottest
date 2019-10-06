@@ -107,16 +107,9 @@ func (b *Bot) SellFinal(ChatId int64) {
 	msg.ReplyMarkup = b.ShareCancel(ChatId, "https://bip.dev/trade/"+depos.Data.Tag)
 	b.Bot.Send(msg)
 	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, depos.Data.Address)
+	newmsg.ReplyMarkup = b.CheckKeyboard(ChatId)
 	b.Bot.Send(newmsg)
 	go b.CheckStatusSell(depos.Data.Tag, ChatId)
-	time.Sleep(3 * time.Second)
-	kb, txt, err := b.SendMenuMessage(ChatId)
-	if err != nil {
-		b.PrintAndSendError(err, ChatId)
-		return
-	}
-	go b.ChangeCurrency(ChatId)
-	b.SendMessage(txt, ChatId, kb)
 	return
 }
 
@@ -130,7 +123,7 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 		select {
 		case <-timeout:
 			if amount == "0.0" {
-				SellStatus[ChatId] = vocab.GetTranslate("No Sell", b.Dlg[ChatId].language)
+				SellStatus[ChatId] = vocab.GetTranslate("No sell", b.Dlg[ChatId].language)
 				// msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("timeout", b.Dlg[ChatId].language))
 				// msg.ReplyMarkup = b.newMainKeyboard(ChatId)
 				// b.Bot.Send(msg)
@@ -153,6 +146,13 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 					taginfo.Data.Amount, taginfo.Data.Coin, taginfo.Data.Price)
 				msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, ans)
 				b.Bot.Send(msg)
+				kb, txt, err := b.SendMenuMessage(ChatId)
+				if err != nil {
+					b.PrintAndSendError(err, ChatId)
+					return
+				}
+				go b.ChangeCurrency(ChatId)
+				b.SendMessage(txt, ChatId, kb)
 				//go a.CheckLootforSell(taginfo.Data.MinterAddress)
 				return
 			}
