@@ -107,7 +107,7 @@ func (b *Bot) SellFinal(ChatId int64) {
 	msg.ReplyMarkup = b.ShareCancel(ChatId, "https://bip.dev/trade/"+depos.Data.Tag)
 	b.Bot.Send(msg)
 	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, depos.Data.Address)
-	newmsg.ReplyMarkup = b.CheckKeyboard(ChatId)
+	newmsg.ReplyMarkup = b.CheckKeyboardSell(ChatId)
 	b.Bot.Send(newmsg)
 	go b.CheckStatusSell(depos.Data.Tag, ChatId)
 	return

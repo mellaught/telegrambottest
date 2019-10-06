@@ -145,7 +145,7 @@ func (b *Bot) BuyFinal(ChatId int64) {
 	}
 	b.Dlg[ChatId].Command = ""
 	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, addr)
-	newmsg.ReplyMarkup = b.CheckKeyboard(ChatId)
+	newmsg.ReplyMarkup = b.CheckKeyboardBuy(ChatId)
 	b.Bot.Send(newmsg)
 	go b.CheckStatusBuy(addr, ChatId)
 	return

@@ -324,8 +324,12 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	// Returns status of buy operation:
 	// 1. Ожидание транзакции BTC…
 	// 2. BTC уже в пути, вы получите как минимум xxx.xx BIP.
-	case checkcommand:
+	case checkcommandBuy:
 		b.Bot.AnswerCallbackQuery(tgbotapi.NewCallbackWithAlert(b.Dlg[ChatId].CallBackId, b.GetStatusBuy(ChatId)))
+	// Returns status of buy operation:
+	// 1. Ожидание транзакции BTC…	
+	case checkcommandSell:
+		b.Bot.AnswerCallbackQuery(tgbotapi.NewCallbackWithAlert(b.Dlg[ChatId].CallBackId, b.GetStatusSell(ChatId)))
 	// buyCommand collects data from the user to transmit their request.
 	// The user will receive the address for the deposit.
 	// After he sends the money he will receive a notification from bot.

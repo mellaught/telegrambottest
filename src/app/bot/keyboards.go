@@ -49,15 +49,31 @@ func (b *Bot) GetChooseKb(ChatId int64) tgbotapi.InlineKeyboardMarkup {
 	)
 }
 
-// CheckKeyboard ..
-func (b *Bot) CheckKeyboard(ChatId int64) tgbotapi.InlineKeyboardMarkup {
+// CheckKeyboardBuy ..
+func (b *Bot) CheckKeyboardBuy(ChatId int64) tgbotapi.InlineKeyboardMarkup {
 	_, ok := PreviousMessage[ChatId]
 	if ok {
 		delete(PreviousMessage, ChatId)
 	}
 	return tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Check", b.Dlg[ChatId].language), checkcommand),
+			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Check", b.Dlg[ChatId].language), checkcommandBuy),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm),
+		),
+	)
+}
+
+// CheckKeyboardSell ..
+func (b *Bot) CheckKeyboardSell(ChatId int64) tgbotapi.InlineKeyboardMarkup {
+	_, ok := PreviousMessage[ChatId]
+	if ok {
+		delete(PreviousMessage, ChatId)
+	}
+	return tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Check", b.Dlg[ChatId].language), checkcommandSell),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm),
