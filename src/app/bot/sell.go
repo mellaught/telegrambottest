@@ -120,7 +120,7 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 	timeout := time.After(30 * time.Minute)
 	tick := time.Tick(5 * time.Second)
 	amount := "0.0"
-	SellStatus[ChatId] = vocab.GetTranslate("Wait deposit", b.Dlg[ChatId].language)
+	SellStatus[ChatId] = fmt.Sprintf(vocab.GetTranslate("Wait deposit coin", b.Dlg[ChatId].language), CoinToSell[ChatId])
 	for {
 		select {
 		case <-timeout:
