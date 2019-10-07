@@ -17,17 +17,15 @@ import (
 )
 
 var (
-	commands        = make(map[int64]string)
-	UserHistory     = make(map[int64]string)
-	PreviousMessage = make(map[int64]tgbotapi.MessageConfig)
-	Message         = make(map[int64]tgbotapi.MessageConfig)
-	MinterAddress   = make(map[int64]string)
-	BitcoinAddress  = make(map[int64]string)
-	CoinToSell      = make(map[int64]string)
-	EmailAddress    = make(map[int64]string)
-	PriceToSell     = make(map[int64]float64)
-	SaveBuy         = make(map[int64]bool)
-	SaveSell        = make(map[int64]bool)
+	commands       = make(map[int64]string)
+	UserHistory    = make(map[int64]string)
+	MinterAddress  = make(map[int64]string)
+	BitcoinAddress = make(map[int64]string)
+	CoinToSell     = make(map[int64]string)
+	EmailAddress   = make(map[int64]string)
+	PriceToSell    = make(map[int64]float64)
+	SaveBuy        = make(map[int64]bool)
+	SaveSell       = make(map[int64]bool)
 )
 
 // Dialog is struct for dialog with user:   - ChatId: User's ChatID
@@ -342,16 +340,11 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	case buyCommand:
 		SaveBuy[ChatId] = false
 		UserHistory[ChatId] = "buy_1"
-		_, ok := PreviousMessage[ChatId]
-		if ok {
-			delete(PreviousMessage, ChatId)
-		}
-
 		kb, txt, err := b.SendMinterAddresses(ChatId)
 		if err != nil {
 			fmt.Println(err)
 		}
-
+		fmt.Println(txt)
 		b.EditAndSend(&kb, txt, ChatId)
 		return
 
@@ -384,11 +377,6 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	case sellCommand:
 		SaveSell[ChatId] = false
 		UserHistory[ChatId] = "sell_1"
-		_, ok := PreviousMessage[ChatId]
-		if ok {
-			delete(PreviousMessage, ChatId)
-		}
-
 		kb := b.CancelKeyboard(ChatId)
 		txt := vocab.GetTranslate("Coin", b.Dlg[ChatId].language)
 		b.EditAndSend(&kb, txt, ChatId)

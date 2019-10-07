@@ -66,7 +66,6 @@ func (b *Bot) SendBTCAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, str
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
-		Message[ChatId] = msg
 		return keyboard, txt, nil
 	} else {
 		txt := vocab.GetTranslate("New bitcoin", b.Dlg[ChatId].language)
@@ -77,7 +76,6 @@ func (b *Bot) SendBTCAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, str
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
 		msg.ReplyMarkup = keyboard
-		Message[ChatId] = msg
 		return keyboard, txt, nil
 	}
 }

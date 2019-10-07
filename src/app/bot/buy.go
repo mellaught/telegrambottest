@@ -17,7 +17,11 @@ func (b *Bot) GetStatusBuy(ChatId int64) string {
 }
 
 func (b *Bot) CheckMinter(address string) bool {
-	return len(address) != 42 || address[:2] != "Mx" || address == "Mx00000000000000000000000000000000000001"
+	if address == "Mx00000000000000000000000000000000000001" {
+		return false
+	}
+
+	return len(address) != 42 || address[:2] != "Mx"
 }
 
 // SendMinterAddresses --
@@ -29,7 +33,6 @@ func (b *Bot) SendMinterAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, 
 	if err != nil {
 		return keyboard, "", err
 	}
-
 	if len(addresses) > 0 {
 		txt := vocab.GetTranslate("Select minter", b.Dlg[ChatId].language)
 		for _, addr := range addresses {
@@ -38,7 +41,6 @@ func (b *Bot) SendMinterAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, 
 			row = append(row, btn)
 			keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		}
-
 		btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
 		var row []tgbotapi.InlineKeyboardButton
 		row = append(row, btn)
@@ -46,8 +48,6 @@ func (b *Bot) SendMinterAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, 
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
-		Message[ChatId] = msg
-		Message[ChatId] = msg
 		return keyboard, txt, nil
 	} else {
 		txt := vocab.GetTranslate("New minter", b.Dlg[ChatId].language)
@@ -55,9 +55,9 @@ func (b *Bot) SendMinterAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, 
 		btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
 		var row []tgbotapi.InlineKeyboardButton
 		row = append(row, btn)
+		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
-		Message[ChatId] = msg
 		return keyboard, txt, nil
 	}
 
@@ -74,8 +74,6 @@ func (b *Bot) CheckEmail(email string) bool {
 
 // SendEmail --
 func (b *Bot) SendEmail(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, error) {
-
-	PreviousMessage[ChatId] = Message[ChatId]
 	keyboard := tgbotapi.InlineKeyboardMarkup{}
 	addresses, err := b.DB.GetEmails(b.Dlg[ChatId].UserId)
 	if err != nil {
@@ -97,7 +95,6 @@ func (b *Bot) SendEmail(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, er
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
-		Message[ChatId] = msg
 		return keyboard, txt, nil
 
 	} else {
@@ -108,7 +105,6 @@ func (b *Bot) SendEmail(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, er
 		row = append(row, btn)
 		msg.ReplyMarkup = keyboard
 		msg.ParseMode = "markdown"
-		Message[ChatId] = msg
 		return keyboard, txt, nil
 	}
 
