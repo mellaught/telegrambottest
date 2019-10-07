@@ -123,7 +123,14 @@ func (b *Bot) SendDepos(ChatId int64) {
 		b.Bot.Send(msg)
 		return
 	}
-	txt := fmt.Sprintf(vocab.GetTranslate("Send deposit", b.Dlg[ChatId].language), price, diff)
+	amount, bonus, err := b.Api.GetBonus()
+	if err != nil {
+		fmt.Println(err)
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
+		b.Bot.Send(msg)
+		return
+	}
+	txt := fmt.Sprintf(vocab.GetTranslate("Send deposit", b.Dlg[ChatId].language), price, diff, amount, bonus)
 	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 	msg.ParseMode = "markdown"
 	// msg.ReplyMarkup = b.CancelKeyboard(ChatId)

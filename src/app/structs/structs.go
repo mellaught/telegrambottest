@@ -24,6 +24,20 @@ type Price struct {
 	} `json:"data"`
 }
 
+// Bonus is a structure of resp method GetBonus()
+type Bonus struct {
+	Data struct {
+		Below struct {
+			TotalBtc string `json:"total_btc"`
+			Volume   string `json:"volume"`
+		} `json:"below_price"`
+		Bonus struct {
+			Amount string  `json:"amount"`
+			Bonus  float64 `json:"bonus"`
+		} `json:"possible_bonus"`
+	} `json:"data"`
+}
+
 // Err is a struct if the request is erroneous
 type Err struct {
 	Error struct {

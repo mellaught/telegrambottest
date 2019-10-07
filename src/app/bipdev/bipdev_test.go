@@ -26,6 +26,26 @@ func TestGetPrice(t *testing.T) {
 	}
 }
 
+// Test for GetBonus.
+// Result: Success: Tests passed.
+func TestGetBonus(t *testing.T) {
+
+	a := InitApp("https://api.bip.dev/api/")
+
+	s, b, err := a.GetBonus()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if b != 48 {
+		t.Errorf("Error price %f, want 1", b)
+	}
+
+	if s != "302384" {
+		t.Errorf("Error amount %s, want 302384", s)
+	}
+}
+
 // Test for GetBTCDeposAddress.
 // Result: Success: Tests passed.
 func TestGetBTCDeposAddress(t *testing.T) {

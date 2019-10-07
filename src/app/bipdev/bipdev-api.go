@@ -83,6 +83,30 @@ func (a *App) GetPrice() (float64, string, error) {
 	return currentPrice, delatastr, nil
 }
 
+// GetBonus return bonus for buy BIP.
+func (a *App) GetBonus() (string, float64, error) {
+
+	req := a.URL + "info"
+	contents, err := GetMethod(req)
+	if err != nil {
+		return "", -1, err
+	}
+
+	data := &stct.Bonus{}
+
+	err = json.Unmarshal([]byte(contents), data)
+	if err != nil {
+		fmt.Println(err)
+		return "", -1, err
+	}
+	// OK now up to ...
+	r := new(big.Rat)
+	r.SetString(data.Data.Bonus.Amount + "/" + "1000000000000000000")
+	amount := r.FloatString(0)
+
+	return amount, float64(data.Data.Bonus.Bonus * float64(100)), nil
+}
+
 // --------------------------- Buy ----------------------------------
 // -------------------------------- 1 --------------------------------
 
