@@ -92,19 +92,14 @@ func (b *Bot) SendEmail(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, er
 		var row []tgbotapi.InlineKeyboardButton
 		row = append(row, btn)
 		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
-		msg.ReplyMarkup = keyboard
-		msg.ParseMode = "markdown"
 		return keyboard, txt, nil
 
 	} else {
 		txt := vocab.GetTranslate("New email", b.Dlg[ChatId].language)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 		btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
 		var row []tgbotapi.InlineKeyboardButton
 		row = append(row, btn)
-		msg.ReplyMarkup = keyboard
-		msg.ParseMode = "markdown"
+		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		return keyboard, txt, nil
 	}
 

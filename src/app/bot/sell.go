@@ -32,7 +32,7 @@ func (b *Bot) CheckPrice(chatId int64, price string) bool {
 
 // CheckCoin ..
 func (b *Bot) CheckCoin(coin string) bool {
-	re := regexp.MustCompile("^[0-9-A-Z]{3,10}$")
+	re := regexp.MustCompile("^[0-9-A-Z-a-z]{3,10}$")
 	return re.MatchString(coin)
 }
 
@@ -51,7 +51,7 @@ func (b *Bot) SendBTCAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, str
 		return keyboard, "", err
 	}
 	if len(addresses) > 0 {
-		txt := vocab.GetTranslate("Select bitcoin", b.Dlg[ChatId].language)
+		txt := vocab.GetTranslate("Send bitcoin", b.Dlg[ChatId].language)
 		for _, addr := range addresses {
 			var row []tgbotapi.InlineKeyboardButton
 			btn := tgbotapi.NewInlineKeyboardButtonData(addr, sendBTC+addr)
@@ -63,19 +63,13 @@ func (b *Bot) SendBTCAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, str
 		var row []tgbotapi.InlineKeyboardButton
 		row = append(row, btn)
 		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
-		msg.ReplyMarkup = keyboard
-		msg.ParseMode = "markdown"
 		return keyboard, txt, nil
 	} else {
 		txt := vocab.GetTranslate("New bitcoin", b.Dlg[ChatId].language)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 		btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
 		var row []tgbotapi.InlineKeyboardButton
 		row = append(row, btn)
-		msg.ReplyMarkup = keyboard
-		msg.ParseMode = "markdown"
-		msg.ReplyMarkup = keyboard
+		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 		return keyboard, txt, nil
 	}
 }

@@ -56,7 +56,7 @@ var Translates = map[string]map[string]string{
 		"ru": "Проверьте правильность введённого адреса, он должен содержать *42 символа* и начинаться с *Mx*.",
 	},
 	// 2
-	"New Email": {
+	"New email": {
 		"en": "Введите ваш почтовый адрес.\n\n*Пример:* mail@example.com",
 		"ru": "Введите ваш почтовый адрес.\n\n*Пример:* mail@example.com",
 	},
@@ -118,9 +118,13 @@ var Translates = map[string]map[string]string{
 		"ru": "⚠️Ошибка\n\nВозможный диапазон цены: от *$0.01* до *$0.32*, вводить цену нужно без символов обозначающих валюту и букв.",
 	},
 	// 3
-	"Send bitcoin": {
+	"New bitcoin": {
 		"en": "Введите ваш *Bitcoin* адрес.",
 		"ru": "Введите ваш *Bitcoin* адрес.",
+	},
+	"Send bitcoin": {
+		"en": "Выберите ваш *Bitcoin* адрес или введите новый.",
+		"ru": "Выберите ваш *Bitcoin* адрес или введите новый.",
 	},
 	"Select bitcoin": {
 		"en": "Select *Bitcoin* address or enter a new one.",

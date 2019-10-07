@@ -138,8 +138,7 @@ func (b *Bot) TextMessageHandler(text string, ChatId int64) {
 				if err != nil {
 					fmt.Println(err)
 				}
-
-				b.EditAndSend(&kb, txt, ChatId)
+				b.SendMessage(txt, ChatId, kb)
 				return
 			}
 		} else if UserHistory[ChatId][4:] == "2" {
@@ -150,7 +149,6 @@ func (b *Bot) TextMessageHandler(text string, ChatId int64) {
 			} else {
 				SaveBuy[ChatId] = true
 				EmailAddress[ChatId] = text
-				fmt.Println("HERE")
 				// Отправьте депозит на биткоин адрес.
 				b.SendMenuChoose(ChatId)
 				b.SendDepos(ChatId)
@@ -344,7 +342,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println(txt)
+
 		b.EditAndSend(&kb, txt, ChatId)
 		return
 
