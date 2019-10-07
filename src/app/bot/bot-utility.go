@@ -36,7 +36,6 @@ const (
 )
 
 func (b *Bot) CancelHandler(ChatId int64) {
-	fmt.Println("Cancel", UserHistory[ChatId])
 	if strings.Contains(UserHistory[ChatId], "buy") {
 		if UserHistory[ChatId][4:] == "1" {
 			kb, txt, err := b.SendMenuMessage(ChatId)
@@ -77,7 +76,6 @@ func (b *Bot) CancelHandler(ChatId int64) {
 			kb := b.CancelKeyboard(ChatId)
 			b.EditAndSend(&kb, txt, ChatId)
 		} else if UserHistory[ChatId][5:] == "4" {
-			fmt.Println("HERE")
 			kb, txt, err := b.SendBTCAddresses(ChatId)
 			if err != nil {
 				b.PrintAndSendError(err, ChatId)

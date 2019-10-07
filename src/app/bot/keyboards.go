@@ -26,17 +26,12 @@ func (b *Bot) SendMenuMessage(ChatId int64) (tgbotapi.InlineKeyboardMarkup, stri
 // SendMenuChoose ..
 func (b *Bot) SendMenuChoose(ChatId int64) {
 	kb := b.GetChooseKb(ChatId)
-	msg := tgbotapi.EditMessageTextConfig{
-		BaseEdit: tgbotapi.BaseEdit{
-			ChatID:      b.Dlg[ChatId].ChatId,
-			MessageID:   b.Dlg[ChatId].MessageId,
-			ReplyMarkup: &kb,
-		},
-		Text:      vocab.GetTranslate("Save", b.Dlg[ChatId].language),
-		ParseMode: "markdown",
-	}
+	b.SendMessage(vocab.GetTranslate("Save", b.Dlg[ChatId].language), ChatId, kb)
+}
 
-	b.Bot.Send(msg)
+func (b *Bot) EditMenuChoose(ChatId int64) {
+	kb := b.GetChooseKb(ChatId)
+	b.EditAndSend(&kb, vocab.GetTranslate("Save", b.Dlg[ChatId].language), ChatId)
 }
 
 // GetChooseKb ..
@@ -113,11 +108,8 @@ func (b *Bot) CancelKeyboard(ChatId int64) tgbotapi.InlineKeyboardMarkup {
 	)
 }
 
-func (b *Bot) ShareCancel(ChatId int64, link string) tgbotapi.InlineKeyboardMarkup {
+func (b *Bot) Share(ChatId int64, link string) tgbotapi.InlineKeyboardMarkup {
 	return tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm),
-		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonSwitch(vocab.GetTranslate("Share", b.Dlg[ChatId].language), link),
 		),

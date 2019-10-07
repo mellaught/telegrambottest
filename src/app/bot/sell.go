@@ -98,16 +98,18 @@ func (b *Bot) SellFinal(ChatId int64) {
 		b.SendMessage(txt, ChatId, kb)
 		return
 	}
-	if SaveSell[ChatId] {
-		b.SendMenuChoose(ChatId)
-	}
-	SaveSell[ChatId] = false
-	b.Dlg[ChatId].Command = ""
 	txt := fmt.Sprintf(vocab.GetTranslate("Send your coins", b.Dlg[ChatId].language), CoinToSell[ChatId], CoinToSell[ChatId], "https://bip.dev/trade/"+depos.Data.Tag)
 	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 	msg.ParseMode = "markdown"
-	msg.ReplyMarkup = b.ShareCancel(ChatId, "https://bip.dev/trade/"+depos.Data.Tag)
-	b.Bot.Send(msg)
+	kb := b.Share(ChatId, "https://bip.dev/trade/"+depos.Data.Tag)
+	fmt.Println(SaveSell[ChatId])
+	if SaveSell[ChatId] {
+		b.SendMenuChoose(ChatId)
+		b.SendMessage(txt, ChatId, &kb)
+	} else {
+		b.EditAndSend(&kb, txt, ChatId)
+	}
+	SaveSell[ChatId] = false
 	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, depos.Data.Address)
 	newmsg.ReplyMarkup = b.CheckKeyboardSell(ChatId)
 	b.Bot.Send(newmsg)
@@ -136,8 +138,8 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 		case <-tick:
 			taginfo, err := b.Api.GetTagInfo(tag)
 			if err != nil {
-				fmt.Println(err)
-				time.Sleep(10 * time.Second)
+				fmt.Println("Sell api error:", err)
+				time.Sleep(30 * time.Second)
 				continue
 			}
 			if taginfo.Data.Amount != amount {

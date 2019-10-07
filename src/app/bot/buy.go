@@ -130,11 +130,29 @@ func (b *Bot) SendDepos(ChatId int64) {
 		b.Bot.Send(msg)
 		return
 	}
+
 	txt := fmt.Sprintf(vocab.GetTranslate("Send deposit", b.Dlg[ChatId].language), price, diff, amount, bonus)
-	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
-	msg.ParseMode = "markdown"
-	// msg.ReplyMarkup = b.CancelKeyboard(ChatId)
-	b.Bot.Send(msg)
+	b.SendMessage(txt, ChatId, nil)
+}
+
+// SendDepos --
+func (b *Bot) EditDepos(ChatId int64) {
+	price, diff, err := b.Api.GetPrice()
+	if err != nil {
+		fmt.Println(err)
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
+		b.Bot.Send(msg)
+		return
+	}
+	amount, bonus, err := b.Api.GetBonus()
+	if err != nil {
+		fmt.Println(err)
+		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
+		b.Bot.Send(msg)
+		return
+	}
+	txt := fmt.Sprintf(vocab.GetTranslate("Send deposit", b.Dlg[ChatId].language), price, diff, amount, bonus)
+	b.EditAndSend(nil, txt, ChatId)
 }
 
 // BuyFinal is function for command "/buy".
@@ -176,8 +194,8 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 		case <-tick:
 			stat, err := b.Api.GetBTCDepositStatus(address)
 			if err != nil {
-				fmt.Println(err)
-				time.Sleep(10 * time.Second)
+				fmt.Println("Buy api error:", err)
+				time.Sleep(30 * time.Second)
 				continue
 			}
 			if stat.Data.WillReceive != willcoin {

@@ -123,7 +123,6 @@ func (b *Bot) Run() {
 
 // TextMessageHandler
 func (b *Bot) TextMessageHandler(text string, ChatId int64) {
-	fmt.Printf("UserHistory: %s \n", UserHistory[ChatId])
 	// Проверка команды <<купить>>.
 	if strings.Contains(UserHistory[ChatId], "buy") {
 		// команда не выбрана.
@@ -151,7 +150,9 @@ func (b *Bot) TextMessageHandler(text string, ChatId int64) {
 				b.SendMessage(vocab.GetTranslate("Wrong email", b.Dlg[ChatId].language), ChatId, nil)
 				return
 			} else {
+				SaveBuy[ChatId] = true
 				EmailAddress[ChatId] = text
+				fmt.Println("HERE")
 				// Отправьте депозит на биткоин адрес.
 				b.SendMenuChoose(ChatId)
 				b.SendDepos(ChatId)
@@ -310,7 +311,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		err = b.DB.PutEmail(b.Dlg[ChatId].UserId, b.Dlg[ChatId].Text)
+		err = b.DB.PutEmail(b.Dlg[ChatId].UserId, EmailAddress[ChatId])
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -369,10 +370,13 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	// sendEmail after the user has selected email from the proposed. ( BUY )
 	case sendEmail:
 		EmailAddress[ChatId] = b.Dlg[ChatId].Text
-		b.SendMenuChoose(ChatId)
 		if SaveBuy[ChatId] {
+			b.SendMenuChoose(ChatId)
 			b.SendDepos(ChatId)
+		} else {
+			b.EditDepos(ChatId)
 		}
+
 		SaveBuy[ChatId] = false
 		b.BuyFinal(ChatId)
 
