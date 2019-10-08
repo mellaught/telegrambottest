@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
@@ -90,7 +91,7 @@ func (b *Bot) SellFinal(ChatId int64) {
 		b.SendMessage(txt, ChatId, kb)
 		return
 	}
-	txt := fmt.Sprintf(vocab.GetTranslate("Send your coins", b.Dlg[ChatId].language), CoinToSell[ChatId], CoinToSell[ChatId], "https://bip.dev/trade/"+depos.Data.Tag)
+	txt := fmt.Sprintf(vocab.GetTranslate("Send your coins", b.Dlg[ChatId].language), strings.ToUpper(CoinToSell[ChatId]), CoinToSell[ChatId], "https://bip.dev/trade/"+depos.Data.Tag)
 	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 	msg.ParseMode = "markdown"
 	kb := b.Share(ChatId, "https://bip.dev/trade/"+depos.Data.Tag)
@@ -114,7 +115,7 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 	timeout := time.After(30 * time.Minute)
 	tick := time.Tick(5 * time.Second)
 	amount := "0.0"
-	SellStatus[ChatId] = fmt.Sprintf(vocab.GetTranslate("Wait deposit coin", b.Dlg[ChatId].language), CoinToSell[ChatId])
+	SellStatus[ChatId] = fmt.Sprintf(vocab.GetTranslate("Wait deposit coin", b.Dlg[ChatId].language), strings.ToUpper(CoinToSell[ChatId]))
 	for {
 		select {
 		case <-timeout:
