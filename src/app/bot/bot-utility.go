@@ -128,8 +128,9 @@ func (b *Bot) EditAndSend(kb *tgbotapi.InlineKeyboardMarkup, txt string, ChatId 
 			MessageID:   b.Dlg[ChatId].MessageId,
 			ReplyMarkup: kb,
 		},
-		Text:      txt,
-		ParseMode: "markdown",
+		DisableWebPagePreview: true,
+		Text:                  txt,
+		ParseMode:             "markdown",
 	}
 	b.Bot.Send(msg)
 }
@@ -144,5 +145,6 @@ func (b Bot) SendMessage(txt string, ChatId int64, kb interface{}) {
 	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 	msg.ParseMode = "markdown"
 	msg.ReplyMarkup = kb
+	msg.DisableWebPagePreview = true
 	b.Bot.Send(msg)
 }
