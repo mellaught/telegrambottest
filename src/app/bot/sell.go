@@ -91,7 +91,7 @@ func (b *Bot) SellFinal(ChatId int64) {
 		b.SendMessage(txt, ChatId, kb)
 		return
 	}
-	txt := fmt.Sprintf(vocab.GetTranslate("Send your coins", b.Dlg[ChatId].language), strings.ToUpper(CoinToSell[ChatId]), CoinToSell[ChatId], "https://bip.dev/trade/"+depos.Data.Tag)
+	txt := fmt.Sprintf(vocab.GetTranslate("Send your coins", b.Dlg[ChatId].language), strings.ToUpper(CoinToSell[ChatId]), strings.ToUpper(CoinToSell[ChatId]), "https://bip.dev/trade/"+depos.Data.Tag)
 	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 	msg.ParseMode = "markdown"
 	kb := b.Share(ChatId, "https://bip.dev/trade/"+depos.Data.Tag)
