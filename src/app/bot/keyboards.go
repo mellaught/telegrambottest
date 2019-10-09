@@ -17,9 +17,6 @@ func (b *Bot) SendMenuMessage(ChatId int64) (tgbotapi.InlineKeyboardMarkup, stri
 	}
 
 	txt := fmt.Sprintf(vocab.GetTranslate("Select", b.Dlg[ChatId].language), price, diff)
-	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
-	msg.ReplyMarkup = kb
-	msg.ParseMode = "markdown"
 	return kb, txt, nil
 }
 

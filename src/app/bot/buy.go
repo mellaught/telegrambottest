@@ -131,15 +131,12 @@ func (b *Bot) EditDepos(ChatId int64) {
 	price, diff, err := b.Api.GetPrice()
 	if err != nil {
 		fmt.Println(err)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
-		b.Bot.Send(msg)
+		b.SendMessage(vocab.GetTranslate("Error", b.Dlg[ChatId].language), ChatId, nil)
 		return
 	}
 	amount, bonus, err := b.Api.GetBonus()
 	if err != nil {
 		fmt.Println(err)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
-		b.Bot.Send(msg)
 		return
 	}
 	txt := fmt.Sprintf(vocab.GetTranslate("Send deposit", b.Dlg[ChatId].language), price, diff, amount, bonus)
