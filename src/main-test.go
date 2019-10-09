@@ -1,10 +1,9 @@
 package main
 
 // import (
-// 	"math/big"
+// 	"fmt"
 
 // 	_ "github.com/jinzhu/gorm/dialects/postgres"
-// 	api "github.com/mrKitikat/telegrambottest/src/app/bipdev"
 // )
 
 // var (
@@ -13,10 +12,9 @@ package main
 // )
 
 // func main() {
-
-// 	app := api.InitApp("https://api.bip.dev/api/")
-
-// 	app.GetBonus()
+// 	address := "Mx3fdca30cb0ffb8ae1096acf60f5d0e0d908a7f75"
+// 	fmt.Println(address[:2],)
+// 	fmt.Println(len(address) != 42 || address[:2] != "Mx")
 // 	//_ := StrToBig("100000000000000000000000")
 // 	// r := new(big.Rat)
 // 	// r.SetString(str1 + "/" + "1000000000000000000")
@@ -27,18 +25,18 @@ package main
 // 	// fmt.Println(humanize.FormatFloat("# ###.##", f))
 // }
 
-// func StrToBig(balance string) *big.Int {
-// 	bigInt, success := big.NewInt(0).SetString(balance, 10)
-// 	if success != true {
-// 		panic("Failed to decode " + balance)
-// 	}
+// // func StrToBig(balance string) *big.Int {
+// // 	bigInt, success := big.NewInt(0).SetString(balance, 10)
+// // 	if success != true {
+// // 		panic("Failed to decode " + balance)
+// // 	}
 
-// 	return bigInt
-// }
+// // 	return bigInt
+// // }
 
-// func PipToBip(value *big.Int) string {
-// 	floatValue := new(big.Float).SetPrec(500).SetInt(value)
-// 	f, _ := new(big.Float).SetPrec(500).Quo(floatValue, pipInBip).Float64()
+// // func PipToBip(value *big.Int) string {
+// // 	floatValue := new(big.Float).SetPrec(500).SetInt(value)
+// // 	f, _ := new(big.Float).SetPrec(500).Quo(floatValue, pipInBip).Float64()
 
-// 	return humanize.FormatFloat("# ###.##", f)
-// }
+// // 	return humanize.FormatFloat("# ###.##", f)
+// // }

@@ -21,7 +21,7 @@ func (b *Bot) CheckMinter(address string) bool {
 		return false
 	}
 
-	return len(address) != 42 || address[:2] != "Mx"
+	return len(address) == 42 || address[:2] != "Mx"
 }
 
 // SendMinterAddresses --
