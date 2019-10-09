@@ -45,19 +45,13 @@ func (b *Bot) SendMinterAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, 
 		var row []tgbotapi.InlineKeyboardButton
 		row = append(row, btn)
 		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
-		msg.ReplyMarkup = keyboard
-		msg.ParseMode = "markdown"
 		return keyboard, txt, nil
 	} else {
 		txt := vocab.GetTranslate("New minter", b.Dlg[ChatId].language)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 		btn := tgbotapi.NewInlineKeyboardButtonData(vocab.GetTranslate("Cancel", b.Dlg[ChatId].language), cancelComm)
 		var row []tgbotapi.InlineKeyboardButton
 		row = append(row, btn)
 		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
-		msg.ReplyMarkup = keyboard
-		msg.ParseMode = "markdown"
 		return keyboard, txt, nil
 	}
 
@@ -109,16 +103,12 @@ func (b *Bot) SendEmail(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, er
 func (b *Bot) SendDepos(ChatId int64) {
 	price, diff, err := b.Api.GetPrice()
 	if err != nil {
-		fmt.Println(err)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
-		b.Bot.Send(msg)
+		b.PrintAndSendError(err, ChatId)
 		return
 	}
 	amount, bonus, err := b.Api.GetBonus()
 	if err != nil {
 		fmt.Println(err)
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
-		b.Bot.Send(msg)
 		return
 	}
 
@@ -130,8 +120,7 @@ func (b *Bot) SendDepos(ChatId int64) {
 func (b *Bot) EditDepos(ChatId int64) {
 	price, diff, err := b.Api.GetPrice()
 	if err != nil {
-		fmt.Println(err)
-		b.SendMessage(vocab.GetTranslate("Error", b.Dlg[ChatId].language), ChatId, nil)
+		b.PrintAndSendError(err, ChatId)
 		return
 	}
 	amount, bonus, err := b.Api.GetBonus()
@@ -191,7 +180,8 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 			if stat.Data.WillReceive != willcoin {
 				if willcoin == start {
 					willcoin = stat.Data.WillReceive - start
-					BuyStatus[ChatId] = fmt.Sprintf(vocab.GetTranslate("New deposit", b.Dlg[ChatId].language), willcoin)
+					coinSend := stat.Data.WillReceive - start
+					BuyStatus[ChatId] = fmt.Sprintf(vocab.GetTranslate("New deposit", b.Dlg[ChatId].language), coinSend)
 					time.Sleep(60 * time.Second)
 				} else {
 					ans := fmt.Sprintf(vocab.GetTranslate("Exchange is successful", b.Dlg[ChatId].language), willcoin)
