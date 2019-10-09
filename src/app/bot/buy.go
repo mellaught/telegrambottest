@@ -196,10 +196,8 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 					time.Sleep(60 * time.Second)
 				} else {
 					ans := fmt.Sprintf(vocab.GetTranslate("Exchange is successful", b.Dlg[ChatId].language), willcoin)
-					msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, ans)
-					msg.ReplyMarkup = b.newMainMenuKeyboard(ChatId)
+					b.SendMessage(ans, ChatId, b.newMainMenuKeyboard(ChatId))
 					BuyStatus[ChatId] = vocab.GetTranslate("No buy", b.Dlg[ChatId].language)
-					b.Bot.Send(msg)
 					time.Sleep(5 * time.Second)
 					kb, txt, err := b.SendMenuMessage(ChatId)
 					if err != nil {
