@@ -171,7 +171,13 @@ func (b *Bot) BuyFinal(ChatId int64) {
 func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 	timeout := time.After(60 * time.Minute)
 	tick := time.Tick(5 * time.Second)
-	willcoin := 0.
+	stat, err := b.Api.GetBTCDepositStatus(address)
+	if err != nil {
+		fmt.Println("Buy api error:", err)
+		time.Sleep(30 * time.Second)
+	}
+	willcoin := stat.Data.WillReceive
+	start := willcoin
 	BuyStatus[ChatId] = vocab.GetTranslate("Wait deposit", b.Dlg[ChatId].language)
 	for {
 		select {
@@ -190,9 +196,9 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 				continue
 			}
 			if stat.Data.WillReceive != willcoin {
-				if willcoin == 0. {
-					willcoin = stat.Data.WillReceive
-					BuyStatus[ChatId] = fmt.Sprintf(vocab.GetTranslate("New deposit", b.Dlg[ChatId].language), stat.Data.WillReceive)
+				if willcoin == start {
+					willcoin = stat.Data.WillReceive - start
+					BuyStatus[ChatId] = fmt.Sprintf(vocab.GetTranslate("New deposit", b.Dlg[ChatId].language), willcoin)
 					time.Sleep(60 * time.Second)
 				} else {
 					ans := fmt.Sprintf(vocab.GetTranslate("Exchange is successful", b.Dlg[ChatId].language), willcoin)
