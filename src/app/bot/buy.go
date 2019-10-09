@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"time"
 
@@ -179,12 +180,13 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 			}
 			if stat.Data.WillReceive != willcoin {
 				if willcoin == start {
-					willcoin = stat.Data.WillReceive - start
+					willcoin = stat.Data.WillReceive
 					coinSend := stat.Data.WillReceive - start
 					BuyStatus[ChatId] = fmt.Sprintf(vocab.GetTranslate("New deposit", b.Dlg[ChatId].language), coinSend)
 					time.Sleep(60 * time.Second)
 				} else {
-					ans := fmt.Sprintf(vocab.GetTranslate("Exchange is successful", b.Dlg[ChatId].language), willcoin)
+					coinSend := math.Abs(willcoin - stat.Data.WillReceive)
+					ans := fmt.Sprintf(vocab.GetTranslate("Exchange is successful", b.Dlg[ChatId].language), coinSend)
 					b.SendMessage(ans, ChatId, b.newMainMenuKeyboard(ChatId))
 					BuyStatus[ChatId] = vocab.GetTranslate("No buy", b.Dlg[ChatId].language)
 					time.Sleep(5 * time.Second)
