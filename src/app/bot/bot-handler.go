@@ -46,3 +46,26 @@ func (b *Bot) UpdateLoots(w http.ResponseWriter, r *http.Request) {
 
 	return
 }
+
+func (b *Bot) DeleteLoot(w http.ResponseWriter, r *http.Request) {
+
+	loot := stct.DeleleLoot{}
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&loot); err != nil {
+		handler.ResponError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	defer r.Body.Close()
+
+	err := b.DB.DeleteLoot(loot.Tag)
+	if err != nil {
+		handler.ResponJSON(w, http.StatusBadGateway, err.Error())
+		return
+	}
+
+	handler.ResponJSON(w, http.StatusOK, "Delete successfull")
+
+	return
+}

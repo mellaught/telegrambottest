@@ -141,8 +141,7 @@ func (b *Bot) CheckStatusSell(tag string, ChatId int64) {
 				b.DB.PutLoot(b.Dlg[ChatId].UserId, tag, taginfo)
 				ans := fmt.Sprintf(vocab.GetTranslate("New deposit for sale", b.Dlg[ChatId].language),
 					taginfo.Data.Amount, taginfo.Data.Coin, taginfo.Data.Price)
-				msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, ans)
-				b.Bot.Send(msg)
+				b.SendMessage(ans, ChatId, nil)
 				kb, txt, err := b.SendMenuMessage(ChatId)
 				if err != nil {
 					b.PrintAndSendError(err, ChatId)

@@ -79,14 +79,14 @@ func TestPutLoot(t *testing.T) {
 		t.Fatal(err)
 	}
 	app := api.InitApp("https://mbank.dl-dev.ru/api/")
-	taginfo, err := app.GetTagInfo("kxCUNnIQdJkFfVPTuE4V")
+	taginfo, err := app.GetTagInfo("RFkfurk0gmexqmgpdx9N")
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Get error: %v", err)
 	}
 
-	err = db.PutLoot(344178872, "kxCUNnIQdJkFfVPTuE4V", taginfo)
+	err = db.PutLoot(344178872, "RFkfurk0gmexqmgpdx9N", taginfo)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Put error: %v", err)
 	}
 }
 
@@ -107,8 +107,8 @@ func TestGetLoots(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if loots[0].Price != 1000 || loots[0].Amout != "1000" || loots[0].Coin != "MNT" {
-		t.Errorf("I wanna see price = 1000, but %d, amount = 1000, but %s, coin = MNT, but %s", loots[0].Price, loots[0].Amout, loots[0].Coin)
+	if loots[0].Price != 0.12 || loots[0].Amout != "100002.0" || loots[0].Coin != "MNT" {
+		t.Errorf("I wanna see price = 1000, but %f, amount = 1000, but %s, coin = MNT, but %s", loots[0].Price, loots[0].Amout, loots[0].Coin)
 	}
 }
 
@@ -132,6 +132,25 @@ func TestUpdateLoots(t *testing.T) {
 
 	if chatid != 344178872 || lang != "ru" {
 		t.Errorf("I want see chatid , but %d and lang want see ,but lang = %s ", chatid, lang)
+	}
+}
+
+// Test for delete user's loot by tag.
+// Result: Success: Tests passed.
+func TestDeleteLoot(t *testing.T) {
+	dbsql, err := sql.Open("postgres", "user=postgres dbname=gorm password=simsim sslmode=disable")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db, err := InitDB(dbsql)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = db.DeleteLoot("RFkfurk0gmexqmgpdx9N")
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 

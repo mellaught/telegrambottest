@@ -46,6 +46,7 @@ func (a *App) setRouters() {
 
 	// Routing for handling the Update user's loots.
 	a.Post("/UpdateLoot", a.Bot.UpdateLoots)
+	a.Post("/DeleteLoot", a.Bot.DeleteLoot)
 }
 
 // Run the app on it's router

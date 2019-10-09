@@ -137,8 +137,7 @@ func (b *Bot) EditAndSend(kb *tgbotapi.InlineKeyboardMarkup, txt string, ChatId 
 
 func (b *Bot) PrintAndSendError(err error, ChatId int64) {
 	fmt.Println(err)
-	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, vocab.GetTranslate("Error", b.Dlg[ChatId].language))
-	b.Bot.Send(msg)
+	b.SendMessage(vocab.GetTranslate("Error", b.Dlg[ChatId].language), ChatId, nil)
 }
 
 func (b Bot) SendMessage(txt string, ChatId int64, kb interface{}) {

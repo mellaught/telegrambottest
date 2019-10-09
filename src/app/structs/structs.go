@@ -97,7 +97,7 @@ type Loot struct {
 	ID            int
 	Tag           string
 	Coin          string
-	Price         int
+	Price         float64
 	Amout         string
 	MinterAddress string
 	CreatedAt     time.Time
@@ -111,4 +111,9 @@ type UPDLoot struct {
 	SellAmount string `json:"sells"`
 	Coin       string `json:"coin"`
 	Price      int    `json:"price"`
+}
+
+// REST API request for delete loot with current tag
+type DeleleLoot struct {
+	Tag string `json:"tag"`
 }

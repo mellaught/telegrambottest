@@ -394,7 +394,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 			b.PrintAndSendError(err, ChatId)
 			return
 		} else if len(loots) == 0 {
-			b.SendMessage(vocab.GetTranslate("Empty loots", b.Dlg[ChatId].language), ChatId, b.newMainMenuKeyboard(ChatId))
+			b.SendMessage(vocab.GetTranslate("Empty loots", b.Dlg[ChatId].language), ChatId, b.CancelKeyboard(ChatId))
 			return
 		}
 

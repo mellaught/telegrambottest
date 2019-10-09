@@ -19,7 +19,13 @@ func InitDB(db *sql.DB) (*DataBase, error) {
 	d := DataBase{
 		DB: db,
 	}
-	_, err := db.Exec(CREATE_USERS_IF_NOT_EXISTS)
+
+	_, err := db.Exec(DELETE_TABLE_LOOTs)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec(CREATE_USERS_IF_NOT_EXISTS)
 	if err != nil {
 		return nil, err
 	}
@@ -121,6 +127,17 @@ func (d *DataBase) GetLoots(UserId int) ([]*stct.Loot, error) {
 	}
 
 	return loots, nil
+}
+
+func (d *DataBase) DeleteLoot(tag string) error {
+
+	_, err := d.DB.Exec("DELETE FROM LOOTS WHERE tag = $1", tag)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
 
 // GetChatIDLang return user's chatID and Language.

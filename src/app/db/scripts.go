@@ -1,5 +1,8 @@
 package db
 
+var DELETE_TABLE_LOOTs = `
+drop table loots;`
+
 var CREATE_USERS_IF_NOT_EXISTS = `
 create table if not exists users (
 	id INT NOT NULL,
@@ -14,7 +17,7 @@ create table if not exists loots (
 	user_id INT NOT NULL,
 	tag VARCHAR(255) UNIQUE,
 	coin VARCHAR(255),
-	price INT,
+	price REAL,
 	amount VARCHAR(255),
 	minter_address VARCHAR(255),
 	created_at timestamp,
