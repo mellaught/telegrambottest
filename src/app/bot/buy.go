@@ -154,15 +154,11 @@ func (b *Bot) BuyFinal(ChatId int64) {
 	addr, err := b.Api.GetBTCDeposAddress(MinterAddress[b.Dlg[ChatId].ChatId], "BIP", EmailAddress[b.Dlg[ChatId].ChatId])
 	if err != nil {
 		b.Dlg[ChatId].Command = ""
-		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, err.Error())
-		msg.ReplyMarkup = b.newMainMenuKeyboard(ChatId)
-		b.Bot.Send(msg)
+		b.SendMessage(err.Error(), ChatId, b.newMainMenuKeyboard(ChatId))
 		return
 	}
 	b.Dlg[ChatId].Command = ""
-	newmsg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, addr)
-	newmsg.ReplyMarkup = b.CheckKeyboardBuy(ChatId)
-	b.Bot.Send(newmsg)
+	b.SendMessage(addr, ChatId, b.CheckKeyboardBuy(ChatId))
 	go b.CheckStatusBuy(addr, ChatId)
 	return
 }
@@ -182,7 +178,7 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 	for {
 		select {
 		case <-timeout:
-			if willcoin == 0. {
+			if willcoin == start {
 				BuyStatus[ChatId] = vocab.GetTranslate("No buy", b.Dlg[ChatId].language)
 				return
 			} else {

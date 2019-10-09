@@ -18,6 +18,7 @@ import (
 
 var (
 	commands       = make(map[int64]string)
+	UserLanguage   = make(map[int64]string)
 	UserHistory    = make(map[int64]string)
 	MinterAddress  = make(map[int64]string)
 	BitcoinAddress = make(map[int64]string)
@@ -209,14 +210,26 @@ func (b *Bot) TextMessageHandler(text string, ChatId int64) {
 func (b *Bot) assembleUpdate(update tgbotapi.Update) (*Dialog, bool) {
 	dialog := &Dialog{}
 	if update.Message != nil {
-		dialog.language = b.DB.GetLanguage(update.Message.Chat.ID)
+		if lang, ok := UserLanguage[update.Message.Chat.ID]; !ok {
+			dialog.language = b.DB.GetLanguage(update.Message.Chat.ID)
+			UserLanguage[update.Message.Chat.ID] = dialog.language
+		} else {
+			dialog.language = lang
+		}
+		//dialog.language = b.DB.GetLanguage(update.Message.Chat.ID)
 		dialog.ChatId = update.Message.Chat.ID
 		dialog.MessageId = update.Message.MessageID
 		dialog.UserId = int(update.Message.Chat.ID)
 		dialog.Text = update.Message.Text
 	} else if update.CallbackQuery != nil {
+		if lang, ok := UserLanguage[update.Message.Chat.ID]; !ok {
+			dialog.language = b.DB.GetLanguage(update.Message.Chat.ID)
+			UserLanguage[update.Message.Chat.ID] = dialog.language
+		} else {
+			dialog.language = lang
+		}
 		dialog.CallBackId = update.CallbackQuery.ID
-		dialog.language = b.DB.GetLanguage(update.CallbackQuery.Message.Chat.ID)
+		//dialog.language = b.DB.GetLanguage(update.CallbackQuery.Message.Chat.ID)
 		dialog.ChatId = update.CallbackQuery.Message.Chat.ID
 		dialog.MessageId = update.CallbackQuery.Message.MessageID
 		dialog.UserId = int(update.CallbackQuery.Message.Chat.ID)
@@ -275,6 +288,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 		commands[ChatId] = ""
 		b.DB.SetLanguage(b.Dlg[ChatId].UserId, "en")
 		b.Dlg[ChatId].language = "en"
+		UserLanguage[ChatId] = "en"
 		kb, txt, err := b.SendMenuMessage(ChatId)
 		if err != nil {
 			b.PrintAndSendError(err, ChatId)
@@ -289,6 +303,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 		commands[ChatId] = ""
 		b.DB.SetLanguage(b.Dlg[ChatId].UserId, "ru")
 		b.Dlg[ChatId].language = "ru"
+		UserLanguage[ChatId] = "ru"
 		kb, txt, err := b.SendMenuMessage(ChatId)
 		if err != nil {
 			b.PrintAndSendError(err, ChatId)
