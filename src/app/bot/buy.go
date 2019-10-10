@@ -161,6 +161,7 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 	}
 	willcoin := stat.Data.WillReceive
 	start := willcoin
+	coinSend := willcoin
 	BuyStatus[ChatId] = vocab.GetTranslate("Wait deposit", b.Dlg[ChatId].language)
 	for {
 		select {
@@ -181,11 +182,13 @@ func (b *Bot) CheckStatusBuy(address string, ChatId int64) {
 			if stat.Data.WillReceive != willcoin {
 				if willcoin == start {
 					willcoin = stat.Data.WillReceive
-					coinSend := stat.Data.WillReceive - start
+					// Сколько должно прилететь.
+					coinSend = stat.Data.WillReceive - start
 					BuyStatus[ChatId] = fmt.Sprintf(vocab.GetTranslate("New deposit", b.Dlg[ChatId].language), coinSend)
 					time.Sleep(60 * time.Second)
-				} else {
-					coinSend := math.Abs(willcoin - stat.Data.WillReceive)
+					// Сравниваем когда баланс уменьшиться на заданную сумму.
+				} else if math.Abs(willcoin-stat.Data.WillReceive) == coinSend {
+					coinSend = math.Abs(willcoin - stat.Data.WillReceive)
 					ans := fmt.Sprintf(vocab.GetTranslate("Exchange is successful", b.Dlg[ChatId].language), coinSend)
 					b.SendMessage(ans, ChatId, b.newMainMenuKeyboard(ChatId))
 					BuyStatus[ChatId] = vocab.GetTranslate("No buy", b.Dlg[ChatId].language)
