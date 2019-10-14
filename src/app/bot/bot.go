@@ -267,7 +267,7 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	// "/Start" interacting with the bot, bot description and available commands.
 	case startCommand:
 		UserHistory[ChatId] = "start"
-		b.SendMessage(vocab.GetTranslate("Hello", b.Dlg[ChatId].language), ChatId, b.newVocabuageKeybord())
+		b.SendMessage(vocab.GetTranslate("Hello", "en"), ChatId, b.newVocabuageKeybord())
 		return
 
 	// engvocabCommand sets english lang for user.
