@@ -142,8 +142,8 @@ var Translates = map[string]map[string]string{
 	},
 	// 5
 	"Send your coins": {
-		"en": "Send *%s* to the address below.\n\n⚠️ Do not send less than *1 000 %s* in one transaction.\n\nYou can track your order at\n%s",
-		"ru": "Отправьте *%s* на указанный ниже адрес.\n\n⚠️ Не отправляйте меньше *1 000 %s* в одной транзакции.\n\nВы можете отслеживать заявку по этой ссылке:\n%s",
+		"en": "Send *%s* to the address below.\n\n⚠️ Do not send less than *100 %s* in one transaction.\n\nYou can track your order at\n%s",
+		"ru": "Отправьте *%s* на указанный ниже адрес.\n\n⚠️ Не отправляйте меньше *100 %s* в одной транзакции.\n\nВы можете отслеживать заявку по этой ссылке:\n%s",
 	},
 	//6
 	"Share": {

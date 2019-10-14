@@ -77,8 +77,8 @@ func (b *Bot) SendBTCAddresses(ChatId int64) (tgbotapi.InlineKeyboardMarkup, str
 
 // SellFinal
 func (b *Bot) SellFinal(ChatId int64) {
-	fmt.Println("Sell data:", BitcoinAddress[b.Dlg[ChatId].ChatId], CoinToSell[b.Dlg[ChatId].ChatId], PriceToSell[b.Dlg[ChatId].ChatId])
-	depos, err := b.Api.GetMinterDeposAddress(BitcoinAddress[b.Dlg[ChatId].ChatId], CoinToSell[b.Dlg[ChatId].ChatId], PriceToSell[b.Dlg[ChatId].ChatId])
+	fmt.Println("Sell data:", BitcoinAddress[b.Dlg[ChatId].ChatId], strings.ToUpper(CoinToSell[ChatId]), PriceToSell[b.Dlg[ChatId].ChatId])
+	depos, err := b.Api.GetMinterDeposAddress(BitcoinAddress[b.Dlg[ChatId].ChatId], strings.ToUpper(CoinToSell[ChatId]), PriceToSell[b.Dlg[ChatId].ChatId])
 	if err != nil {
 		msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, err.Error())
 		b.Bot.Send(msg)
