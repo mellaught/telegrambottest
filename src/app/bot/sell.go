@@ -19,7 +19,7 @@ func (b *Bot) GetStatusSell(ChatId int64) string {
 
 // CheckPrice ..
 func (b *Bot) CheckPrice(chatId int64, price string) bool {
-	if CoinToSell[chatId] == "BIP" {
+	if strings.ToUpper(CoinToSell[chatId]) == "BIP" {
 		if s, err := strconv.ParseFloat(price, 64); err == nil {
 			if 0.01 <= s && s <= 0.32 {
 				PriceToSell[chatId] = s
@@ -104,7 +104,11 @@ func (b *Bot) SellFinal(ChatId int64) {
 		b.SendMessage(txt, ChatId, kb)
 		return
 	}
-	txt := fmt.Sprintf(vocab.GetTranslate("Send your coins", b.Dlg[ChatId].language), strings.ToUpper(CoinToSell[ChatId]), strings.ToUpper(CoinToSell[ChatId]), "https://bip.dev/trade/"+depos.Data.Tag)
+	txt := fmt.Sprintf(vocab.GetTranslate("Send custom", b.Dlg[ChatId].language), strings.ToUpper(CoinToSell[ChatId]), strings.ToUpper(CoinToSell[ChatId]), "https://bip.dev/trade/"+depos.Data.Tag)
+	if strings.ToUpper(CoinToSell[ChatId]) == "BIP" {
+		txt = fmt.Sprintf(vocab.GetTranslate("Send your coins", b.Dlg[ChatId].language), strings.ToUpper(CoinToSell[ChatId]), strings.ToUpper(CoinToSell[ChatId]), "https://bip.dev/trade/"+depos.Data.Tag)
+	}
+
 	msg := tgbotapi.NewMessage(b.Dlg[ChatId].ChatId, txt)
 	msg.ParseMode = "markdown"
 	kb := b.Share(ChatId, "https://bip.dev/trade/"+depos.Data.Tag)
