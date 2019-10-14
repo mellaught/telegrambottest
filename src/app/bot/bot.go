@@ -346,14 +346,18 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 	// After the money is confirmed, he will receive another notification from bot.
 	// ( BUY )
 	case buyCommand:
+
 		SaveBuy[ChatId] = false
 		UserHistory[ChatId] = "buy_1"
 		kb, txt, err := b.SendMinterAddresses(ChatId)
 		if err != nil {
 			fmt.Println(err)
 		}
-
-		b.EditAndSend(&kb, txt, ChatId)
+		if b.Dlg[ChatId].Text == "/buy" {
+			b.SendMessage(txt, ChatId, kb)
+		} else {
+			b.EditAndSend(&kb, txt, ChatId)
+		}
 		return
 
 	//sendMinter after the user has selected the minter address from the proposed. ( BUY )
@@ -387,7 +391,11 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 		UserHistory[ChatId] = "sell_1"
 		kb := b.CancelKeyboard(ChatId)
 		txt := vocab.GetTranslate("Coin", b.Dlg[ChatId].language)
-		b.EditAndSend(&kb, txt, ChatId)
+		if b.Dlg[ChatId].Text == "/sell" {
+			b.SendMessage(txt, ChatId, kb)
+		} else {
+			b.EditAndSend(&kb, txt, ChatId)
+		}
 		return
 		// Message[ChatId] = msg
 
@@ -405,11 +413,21 @@ func (b *Bot) RunCommand(command string, ChatId int64) {
 			return
 		} else if len(loots) == 0 {
 			kb := b.CancelKeyboard(ChatId)
-			b.EditAndSend(&kb, vocab.GetTranslate("Empty loots", b.Dlg[ChatId].language), ChatId)
+			if b.Dlg[ChatId].Text == "/orders" {
+				b.SendMessage(vocab.GetTranslate("Empty loots", b.Dlg[ChatId].language), ChatId, kb)
+			} else {
+				b.EditAndSend(&kb, vocab.GetTranslate("Empty loots", b.Dlg[ChatId].language), ChatId)
+			}
+
 			return
 		}
+		kb, txt := b.SendLoots(loots, ChatId)
+		if b.Dlg[ChatId].Text == "/orders" {
+			b.SendMessage(txt, ChatId, kb)
+		} else {
+			b.EditAndSend(&kb, txt, ChatId)
+		}
 
-		b.SendLoots(loots, ChatId)
 		return
 	}
 }

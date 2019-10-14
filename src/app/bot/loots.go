@@ -11,7 +11,7 @@ import (
 const lootlink = "https://bip.dev/trade/"
 
 // Method for sending loots in markdown style to user.
-func (b *Bot) SendLoots(loots []*stct.Loot, ChatId int64) {
+func (b *Bot) SendLoots(loots []*stct.Loot, ChatId int64) (tgbotapi.InlineKeyboardMarkup, string) {
 
 	keyboard := tgbotapi.InlineKeyboardMarkup{}
 
@@ -28,4 +28,5 @@ func (b *Bot) SendLoots(loots []*stct.Loot, ChatId int64) {
 	row = append(row, btn)
 	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, row)
 	b.EditAndSend(&keyboard, vocab.GetTranslate("Your loots", b.Dlg[ChatId].language), ChatId)
+	return keyboard, vocab.GetTranslate("Your loots", b.Dlg[ChatId].language)
 }
