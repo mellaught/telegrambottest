@@ -117,6 +117,10 @@ var Translates = map[string]map[string]string{
 		"en": "⚠️ *Error*\n\nThe possible price range is *$0.01*–*$0.32*. The value should be strictly numerical.",
 		"ru": "⚠️ *Ошибка*\n\nВозможный диапазон цены: от *$0.01* до *$0.32*, вводить цену нужно без символов обозначающих валюту и букв.",
 	},
+	"Wrong custom": {
+		"en": "⚠️ *Error*\n\nThe possible price range is *$0.01*–*$1000*. The value should be strictly numerical.",
+		"ru": "⚠️ *Ошибка*\n\nВозможный диапазон цены: от *$0.01* до *$1000*, вводить цену нужно без символов обозначающих валюту и букв.",
+	},
 	// 3
 	"New bitcoin": {
 		"en": "Enter your *Bitcoin* address.",

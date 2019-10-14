@@ -19,15 +19,28 @@ func (b *Bot) GetStatusSell(ChatId int64) string {
 
 // CheckPrice ..
 func (b *Bot) CheckPrice(chatId int64, price string) bool {
-	if s, err := strconv.ParseFloat(price, 64); err == nil {
-		if 0.01 <= s && s <= 0.32 {
-			PriceToSell[chatId] = s
-			return true
+	if CoinToSell[chatId] == "BIP" {
+		if s, err := strconv.ParseFloat(price, 64); err == nil {
+			if 0.01 <= s && s <= 0.32 {
+				PriceToSell[chatId] = s
+				return true
+			} else {
+				return false
+			}
 		} else {
 			return false
 		}
 	} else {
-		return false
+		if s, err := strconv.ParseFloat(price, 64); err == nil {
+			if 0.01 <= s && s <= 1000 {
+				PriceToSell[chatId] = s
+				return true
+			} else {
+				return false
+			}
+		} else {
+			return false
+		}
 	}
 }
 

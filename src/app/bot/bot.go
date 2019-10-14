@@ -174,7 +174,11 @@ func (b *Bot) TextMessageHandler(text string, ChatId int64) {
 		} else if UserHistory[ChatId][5:] == "2" {
 			// Проверка цены за монеты.
 			if !b.CheckPrice(ChatId, text) {
-				b.SendMessage(vocab.GetTranslate("Wrong price", b.Dlg[ChatId].language), ChatId, nil)
+				if CoinToSell[ChatId] == "BIP" {
+					b.SendMessage(vocab.GetTranslate("Wrong price", b.Dlg[ChatId].language), ChatId, nil)
+				} else {
+					b.SendMessage(vocab.GetTranslate("Wrong custom", b.Dlg[ChatId].language), ChatId, nil)
+				}
 				return
 			} else {
 				// Отправьте биткоин адрес.
