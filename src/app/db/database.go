@@ -20,12 +20,12 @@ func InitDB(db *sql.DB) (*DataBase, error) {
 		DB: db,
 	}
 
-	_, err := db.Exec(DELETE_TABLE_LOOTs)
-	if err != nil {
-		return nil, err
-	}
+	// _, err := db.Exec(DELETE_TABLE_LOOTs)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	_, err = db.Exec(CREATE_USERS_IF_NOT_EXISTS)
+	_, err := db.Exec(CREATE_USERS_IF_NOT_EXISTS)
 	if err != nil {
 		return nil, err
 	}

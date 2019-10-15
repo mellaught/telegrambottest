@@ -121,6 +121,7 @@ func (b *Bot) Run() {
 
 // TextMessageHandler
 func (b *Bot) TextMessageHandler(text string, ChatId int64) {
+	fmt.Println("HISTORY:", UserHistory[ChatId])
 	// Проверка команды <<купить>>.
 	if strings.Contains(UserHistory[ChatId], "buy") {
 		// команда не выбрана.
@@ -156,7 +157,7 @@ func (b *Bot) TextMessageHandler(text string, ChatId int64) {
 				return
 			}
 		}
-	} else {
+	} else if strings.Contains(UserHistory[ChatId], "sell") {
 		if UserHistory[ChatId][5:] == "1" {
 			// Проверка названия монеты.
 			if !b.CheckCoin(text) {
