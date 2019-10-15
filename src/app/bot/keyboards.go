@@ -11,14 +11,8 @@ import (
 func (b *Bot) SendMenuMessage(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, error) {
 	UserHistory[ChatId] = ""
 	kb := b.newMainMenuKeyboard(ChatId)
-	price, diff, err := b.Api.GetPrice()
-	if err != nil {
-		txt := fmt.Sprintf(vocab.GetTranslate("Select", b.Dlg[ChatId].language), CurrentPrice, CurrnetMarkup)
-		return kb, txt, nil
-	}
-	CurrentPrice = price
-	CurrnetMarkup = diff
-	txt := fmt.Sprintf(vocab.GetTranslate("Select", b.Dlg[ChatId].language), price, diff)
+	fmt.Println(CurrentPrice, CurrnetMarkup)
+	txt := fmt.Sprintf(vocab.GetTranslate("Select", b.Dlg[ChatId].language), CurrentPrice, CurrnetMarkup)
 	return kb, txt, nil
 }
 

@@ -84,6 +84,7 @@ func InitBot(config *stct.Config, dbsql *sql.DB) *Bot {
 	}
 
 	b.Bot = bot
+	go b.UpdatePrice()
 	go b.Run()
 
 	return &b

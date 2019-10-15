@@ -95,15 +95,27 @@ func (b *Bot) CancelHandler(ChatId int64) {
 
 }
 
+func (b *Bot) UpdatePrice() {
+	for {
+
+		price, diff, err := b.Api.GetPrice()
+		if err != nil {
+			fmt.Println(err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		CurrentPrice = price
+		CurrnetMarkup = diff
+		time.Sleep(30 * time.Minute)
+	}
+}
+
 func (b *Bot) ChangeCurrency(ChatId int64) {
-	timeout := time.After(10 * time.Minute)
-	tick := time.Tick(1 * time.Minute)
+	tick := time.Tick(15 * time.Minute)
 	CallId := b.Dlg[ChatId].CallBackId
 	MessageId := b.Dlg[ChatId].MessageId
 	for {
 		select {
-		case <-timeout:
-			return
 		case <-tick:
 			if MessageId == b.Dlg[ChatId].MessageId && CallId == b.Dlg[ChatId].CallBackId {
 				kb, txt, err := b.SendMenuMessage(ChatId)
