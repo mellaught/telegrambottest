@@ -71,9 +71,9 @@ var Translates = map[string]map[string]string{
 	// 3 Send BTC ... 2 confirmations...
 	"Send deposit": {
 		"en": "Send BTC to the following address. After *2* confirmations, you will receive BIP to the Minter address you've specified before.\n\nThe *current rate* is $%.4f (%s %%)\n\n" +
-			"💡 1 BTC will now buy you *%s* BIP. That's a *%.4f %% bonus* to the indicative price.",
+			"💡 1 BTC will now buy you *%s* BIP. That's a *%.2f %% bonus* to the indicative price.",
 		"ru": "Отправьте BTC на следующий адрес, после *2* подтверждений сети, вы получите BIP на указанный вами адрес в сети Minter.\n\n*Текущий курс:* $%.4f (%s %%)\n\n" +
-			"💡 Сейчас за 1 BTC вы можете купить *%s* BIP, это на *%.4f %% больше* актуальной цены.",
+			"💡 Сейчас за 1 BTC вы можете купить *%s* BIP, это на *%.2f %% больше* актуальной цены.",
 	},
 	// 4
 	"Check": {
