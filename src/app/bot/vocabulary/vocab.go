@@ -38,8 +38,8 @@ var Translates = map[string]map[string]string{
 		"ru": "Нет",
 	},
 	"Select": {
-		"en": "The current rate is *$%.2f* (%s %%).\n\nHere you can buy or sell *BIP* and track the orders you've placed.",
-		"ru": "Текущий курс: *$%.2f* (%s %%).\n\nЗдесь вы можете купить или продать *BIP*, а также отслеживать созданные заявки.",
+		"en": "The current rate is *$%.4f* (%s %%).\n\nHere you can buy or sell *BIP* and track the orders you've placed.",
+		"ru": "Текущий курс: *$%.4f* (%s %%).\n\nЗдесь вы можете купить или продать *BIP*, а также отслеживать созданные заявки.",
 	},
 	// Buy
 	// 1
@@ -70,10 +70,10 @@ var Translates = map[string]map[string]string{
 	},
 	// 3 Send BTC ... 2 confirmations...
 	"Send deposit": {
-		"en": "Send BTC to the following address. After *2* confirmations, you will receive BIP to the Minter address you've specified before.\n\nThe *current rate* is $%.2f (%s %%)\n\n" +
-			"💡 1 BTC will now buy you *%s* BIP. That's a *%.2f %% bonus* to the indicative price.",
-		"ru": "Отправьте BTC на следующий адрес, после *2* подтверждений сети, вы получите BIP на указанный вами адрес в сети Minter.\n\n*Текущий курс:* $%.2f (%s %%)\n\n" +
-			"💡 Сейчас за 1 BTC вы можете купить *%s* BIP, это на *%.2f %% больше* актуальной цены.",
+		"en": "Send BTC to the following address. After *2* confirmations, you will receive BIP to the Minter address you've specified before.\n\nThe *current rate* is $%.4f (%s %%)\n\n" +
+			"💡 1 BTC will now buy you *%s* BIP. That's a *%.4f %% bonus* to the indicative price.",
+		"ru": "Отправьте BTC на следующий адрес, после *2* подтверждений сети, вы получите BIP на указанный вами адрес в сети Minter.\n\n*Текущий курс:* $%.4f (%s %%)\n\n" +
+			"💡 Сейчас за 1 BTC вы можете купить *%s* BIP, это на *%.4f %% больше* актуальной цены.",
 	},
 	// 4
 	"Check": {
@@ -85,8 +85,8 @@ var Translates = map[string]map[string]string{
 		"ru": "Ожидание транзакции BTC…",
 	},
 	"New deposit": {
-		"en": "BTC is already on the way. You will get at least %.2f BIP.",
-		"ru": "BTC уже в пути, вы получите как минимум %.2f BIP.",
+		"en": "BTC is already on the way. You will get at least %.4f BIP.",
+		"ru": "BTC уже в пути, вы получите как минимум %.4f BIP.",
 	},
 	"No buy": {
 		"en": "You've got no buy orders.",
@@ -94,8 +94,8 @@ var Translates = map[string]map[string]string{
 	},
 	// 5
 	"Exchange is successful": {
-		"en": "🎉 *%.2f* BIP has been sent to your address.",
-		"ru": "🎉 *%.2f* BIP были отправлены на ваш адрес.",
+		"en": "🎉 *%.4f* BIP has been sent to your address.",
+		"ru": "🎉 *%.4f* BIP были отправлены на ваш адрес.",
 	},
 	// 1
 	"Coin": {
@@ -168,8 +168,8 @@ var Translates = map[string]map[string]string{
 	},
 	// 7
 	"New deposit for sale": {
-		"en": "A new sell order: *%s* %s at *%.2f* $.",
-		"ru": "Новая заявка на продажу: *%s* %s по *%.2f* $.",
+		"en": "A new sell order: *%s* %s at *%.4f* $.",
+		"ru": "Новая заявка на продажу: *%s* %s по *%.4f* $.",
 	},
 	// Заявки
 	"Your loots": {
@@ -203,8 +203,8 @@ var Translates = map[string]map[string]string{
 	},
 	// ------------------------------------------------------
 	"Now": {
-		"en": "The current rate is $%.2f (+%.2f %)",
-		"ru": "Текущий курс: $%.2f (+%.2f %)",
+		"en": "The current rate is $%.4f (+%.4f %)",
+		"ru": "Текущий курс: $%.4f (+%.4f %)",
 	},
 	"Coin exchanged": {
 		"en": "%.4f %s has been exchanged for %.4f BTC.",
