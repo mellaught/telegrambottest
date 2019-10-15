@@ -117,7 +117,7 @@ func (b *Bot) ChangeCurrency(ChatId int64) {
 	for {
 		select {
 		case <-tick:
-			if MessageId == b.Dlg[ChatId].MessageId && CallId == b.Dlg[ChatId].CallBackId {
+			if MessageId == b.Dlg[ChatId].MessageId || CallId == b.Dlg[ChatId].CallBackId {
 				kb, txt, err := b.SendMenuMessage(ChatId)
 				if err != nil {
 					fmt.Println(err)
@@ -158,4 +158,5 @@ func (b Bot) SendMessage(txt string, ChatId int64, kb interface{}) {
 	msg.ReplyMarkup = kb
 	msg.DisableWebPagePreview = true
 	b.Bot.Send(msg)
+	b.Dlg[ChatId].MessageId++
 }
