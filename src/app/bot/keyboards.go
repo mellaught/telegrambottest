@@ -11,7 +11,6 @@ import (
 func (b *Bot) SendMenuMessage(ChatId int64) (tgbotapi.InlineKeyboardMarkup, string, error) {
 	UserHistory[ChatId] = ""
 	kb := b.newMainMenuKeyboard(ChatId)
-	fmt.Println(CurrentPrice, CurrnetMarkup)
 	txt := fmt.Sprintf(vocab.GetTranslate("Select", b.Dlg[ChatId].language), CurrentPrice, CurrnetMarkup)
 	return kb, txt, nil
 }
