@@ -17,6 +17,8 @@ import (
 )
 
 var (
+	CurrentPrice   float64
+	CurrnetMarkup  string
 	commands       = make(map[int64]string)
 	UserHistory    = make(map[int64]string)
 	MinterAddress  = make(map[int64]string)
